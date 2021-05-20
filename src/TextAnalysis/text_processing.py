@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*- 
+# -*- coding: UTF-8 -*-
 """
 Created on Fri Feb 23 12:37:46 2018
 
@@ -8,175 +8,206 @@ Created on Fri Feb 23 12:37:46 2018
 import numpy as np
 
 import jieba, os
-from gensim import corpora,similarities,models,matutils,utils
+from gensim import corpora, similarities, models, matutils, utils
 
 
 class TextProcessing(object):
-    '''Text pre-processing functions class.
+    """Text pre-processing functions class.
 
     # Arguments
         chnSTWPath: chinese stop words txt file path.
         finance_dict: latest financial related words txt file path.
-    '''
+    """
 
-    def __init__(self,chnSTWPath,finance_dict):
+    def __init__(self, chnSTWPath, finance_dict):
         self.chnSTWPath = chnSTWPath
         self.finance_dict = finance_dict
 
-    def renewFinanceDict(self,new_Word_list):
-        '''Add latest necessary financial words into financial dictionary
+    def renewFinanceDict(self, new_Word_list):
+        """Add latest necessary financial words into financial dictionary
             for improving tokenization effect.
 
         # Arguments:
             new_Word_list: New financial words list, eg: ["区块链"，"离岸金融"].
-        '''
-        with open(self.finance_dict,'a',encoding='utf-8') as file:
+        """
+        with open(self.finance_dict, "a", encoding="utf-8") as file:
             for word in new_Word_list:
-                file.write(word + '\n')
+                file.write(word + "\n")
 
     def getchnSTW(self):
-        '''Load the stop words txt file.
-        '''   
-        stopwords = [line.strip() for line in open(self.chnSTWPath, 'r').readlines()]  
+        """Load the stop words txt file."""
+        stopwords = [line.strip() for line in open(self.chnSTWPath, "r").readlines()]
         return stopwords
 
-    def jieba_tokenize(self,documents): 
-        '''Cut the documents into a sequence of independent words.
+    def jieba_tokenize(self, documents):
+        """Cut the documents into a sequence of independent words.
 
         # Arguments:
             documents: List of news(articles).
-        '''
+        """
         chnSTW = self.getchnSTW()
         corpora_documents = []
         jieba.load_userdict(self.finance_dict)
-        for item_text in documents: 
+        for item_text in documents:
             outstr = []
             sentence_seged = list(jieba.cut(item_text))
-            for word in sentence_seged:  
-                if word not in chnSTW and word != '\t' \
-                and word != ' ':  
+            for word in sentence_seged:
+                if word not in chnSTW and word != "\t" and word != " ":
                     outstr.append(word)
             corpora_documents.append(outstr)
         return corpora_documents
 
-    def RemoveWordAppearOnce(self,corpora_documents):
-        '''Remove the words that appear once among all the tokenized news(articles).
+    def RemoveWordAppearOnce(self, corpora_documents):
+        """Remove the words that appear once among all the tokenized news(articles).
 
         # Arguments:
              corpora_documents: List of tokenized news(articles).
-        '''
-        frequency = defaultdict(int)  
-        for text in corpora_documents:  
-            for token in text:      
-                frequency[token] += 1 
-        corpora_documents = [[token for token in text if frequency[token] > 1]  for text in corpora_documents] 
+        """
+        frequency = defaultdict(int)
+        for text in corpora_documents:
+            for token in text:
+                frequency[token] += 1
+        corpora_documents = [
+            [token for token in text if frequency[token] > 1]
+            for text in corpora_documents
+        ]
         return corpora_documents
 
-    def genDictionary(self,documents,**kwarg):
-        '''Generate dictionary and bow-vector of all tokenzied news(articles).
+    def genDictionary(self, documents, **kwarg):
+        """Generate dictionary and bow-vector of all tokenzied news(articles).
 
         # Arguments:
             documents: List of news(articles).
             saveDict: Save dictionary or not(bool type).
             saveBowvec: Save bow-vector or not(bool type).
             returnValue: Return value or not(bool type).
-        '''
+        """
         self._raw_documents = documents
-        token = self.jieba_tokenize(documents) #jieba tokenize
-        #corpora_documents = self.RemoveWordAppearOnce(token)  # remove thw words appearing once in the dictionary
-        self._dictionary = corpora.Dictionary(token)  # generate dictionary using tokenized documents  
-        if kwarg['saveDict']:
-            self._dictionary.save(kwarg['saveDictPath']) # store the dictionary, for future reference
-        self._BowVecOfEachDoc = [self._dictionary.doc2bow(text) for text in token]  # convert tokenized documents to vectors
-        if kwarg['saveBowvec']:
-            corpora.MmCorpus.serialize(kwarg['saveBowvecPath'], self._BowVecOfEachDoc)  # store to disk, for later use
-        if kwarg['returnValue']:
+        token = self.jieba_tokenize(documents)  # jieba tokenize
+        # corpora_documents = self.RemoveWordAppearOnce(token)  # remove thw words appearing once in the dictionary
+        self._dictionary = corpora.Dictionary(
+            token
+        )  # generate dictionary using tokenized documents
+        if kwarg["saveDict"]:
+            self._dictionary.save(
+                kwarg["saveDictPath"]
+            )  # store the dictionary, for future reference
+        self._BowVecOfEachDoc = [
+            self._dictionary.doc2bow(text) for text in token
+        ]  # convert tokenized documents to vectors
+        if kwarg["saveBowvec"]:
+            corpora.MmCorpus.serialize(
+                kwarg["saveBowvecPath"], self._BowVecOfEachDoc
+            )  # store to disk, for later use
+        if kwarg["returnValue"]:
             return token, self._dictionary, self._BowVecOfEachDoc
 
-    def CallTransformationModel(self,Dict,Bowvec,**kwarg):
-        '''Invoke specific transformation models of Gensim module.
+    def CallTransformationModel(self, Dict, Bowvec, **kwarg):
+        """Invoke specific transformation models of Gensim module.
 
         # Arguments:
             Dict: Dictionary made by all tokenized news(articles/documents).
             Bowvec: Bow-vector created by all tokenized news(articles/documents).
             modelType: Transformation model type, including 'lsi', 'lda' and 'None', 'None' means TF-IDF mmodel.
-            tfDim: The number of topics that will be extracted from each news(articles/documents). 
+            tfDim: The number of topics that will be extracted from each news(articles/documents).
             renewModel: Re-train the transformation models or not(bool type).
             modelPath: The path of saving trained transformation models.
-        '''
-        if kwarg['renewModel']:
+        """
+        if kwarg["renewModel"]:
             tfidf = models.TfidfModel(Bowvec)  # initialize tfidf model
-            tfidfVec = tfidf[Bowvec] # use the model to transform whole corpus
-            tfidf.save(kwarg['modelPath']+"tfidf_model.tfidf")
-            if kwarg['modelType'] == 'lsi':
-                model = models.LsiModel(tfidfVec, id2word=Dict, num_topics=kwarg['tfDim']) # initialize an LSI transformation
-                modelVec = model[tfidfVec] # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
-                model.save(kwarg['modelPath']) # same for tfidf, lda, ...
-            elif kwarg['modelType'] == 'lda':
-                model = models.LdaModel(tfidfVec, id2word=Dict, num_topics=kwarg['tfDim'])
-                modelVec = model[tfidfVec] #每个文本对应的LDA向量，稀疏的，元素值是隶属与对应序数类的权重 
-                model.save(kwarg['modelPath']) # same for tfidf, lda, ...
-            elif kwarg['modelType'] == 'None': 
+            tfidfVec = tfidf[Bowvec]  # use the model to transform whole corpus
+            tfidf.save(kwarg["modelPath"] + "tfidf_model.tfidf")
+            if kwarg["modelType"] == "lsi":
+                model = models.LsiModel(
+                    tfidfVec, id2word=Dict, num_topics=kwarg["tfDim"]
+                )  # initialize an LSI transformation
+                modelVec = model[
+                    tfidfVec
+                ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
+                model.save(kwarg["modelPath"])  # same for tfidf, lda, ...
+            elif kwarg["modelType"] == "lda":
+                model = models.LdaModel(
+                    tfidfVec, id2word=Dict, num_topics=kwarg["tfDim"]
+                )
+                modelVec = model[tfidfVec]  # 每个文本对应的LDA向量，稀疏的，元素值是隶属与对应序数类的权重
+                model.save(kwarg["modelPath"])  # same for tfidf, lda, ...
+            elif kwarg["modelType"] == "None":
                 model = tfidf
                 modelVec = tfidfVec
         else:
-            if not os.path.exists(kwarg['modelPath']+"tfidf_model.tfidf"):
+            if not os.path.exists(kwarg["modelPath"] + "tfidf_model.tfidf"):
                 tfidf = models.TfidfModel(Bowvec)  # initialize tfidf model
-                tfidfVec = tfidf[Bowvec] #
-                tfidf.save(kwarg['modelPath']+"tfidf_model.tfidf")
+                tfidfVec = tfidf[Bowvec]  #
+                tfidf.save(kwarg["modelPath"] + "tfidf_model.tfidf")
             else:
-                tfidf = models.TfidfModel.load(kwarg['modelPath']+"tfidf_model.tfidf") 
-                tfidfVec = tfidf[Bowvec] # use the model to transform whole corpus
-            if kwarg['modelType'] == 'lsi':
-                if not os.path.exists(kwarg['modelPath']+"lsi_model.lsi"):
-                    tfidf = models.TfidfModel.load(kwarg['modelPath']+"tfidf_model.tfidf") 
-                    tfidfVec = tfidf[Bowvec] # use the model to transform whole corpus
-                    model = models.LsiModel(tfidfVec, id2word=Dict, num_topics=kwarg['tfDim']) # initialize an LSI transformation
-                    modelVec = model[tfidfVec] # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
-                    model.save(kwarg['modelPath']+"lsi_model.lsi") # same for tfidf, lda, ...
+                tfidf = models.TfidfModel.load(kwarg["modelPath"] + "tfidf_model.tfidf")
+                tfidfVec = tfidf[Bowvec]  # use the model to transform whole corpus
+            if kwarg["modelType"] == "lsi":
+                if not os.path.exists(kwarg["modelPath"] + "lsi_model.lsi"):
+                    tfidf = models.TfidfModel.load(
+                        kwarg["modelPath"] + "tfidf_model.tfidf"
+                    )
+                    tfidfVec = tfidf[Bowvec]  # use the model to transform whole corpus
+                    model = models.LsiModel(
+                        tfidfVec, id2word=Dict, num_topics=kwarg["tfDim"]
+                    )  # initialize an LSI transformation
+                    modelVec = model[
+                        tfidfVec
+                    ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
+                    model.save(
+                        kwarg["modelPath"] + "lsi_model.lsi"
+                    )  # same for tfidf, lda, ...
                 else:
-                    model = models.LsiModel.load(kwarg['modelPath']+"lsi_model.lsi")
-                    modelVec = model[tfidfVec] 
-            elif kwarg['modelType'] == 'lda':
-                if not os.path.exists(kwarg['modelPath']+"lda_model.lda"):
-                    tfidf = models.TfidfModel.load(kwarg['modelPath']+"tfidf_model.tfidf") 
-                    tfidfVec = tfidf[Bowvec] # use the model to transform whole corpus
-                    model = models.LdaModel(tfidfVec, id2word=Dict, num_topics=kwarg['tfDim'])
-                    modelVec = model[tfidfVec] #每个文本对应的LDA向量，稀疏的，元素值是隶属与对应序数类的权重 
-                    model.save(kwarg['modelPath']+"lda_model.lda") # same for tfidf, lda, ...
+                    model = models.LsiModel.load(kwarg["modelPath"] + "lsi_model.lsi")
+                    modelVec = model[tfidfVec]
+            elif kwarg["modelType"] == "lda":
+                if not os.path.exists(kwarg["modelPath"] + "lda_model.lda"):
+                    tfidf = models.TfidfModel.load(
+                        kwarg["modelPath"] + "tfidf_model.tfidf"
+                    )
+                    tfidfVec = tfidf[Bowvec]  # use the model to transform whole corpus
+                    model = models.LdaModel(
+                        tfidfVec, id2word=Dict, num_topics=kwarg["tfDim"]
+                    )
+                    modelVec = model[tfidfVec]  # 每个文本对应的LDA向量，稀疏的，元素值是隶属与对应序数类的权重
+                    model.save(
+                        kwarg["modelPath"] + "lda_model.lda"
+                    )  # same for tfidf, lda, ...
                 else:
-                    model = models.LdaModel.load(kwarg['modelPath']+"lda_model.lda")
-                    modelVec = model[tfidfVec] 
-            elif kwarg['modelType'] == 'None': 
+                    model = models.LdaModel.load(kwarg["modelPath"] + "lda_model.lda")
+                    modelVec = model[tfidfVec]
+            elif kwarg["modelType"] == "None":
                 model = tfidf
                 modelVec = tfidfVec
         return tfidfVec, modelVec
 
-    def CalSim(self,test_document,Type,best_num):
-        '''Calculate similarities between test document wth all news(articles/documents).
+    def CalSim(self, test_document, Type, best_num):
+        """Calculate similarities between test document wth all news(articles/documents).
 
         # Arguments:
             test_document: List of raw documents.
             Type: Models of calculating similarities.
             best_num: refer to 'num_best' parameter in Gensim module.
-        '''
-        if Type == 'Similarity-tfidf-index':
-            tfidf = models.TfidfModel(self._BowVecOfEachDoc)  
+        """
+        if Type == "Similarity-tfidf-index":
+            tfidf = models.TfidfModel(self._BowVecOfEachDoc)
             tfidfVec = tfidf[self._BowVecOfEachDoc]
             self._num_features = len(self._dictionary.token2id.keys())
-            self._similarity = similarities.Similarity(Type, tfidfVec, \
-                num_features=self._num_features,num_best=best_num)  
-            test_cut_raw = list(jieba.cut(test_document))  
-            test_BowVecOfEachDoc = self._dictionary.doc2bow(test_cut_raw) 
+            self._similarity = similarities.Similarity(
+                Type, tfidfVec, num_features=self._num_features, num_best=best_num
+            )
+            test_cut_raw = list(jieba.cut(test_document))
+            test_BowVecOfEachDoc = self._dictionary.doc2bow(test_cut_raw)
             self._test_BowVecOfEachDoc = tfidf[test_BowVecOfEachDoc]
-        elif Type == 'Similarity-LSI-index':
-            lsi_model = models.LsiModel(self._BowVecOfEachDoc)  
+        elif Type == "Similarity-LSI-index":
+            lsi_model = models.LsiModel(self._BowVecOfEachDoc)
             corpus_lsi = lsi_model[self._BowVecOfEachDoc]
             self._num_features = len(self._dictionary.token2id.keys())
-            self._similarity = similarities.Similarity(Type, corpus_lsi, \
-                num_features=self._num_features,num_best=best_num)  
-            test_cut_raw = list(jieba.cut(test_document))  
-            test_BowVecOfEachDoc = self._dictionary.doc2bow(test_cut_raw) 
+            self._similarity = similarities.Similarity(
+                Type, corpus_lsi, num_features=self._num_features, num_best=best_num
+            )
+            test_cut_raw = list(jieba.cut(test_document))
+            test_BowVecOfEachDoc = self._dictionary.doc2bow(test_cut_raw)
             self._test_BowVecOfEachDoc = lsi_model[test_BowVecOfEachDoc]
         self.Print_CalSim()
         IdLst = []
@@ -186,34 +217,46 @@ class TextProcessing(object):
             IdLst.append(Id)
             SimRltLst.append(Sim)
             SimTxLst.append(self._raw_documents[Id])
-        return IdLst,SimTxLst,SimRltLst
+        return IdLst, SimTxLst, SimRltLst
 
-    def PrintWorfCloud(self,documents,backgroundImgPath,fontPath):
-        '''Print out the word cloud of all news(articles/documents).
+    def PrintWorfCloud(self, documents, backgroundImgPath, fontPath):
+        """Print out the word cloud of all news(articles/documents).
 
         # Arguments:
             documents: Overall raw documents.
             backgroundImgPath: Background image path.
             fontPath: The path of windows fonts that used to create the word-cloud.
-        '''
+        """
         from scipy.misc import imread
         import matplotlib.pyplot as plt
         from wordcloud import WordCloud
-        corpora_documents = self.jieba_tokenize(documents) #分词
+
+        corpora_documents = self.jieba_tokenize(documents)  # 分词
         for k in range(len(corpora_documents)):
-            corpora_documents[k] = ' '.join(corpora_documents[k])
-        corpora_documents = ' '.join(corpora_documents)
-        color_mask = imread(backgroundImgPath) #"C:\\Users\\lenovo\\Desktop\\Text_Mining\\3.jpg"
-        cloud = WordCloud(font_path=fontPath,mask=color_mask,background_color='white',\
-                          max_words=2000,max_font_size=40) #"C:\\Windows\\Fonts\\simhei.ttf"
-        word_cloud = cloud.generate(corpora_documents) 
-        plt.imshow(word_cloud, interpolation='bilinear')
+            corpora_documents[k] = " ".join(corpora_documents[k])
+        corpora_documents = " ".join(corpora_documents)
+        color_mask = imread(
+            backgroundImgPath
+        )  # "C:\\Users\\lenovo\\Desktop\\Text_Mining\\3.jpg"
+        cloud = WordCloud(
+            font_path=fontPath,
+            mask=color_mask,
+            background_color="white",
+            max_words=2000,
+            max_font_size=40,
+        )  # "C:\\Windows\\Fonts\\simhei.ttf"
+        word_cloud = cloud.generate(corpora_documents)
+        plt.imshow(word_cloud, interpolation="bilinear")
         plt.axis("off")
 
-if __name__ == '__main__':
-    tp = TextProcessing(os.getcwd() + '\\' + 'Chinese_Stop_Words.txt', \
-    os.getcwd() + '\\' + 'finance_dict.txt')
-    doc = ['中央、地方支持政策频出,煤炭行业站上了风口 券商研报浩如烟海，投资线索眼花缭乱，第一财经推出\
+
+if __name__ == "__main__":
+    tp = TextProcessing(
+        os.getcwd() + "\\" + "Chinese_Stop_Words.txt",
+        os.getcwd() + "\\" + "finance_dict.txt",
+    )
+    doc = [
+        "中央、地方支持政策频出,煤炭行业站上了风口 券商研报浩如烟海，投资线索眼花缭乱，第一财经推出\
             《一财研选》产品，挖掘研报精华，每期梳理5条投资线索，便于您短时间内获取有价值的信息。专业团队\
             每周日至每周四晚8点准时“上新”，\
             助您投资顺利！1．中央、地方支持政策频出，这个行业站上了风口！（信达证券）近年来，利好住房租赁\
@@ -250,8 +293,8 @@ if __name__ == '__main__':
             兖州煤业(15.150, -1.24, -7.57%)（600803.SH）、中国神华(24.290, -1.16, -4.56%)（601088.SH），以及优质\
             的国企改革兼并重组题材股潞安环能(11.590, -1.11, -8.74%)（601699.SH）、山西焦化(12.420, -1.38, -10.00%\
             )（600740.SH）、山煤国际(4.520, -0.50, -9.96%)（600546.SH）、阳泉煤业(7.780, -0.86, -9.95%)（600348.SH）\
-            。',\
-            '郭文仓到重点工程项目督导检查 2月2日,公司党委书记、董事长、总经理郭文仓,公司董事,股份公司副总经理、总工程师、\
+            。",
+        "郭文仓到重点工程项目督导检查 2月2日,公司党委书记、董事长、总经理郭文仓,公司董事,股份公司副总经理、总工程师、\
             郭毅民,股份公司副总经理张国富、柴高贵及相关单位负责人到焦化厂煤场全封闭和1#—4#干熄焦等重点工程项目建设工地\
             督导检查施工进度和安全工作情况。郭文仓一行实地查看并详细了解了现场施工情况,询问了施工队伍人员状况,他说,\
             煤场全封闭项目和1#—4#干熄焦项目是公司的重点环保项目,一定要力争将重点工程项目建成精品工程、一流环保标杆项目\
@@ -259,13 +302,20 @@ if __name__ == '__main__':
             起,消除隐患,确保收尾工作安全稳定顺利。1#—4#干熄焦项目在大面积开工的重要时期,一定要统筹安排项目进度和质量\
             管理,落实好冬季防护措施,管控好每一道施工环节,目前尤其要注重人员的思想状况,做到不安全不施工,保证施工安全和人\
             员人身安全,确保项目“安全无事故、质量全达标、进度按计划、投资不超概、投产即达效、竣工不留尾、审计无问题、廉政建\
-            设好”,为公司打造成全国独立焦化旗舰企业奠定坚实的基础。']
-    DictPath = os.getcwd() + '\\' + 'stock_dict_file'
-    stockCode = '600740'
+            设好”,为公司打造成全国独立焦化旗舰企业奠定坚实的基础。",
+    ]
+    DictPath = os.getcwd() + "\\" + "stock_dict_file"
+    stockCode = "600740"
     print(DictPath)
-    print(DictPath+'\\'+stockCode+'\\'+stockCode+'_dict.dict')
-    print(DictPath+'\\'+stockCode+'\\'+stockCode+'_bowvec.mm')
-    if not os.path.exists(DictPath+'\\'+stockCode):
-        os.makedirs(DictPath+'\\'+stockCode)
-    tp.genDictionary(doc,saveDict=True,saveDictPath=DictPath+'\\'+stockCode+'\\'+stockCode+'_dict.dict',\
-        saveBowvec=True,saveBowvecPath=DictPath+'\\'+stockCode+'\\'+stockCode+'_bowvec.mm',returnValue=False)
+    print(DictPath + "\\" + stockCode + "\\" + stockCode + "_dict.dict")
+    print(DictPath + "\\" + stockCode + "\\" + stockCode + "_bowvec.mm")
+    if not os.path.exists(DictPath + "\\" + stockCode):
+        os.makedirs(DictPath + "\\" + stockCode)
+    tp.genDictionary(
+        doc,
+        saveDict=True,
+        saveDictPath=DictPath + "\\" + stockCode + "\\" + stockCode + "_dict.dict",
+        saveBowvec=True,
+        saveBowvecPath=DictPath + "\\" + stockCode + "\\" + stockCode + "_bowvec.mm",
+        returnValue=False,
+    )

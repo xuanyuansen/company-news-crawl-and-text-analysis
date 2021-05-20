@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 """
 新浪财经网：https://finance.sina.com.cn
 公司要闻：https://finance.sina.com.cn/roll/index.d.html?cid=56592&page=1
@@ -9,6 +11,3 @@
 行业研究：http://stock.finance.sina.com.cn/stock/go.php/vReport_List/kind/industry/index.phtml?p=1
 投资策略：http://stock.finance.sina.com.cn/stock/go.php/vReport_List/kind/strategy/index.phtml?p=1
 """
-
-import __init__
-from spyder import Spyder

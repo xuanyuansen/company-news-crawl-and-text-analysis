@@ -11,7 +11,7 @@ def generate_pages_list(total_pages, range, init_page_id):
     k = init_page_id
 
     while k + range - 1 <= total_pages:
-        page_list.append((k, k + range -1))
+        page_list.append((k, k + range - 1))
         k += range
 
     if k + range - 1 < total_pages:
@@ -21,12 +21,12 @@ def generate_pages_list(total_pages, range, init_page_id):
 
 
 def count_chn(string):
-    '''Count Chinese numbers and calculate the frequency of Chinese occurrence.
+    """Count Chinese numbers and calculate the frequency of Chinese occurrence.
 
     # Arguments:
         string: Each part of crawled website analyzed by BeautifulSoup.
-    '''
-    pattern = re.compile(u'[\u1100-\uFFFDh]+?')
+    """
+    pattern = re.compile(u"[\u1100-\uFFFDh]+?")
     result = pattern.findall(string)
     chn_num = len(result)
     possible = chn_num / len(str(string))
@@ -35,8 +35,7 @@ def count_chn(string):
 
 
 def get_date_list_from_range(begin_date, end_date):
-    '''Get date list from 'begin_date' to 'end_date' on the calendar.
-    '''
+    """Get date list from 'begin_date' to 'end_date' on the calendar."""
     date_list = list()
     begin_date = datetime.datetime.strptime(begin_date, "%Y-%m-%d")
     end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
@@ -55,7 +54,7 @@ def gen_dates_list(date_list, date_range):
         if k + date_range >= len(date_list):
             break
         else:
-            date_list_latest.append(date_list[k: k + date_range])
+            date_list_latest.append(date_list[k : k + date_range])
             k += date_range
     date_list_latest.append(date_list[k:])
 
@@ -71,7 +70,7 @@ def get_date_before(n_days):
     # 计算偏移量
     offset = datetime.timedelta(days=-n_days)
     # 获取想要的日期的时间
-    re_date = (today + offset).strftime('%Y-%m-%d')
+    re_date = (today + offset).strftime("%Y-%m-%d")
     return re_date
 
 
@@ -92,8 +91,7 @@ def search_max_pages_num(first_url, date):
     max_pages_num = 1
     for a in a_list:
         if "href" in a.attrs and "target" in a.attrs:
-            if a["href"].find(date.replace("-", "") + "_") != -1 \
-                    and a.text.isdigit():
+            if a["href"].find(date.replace("-", "") + "_") != -1 and a.text.isdigit():
                 max_pages_num += 1
 
     return max_pages_num
@@ -108,9 +106,8 @@ def html_parser(url):
 
 
 def get_chn_stop_words(path):
-    '''Load the stop words txt file.
-    '''
-    stopwords = [line.strip() for line in open(path, 'r').readlines()]
+    """Load the stop words txt file."""
+    stopwords = [line.strip() for line in open(path, "r").readlines()]
 
     return stopwords
 
@@ -160,7 +157,7 @@ def is_contain_chn(word):
     :param word: 待判断字符串
     :return: True:包含中文  False:不包含中文
     """
-    zh_pattern = re.compile(u'[\u4e00-\u9fa5]+')
+    zh_pattern = re.compile(u"[\u4e00-\u9fa5]+")
     if zh_pattern.search(word):
         return True
     else:
@@ -169,6 +166,6 @@ def is_contain_chn(word):
 
 def batch_lpop(client, key, n):
     p = client.pipeline()
-    p.lrange(key, 0, n-1)
+    p.lrange(key, 0, n - 1)
     p.ltrim(key, n, -1)
     p.execute()

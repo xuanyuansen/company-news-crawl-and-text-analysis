@@ -1,7 +1,8 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 class Spyder(object):
-
     def __init__(self):
-        self.is_article_prob = .5
+        self.is_article_prob = 0.5
 
     def extract_data(self, tag_list):
         data = list()
@@ -13,7 +14,7 @@ class Spyder(object):
 
     def query_news(self, _key, param):
         # 模糊查询
-        return self.col.find({_key: {'$regex': ".*{}.*".format(param)}})
+        return self.col.find({_key: {"$regex": ".*{}.*".format(param)}})
 
     def get_url_info(self, url):
         pass

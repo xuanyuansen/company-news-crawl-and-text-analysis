@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 """
 凤凰财经网：https://finance.ifeng.com
 上市公司：https://finance.ifeng.com/shanklist/1-62-83-

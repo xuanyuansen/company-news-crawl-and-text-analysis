@@ -12,10 +12,12 @@ CHROME_DRIVER = "./info/chromedriver"
 #                                        "https://ggjd.cnstock.com/gglist/search/qmtbbdj": "公告解读",
 #                                        "https://ggjd.cnstock.com/gglist/search/ggkx": "公告快讯",
 #                                        "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh": "利好公告"}
-WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK = {"https://company.cnstock.com/company/scp_gsxw": "公司聚焦",
-                                       "http://ggjd.cnstock.com/company/scp_ggjd/tjd_bbdj": "公告解读",
-                                       "http://ggjd.cnstock.com/company/scp_ggjd/tjd_ggkx": "公告快讯",
-                                       "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh": "利好公告"}
+WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK = {
+    "https://company.cnstock.com/company/scp_gsxw": "公司聚焦",
+    "http://ggjd.cnstock.com/company/scp_ggjd/tjd_bbdj": "公告解读",
+    "http://ggjd.cnstock.com/company/scp_ggjd/tjd_ggkx": "公告快讯",
+    "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh": "利好公告",
+}
 RECORD_CNSTOCK_FAILED_URL_TXT_FILE_PATH = "./info/cnstock_failed_urls.txt"
 CNSTOCK_MAX_REJECTED_AMOUNTS = 10
 
@@ -43,10 +45,16 @@ REDIS_CLIENT_FOR_CACHING_STOCK_INFO_DB_ID = 1
 ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE = "stocknews"
 
 TOPIC_NUMBER = 200
-SVM_TUNED_PARAMTERS = {"kernel": ["rbf"], "gamma": [10, 20, 50, 100, 150, 200], "C": [10, 15, 20, 30, 50, 100]}
-RDFOREST_TUNED_PARAMTERS = {"n_estimators": [1, 2, 3, 4, 5, 10],
-                            "criterion": ["gini", "entropy"],
-                            "max_features": ["auto", "sqrt"]}
+SVM_TUNED_PARAMTERS = {
+    "kernel": ["rbf"],
+    "gamma": [10, 20, 50, 100, 150, 200],
+    "C": [10, 15, 20, 30, 50, 100],
+}
+RDFOREST_TUNED_PARAMTERS = {
+    "n_estimators": [1, 2, 3, 4, 5, 10],
+    "criterion": ["gini", "entropy"],
+    "max_features": ["auto", "sqrt"],
+}
 CLASSIFIER_SCORE_LIST = ["f1_weighted"]
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
 CHN_STOP_WORDS_PATH = "./info/Chinese_Stop_Words.txt"

@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 """
 网易财经网：https://money.163.com
 个股资讯：http://money.163.com/special/g/00251LR5/gptj.html

@@ -2,7 +2,7 @@ import __init__
 import logging
 import warnings
 
-from Kite import config
+from Utils import config
 
 import joblib
 from sklearn import svm
@@ -11,22 +11,25 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import sklearn.exceptions
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-                    datefmt="%a, %d %b %Y %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+    datefmt="%a, %d %b %Y %H:%M:%S",
+)
 
 warnings.filterwarnings("ignore", category=sklearn.exceptions.UndefinedMetricWarning)
-warnings.filterwarnings("ignore", category=Warning, module='sklearn')
-warnings.filterwarnings("ignore", category=UserWarning, module='gensim')
-warnings.filterwarnings("ignore", category=RuntimeWarning, module='gensim')
+warnings.filterwarnings("ignore", category=Warning, module="sklearn")
+warnings.filterwarnings("ignore", category=UserWarning, module="gensim")
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="gensim")
 
 
 class Classifier(object):
-
     def __init__(self):
         self.scores = config.CLASSIFIER_SCORE_LIST
 
-    def train(self, train_x, train_y, test_x, test_y, model_type="svm", model_save_path=None):
+    def train(
+        self, train_x, train_y, test_x, test_y, model_type="svm", model_save_path=None
+    ):
         assert len(self.scores) != 0
         clf = None
         for score in self.scores:
@@ -36,18 +39,18 @@ class Classifier(object):
             #          次fit一遍全部数据集
             if model_type == "svm":
                 tuned_parameters = config.SMV_TUNED_PARAMTERS
-                clf = GridSearchCV(svm.SVC(),
-                                   tuned_parameters,
-                                   cv=5,
-                                   scoring=score,
-                                   refit="AUC")
+                clf = GridSearchCV(
+                    svm.SVC(), tuned_parameters, cv=5, scoring=score, refit="AUC"
+                )
             elif model_type == "rdforest":
                 tuned_parameters = config.RDFOREST_TUNED_PARAMTERS
-                clf = GridSearchCV(RandomForestClassifier(random_state=10),
-                                   tuned_parameters,
-                                   cv=5,
-                                   scoring=score,
-                                   refit="AUC")
+                clf = GridSearchCV(
+                    RandomForestClassifier(random_state=10),
+                    tuned_parameters,
+                    cv=5,
+                    scoring=score,
+                    refit="AUC",
+                )
             # 只在训练集上面做k-fold,然后返回最优的模型参数
             clf.fit(train_x, train_y)
             if model_save_path is not None:
@@ -65,9 +68,12 @@ class Classifier(object):
             for k in range(len(test_pred)):
                 if test_pred[k] == test_y[k]:
                     precise_test += 1
-            logging.info('train_accuracy: {}  test_accuracy: {}'
-                         .format(str(round(precise_train / len(train_y), 4)),
-                                 str(round(precise_test / len(test_pred), 4))))
+            logging.info(
+                "train_accuracy: {}  test_accuracy: {}".format(
+                    str(round(precise_train / len(train_y), 4)),
+                    str(round(precise_test / len(test_pred), 4)),
+                )
+            )
             self._precise = precise_test / len(test_pred)
         assert clf is not None
         return clf

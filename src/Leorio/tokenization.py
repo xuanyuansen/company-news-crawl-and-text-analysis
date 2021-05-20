@@ -1,22 +1,21 @@
-import __init__
-
-from Kite.database import Database
-from Kite import config
-from Kite import utils
+from Utils.database import Database
+from Utils import config
+from Utils import utils
 
 import jieba
 import pkuseg
 import logging
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+    datefmt="%a, %d %b %Y %H:%M:%S",
+)
 
 
 class Tokenization(object):
-
     def __init__(self, import_module="jieba", user_dict=None, chn_stop_words_dir=None):
-        #self.database = Database().conn[config.DATABASE_NAME]  #.get_collection(config.COLLECTION_NAME_CNSTOCK)
+        # self.database = Database().conn[config.DATABASE_NAME]  #.get_collection(config.COLLECTION_NAME_CNSTOCK)
         self.database = Database()
         self.import_module = import_module
         self.user_dict = user_dict
@@ -33,14 +32,18 @@ class Tokenization(object):
         with open(old_user_dict_dir, "r", encoding="utf-8") as file:
             for row in file:
                 word_list.append(row.split("\n")[0])
-        name_code_df = self.database.get_data(config.STOCK_DATABASE_NAME,
-                                              config.COLLECTION_NAME_STOCK_BASIC_INFO,
-                                              keys=["name", "code"])
+        name_code_df = self.database.get_data(
+            config.STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO,
+            keys=["name", "code"],
+        )
         new_words_list = list(set(name_code_df["name"].tolist()))
         for word in new_words_list:
             if word not in word_list:
                 word_list.append(word)
-        new_user_dict_dir = old_user_dict_dir if not new_user_dict_dir else new_user_dict_dir
+        new_user_dict_dir = (
+            old_user_dict_dir if not new_user_dict_dir else new_user_dict_dir
+        )
         with open(new_user_dict_dir, "w", encoding="utf-8") as file:
             for word in word_list:
                 file.write(word + "\n")
@@ -57,11 +60,13 @@ class Tokenization(object):
             sentence_seged = seg.cut(text)  # 进行分词
         if sentence_seged:
             for word in sentence_seged:
-                if word not in self.stop_words_list \
-                        and word != "\t" \
-                        and word != " " \
-                        and utils.is_contain_chn(word)\
-                        and len(word) > 1:
+                if (
+                    word not in self.stop_words_list
+                    and word != "\t"
+                    and word != " "
+                    and utils.is_contain_chn(word)
+                    and len(word) > 1
+                ):
                     outstr.append(word)
             return outstr
         else:
@@ -78,13 +83,17 @@ class Tokenization(object):
                     pass
         return list(set(stock_codes_set))
 
-    def update_news_database_rows(self,
-                                  database_name,
-                                  collection_name,
-                                  incremental_column_name="RelatedStockCodes"):
-        name_code_df = self.database.get_data(config.STOCK_DATABASE_NAME,
-                                              config.COLLECTION_NAME_STOCK_BASIC_INFO,
-                                              keys=["name", "code"])
+    def update_news_database_rows(
+        self,
+        database_name,
+        collection_name,
+        incremental_column_name="RelatedStockCodes",
+    ):
+        name_code_df = self.database.get_data(
+            config.STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO,
+            keys=["name", "code"],
+        )
         name_code_dict = dict(name_code_df.values)
         data = self.database.get_collection(database_name, collection_name).find()
         for row in data:
@@ -93,23 +102,39 @@ class Tokenization(object):
             # 判断数据结构中是否包含该incremental_column_name字段
             if incremental_column_name not in row.keys():
                 related_stock_codes_list = self.find_relevant_stock_codes_in_article(
-                                             row["Article"], name_code_dict)
-                self.database.update_row(database_name,
-                                         collection_name,
-                                         {"_id": row["_id"]},
-                                         {incremental_column_name: " ".join(related_stock_codes_list)}
-                                         )
-                logging.info("[{} -> {} -> {}] updated {} key value ... "
-                             .format(database_name, collection_name, row["Date"], incremental_column_name))
+                    row["Article"], name_code_dict
+                )
+                self.database.update_row(
+                    database_name,
+                    collection_name,
+                    {"_id": row["_id"]},
+                    {incremental_column_name: " ".join(related_stock_codes_list)},
+                )
+                logging.info(
+                    "[{} -> {} -> {}] updated {} key value ... ".format(
+                        database_name,
+                        collection_name,
+                        row["Date"],
+                        incremental_column_name,
+                    )
+                )
             else:
-                logging.info("[{} -> {} -> {}] has already existed {} key value ... "
-                             .format(database_name, collection_name, row["Date"], incremental_column_name))
+                logging.info(
+                    "[{} -> {} -> {}] has already existed {} key value ... ".format(
+                        database_name,
+                        collection_name,
+                        row["Date"],
+                        incremental_column_name,
+                    )
+                )
 
 
 if __name__ == "__main__":
-    tokenization = Tokenization(import_module="jieba",
-                                user_dict="financedict.txt",
-                                chn_stop_words_dir="chnstopwords.txt")
+    tokenization = Tokenization(
+        import_module="jieba",
+        user_dict="financedict.txt",
+        chn_stop_words_dir="chnstopwords.txt",
+    )
     # documents_list = \
     #     [
     #         "中央、地方支持政策频出,煤炭行业站上了风口 券商研报浩如烟海，投资线索眼花缭乱，\
