@@ -53,7 +53,7 @@ class GenStockNewsDB(object):
         )
         if "RelatedStockCodes" not in _keys_list:
             tokenization = Tokenization(
-                import_module="jieba", user_dict="./Leorio/financedict.txt"
+                import_module="jieba", user_dict="./info/finance_dict.txt"
             )
             tokenization.update_news_database_rows(database_name, collection_name)
         # 创建stock_code为名称的collection
