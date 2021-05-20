@@ -1,4 +1,3 @@
-import __init__
 import logging
 import warnings
 
