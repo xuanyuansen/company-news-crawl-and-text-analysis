@@ -1,0 +1,17 @@
+mac install mongo
+mac install redis
+brew install mangodb
+brew install mongodb
+brew tap mongodb/brew
+brew install mongodb-community
+brew services start mongodb-community
+ps -ef |grep mongodb
+mongo visual tool
+
+
+install pkuseg
+https://github.com/explosion/spaCy/issues/6666
+pip install https://github.com/lancopku/pkuseg-python/archive/master.zip
+
+chrome driver
+https://stackoverflow.com/questions/47148872/webdrivers-executable-may-have-wrong-permissions-please-see-https-sites-goo
