@@ -61,7 +61,11 @@ class Database(object):
                 for _id, row in enumerate(data):
                     if _id + 1 <= max_data_request:
                         for _key in keys:
-                            _dict[_key].append(row[_key])
+                            # print("key is {0}, row is {1}".format(_key, row))
+                            if row.get(_key) is not None:
+                                _dict[_key].append(row[_key])
+                            else:
+                                _dict[_key].append("null")
                     else:
                         break
             else:
@@ -81,7 +85,7 @@ class Database(object):
                         break
             return pd.DataFrame(_dict)
         except Exception as ex:
-            print("出现如下异常%s" % ex)
+            print("出现如下异常{0}, keys {1}, data {2}".format(ex, keys, query))
             traceback.print_exc()
             return None
 

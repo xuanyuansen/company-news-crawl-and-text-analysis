@@ -22,9 +22,9 @@ CHROME_DRIVER = "./info/chromedriver_mac" if os_type == 'Darwin' else "./info/ch
 #                                        "https://ggjd.cnstock.com/gglist/search/ggkx": "公告快讯",
 #                                        "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh": "利好公告"}
 WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK = {
-    "https://company.cnstock.com/company/scp_gsxw": "公司聚焦",
-    "http://ggjd.cnstock.com/company/scp_ggjd/tjd_bbdj": "公告解读",
-    "http://ggjd.cnstock.com/company/scp_ggjd/tjd_ggkx": "公告快讯",
+    #"https://company.cnstock.com/company/scp_gsxw": "公司聚焦",
+    #"http://ggjd.cnstock.com/company/scp_ggjd/tjd_bbdj": "公告解读",
+    #"http://ggjd.cnstock.com/company/scp_ggjd/tjd_ggkx": "公告快讯",
     "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh": "利好公告",
 }
 RECORD_CNSTOCK_FAILED_URL_TXT_FILE_PATH = "./info/cnstock_failed_urls.txt"

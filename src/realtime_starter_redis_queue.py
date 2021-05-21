@@ -2,7 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 import redis
 from Utils import config
-from Killua.buildstocknewsdb import GenStockNewsDB
+from ComTools.buildstocknewsdb import GenStockNewsDB
 
 
 redis_client = redis.StrictRedis(

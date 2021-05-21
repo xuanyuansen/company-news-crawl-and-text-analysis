@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 """
 删除数据库中含有null值的行
 """

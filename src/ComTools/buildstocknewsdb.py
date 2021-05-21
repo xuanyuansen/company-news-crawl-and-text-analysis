@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 import json
 import redis
 import logging

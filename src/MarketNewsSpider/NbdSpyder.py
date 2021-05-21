@@ -4,18 +4,10 @@
 每经网：http://www.nbd.com.cn
 A股动态：http://stocks.nbd.com.cn/columns/275/page/1
 """
-from BasicSpyder import Spyder
-
-from Utils import utils
-from Utils import config
-from Utils.database import Database
-
-from NlpUtils.tokenization import Tokenization
-
+from MarketNewsSpider.BasicSpyder import Spyder
+from Utils import utils, config
 import re
 import time
-import json
-import redis
 import logging
 
 logging.basicConfig(
@@ -170,31 +162,13 @@ class NbdSpyder(Spyder):
                     if a["href"] not in self.redis_client.lrange(
                         config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME, 0, -1
                     ):
-                        result = self.get_url_info(a["href"])
+                        result = self.get_url_info(a["href"], "")
                         while not result:
-                            self.terminated_amount += 1
-                            if self.terminated_amount > config.NBD_MAX_REJECTED_AMOUNTS:
-                                # 始终无法爬取的URL保存起来
-                                with open(
-                                    config.RECORD_NBD_FAILED_URL_TXT_FILE_PATH, "a+"
-                                ) as file:
-                                    file.write("{}\n".format(a["href"]))
-                                logging.info(
-                                    "rejected by remote server longer than {} minutes, "
-                                    "and the failed url has been written in path {}".format(
-                                        config.NBD_MAX_REJECTED_AMOUNTS,
-                                        config.RECORD_NBD_FAILED_URL_TXT_FILE_PATH,
-                                    )
-                                )
+                            terminated = self.fail_scrap(a["href"])
+                            if terminated:
                                 break
-                            logging.info(
-                                "rejected by remote server, request {} again after "
-                                "{} seconds...".format(
-                                    a["href"], 60 * self.terminated_amount
-                                )
-                            )
-                            time.sleep(60 * self.terminated_amount)
-                            result = self.get_url_info(a["href"])
+                            self.fail_sleep(a["href"])
+                            result = self.get_url_info(a["href"], "")
                         if not result:
                             # 爬取失败的情况
                             logging.info("[FAILED] {} {}".format(a.string, a["href"]))
@@ -202,118 +176,12 @@ class NbdSpyder(Spyder):
                             # 有返回但是article为null的情况
                             date, article = result
                             if date > latest_date:
-                                while article == "" and self.is_article_prob >= 0.1:
-                                    self.is_article_prob -= 0.1
-                                    result = self.get_url_info(a["href"])
-                                    while not result:
-                                        self.terminated_amount += 1
-                                        if (
-                                            self.terminated_amount
-                                            > config.NBD_MAX_REJECTED_AMOUNTS
-                                        ):
-                                            # 始终无法爬取的URL保存起来
-                                            with open(
-                                                config.RECORD_NBD_FAILED_URL_TXT_FILE_PATH,
-                                                "a+",
-                                            ) as file:
-                                                file.write("{}\n".format(a["href"]))
-                                            logging.info(
-                                                "rejected by remote server longer than {} minutes, "
-                                                "and the failed url has been written in path {}".format(
-                                                    config.NBD_MAX_REJECTED_AMOUNTS,
-                                                    config.RECORD_NBD_FAILED_URL_TXT_FILE_PATH,
-                                                )
-                                            )
-                                            break
-                                        logging.info(
-                                            "rejected by remote server, request {} again after "
-                                            "{} seconds...".format(
-                                                a["href"], 60 * self.terminated_amount
-                                            )
-                                        )
-                                        time.sleep(60 * self.terminated_amount)
-                                        result = self.get_url_info(a["href"])
-                                    date, article = result
-                                self.is_article_prob = 0.5
+                                self.process_article(result, a["href"], a.string, date, None, True)
                                 if article != "":
-                                    related_stock_codes_list = self.tokenization.find_relevant_stock_codes_in_article(
-                                        article, name_code_dict
-                                    )
-                                    self.db_obj.insert_data(
-                                        self.db_name,
-                                        self.col_name,
-                                        {
-                                            "Date": date,
-                                            # "PageId": page_url.split("/")[-1],
-                                            "Url": a["href"],
-                                            "Title": a.string,
-                                            "Article": article,
-                                            "RelatedStockCodes": " ".join(
-                                                related_stock_codes_list
-                                            ),
-                                        },
-                                    )
-                                    self.redis_client.lpush(
-                                        config.CACHE_NEWS_LIST_NAME,
-                                        json.dumps(
-                                            {
-                                                "Date": date,
-                                                # "PageId": page_url.split("/")[-1],
-                                                "Url": a["href"],
-                                                "Title": a.string,
-                                                "Article": article,
-                                                "RelatedStockCodes": " ".join(
-                                                    related_stock_codes_list
-                                                ),
-                                                "OriDB": config.DATABASE_NAME,
-                                                "OriCOL": config.COLLECTION_NAME_NBD,
-                                            }
-                                        ),
-                                    )
                                     # crawled_urls.append(a["href"])
                                     self.redis_client.lpush(
                                         config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME,
                                         a["href"],
                                     )
-                                    logging.info(
-                                        "[SUCCESS] {} {} {}".format(
-                                            date, a.string, a["href"]
-                                        )
-                                    )
-            # logging.info("sleep {} secs then request again ... ".format(interval))
+            logging.info("sleep {} secs then request again ... ".format(interval))
             time.sleep(interval)
-
-
-# """
-# Example-1:
-# 爬取历史新闻数据
-# """
-# if __name__ == "__main__":
-#     nbd_spyder = NbdSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_NBD)
-#     nbd_spyder.get_historical_news(start_page=684)
-#
-#     Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
-#     DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
-
-
-# """
-# Example-2:
-# 爬取实时新闻数据
-# """
-# if __name__ == '__main__':
-#     from Utils import config
-#
-#     from Killua.denull import DeNull
-#     from Killua.deduplication import Deduplication
-#
-#     from MarketNewsSpider.nbdspyder import NbdSpyder
-#
-#     # 如果没有历史数据从头爬取，如果已爬取历史数据，则从最新的时间开始爬取
-#     # 如历史数据中最近的新闻时间是"2020-12-09 20:37:10"，则从该时间开始爬取
-#     nbd_spyder = NbdSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_NBD)
-#     nbd_spyder.get_historical_news()
-#
-#     Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
-#     DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
-#
-#     nbd_spyder.get_realtime_news()

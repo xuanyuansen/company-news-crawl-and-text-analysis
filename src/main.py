@@ -10,9 +10,9 @@ from MarketNewsSpider.NbdSpyder import NbdSpyder
 from MarketNewsSpider.CnStockSpyder import CnStockSpyder
 from MarketNewsSpider.StockInfoSpyder import StockInfoSpyder
 
-from Killua.denull import DeNull
-from Killua.deduplication import Deduplication
-from Killua.buildstocknewsdb import GenStockNewsDB
+from ComTools.denull import DeNull
+from ComTools.deduplication import Deduplication
+from ComTools.buildstocknewsdb import GenStockNewsDB
 
 
 # 1. 爬取历史数据

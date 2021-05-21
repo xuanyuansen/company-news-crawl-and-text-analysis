@@ -64,7 +64,7 @@ class Spyder(object):
         )
         time.sleep(60 * self.terminated_amount)
 
-    def process_article(self, init_result, url, title, date, is_real_time: bool = False):
+    def process_article(self, init_result, url, title, date, category_chn=None, is_real_time: bool = False):
         # 有返回但是article为null的情况
         article_specific_date, article = init_result
         child_method = getattr(self, 'get_url_info')  # 获取子类的out()方法
@@ -95,18 +95,24 @@ class Spyder(object):
                 "RelatedStockCodes": " ".join(
                     related_stock_codes_list
                 ),
-            }
-            result_f = self.col.find_one(old_data)
-            logging.info(cut_words_json)
-            new_data = {
                 "WordsFrequent": cut_words_json,
             }
-            if result_f is not None:
-                logging.info("id is {0}".format(result_f["_id"]))
-                self.db_obj.update_row(self.db_name, self.col_name, old_data, new_data)
+            # result_f = self.col.find_one(old_data)
+            logging.info(cut_words_json)
+            if self.col_name == config.COLLECTION_NAME_CNSTOCK:
+                plus_data = {
+                    "Category": category_chn,
+                }
+                # if result_f is not None:
+                # logging.info("id is {0}".format(result_f["_id"]))
+                # self.db_obj.update_row(self.db_name, self.col_name, old_data, new_data)
+                # else:
+                self.db_obj.insert_data(
+                        self.db_name, self.col_name, dict(old_data, **plus_data)
+                    )
             else:
                 self.db_obj.insert_data(
-                    self.db_name, self.col_name, dict(old_data, **new_data)
+                    self.db_name, self.col_name, dict(old_data)
                 )
             logging.info(
                 "[SUCCESS] {} {} {}".format(
@@ -116,21 +122,27 @@ class Spyder(object):
                 )
             )
             if is_real_time:
+                data = dict({
+                    "Date": article_specific_date,
+                    "Url": url,
+                    "Title": title,
+                    "Article": article,
+                    "RelatedStockCodes": " ".join(
+                        related_stock_codes_list
+                    ),
+                    "OriDB": config.DATABASE_NAME,
+                    "OriCOL": self.col_name,
+                    "WordsFrequent": cut_words_json,
+                })
+                if self.col_name == config.COLLECTION_NAME_CNSTOCK:
+                    plus = dict({
+                        "Category": category_chn,
+                    })
+                    data = dict(data, **plus)
                 self.redis_client.lpush(
                     config.CACHE_NEWS_LIST_NAME,
                     json.dumps(
-                        {
-                            "Date": article_specific_date,
-                            "Url": url,
-                            "Title": title,
-                            "Article": article,
-                            "RelatedStockCodes": " ".join(
-                                related_stock_codes_list
-                            ),
-                            "OriDB": config.DATABASE_NAME,
-                            "OriCOL": self.col_name,
-                            "WordsFrequent": cut_words_json,
-                        }
+                        data, ensure_ascii=False
                     ),
                 )
                 logging.info(

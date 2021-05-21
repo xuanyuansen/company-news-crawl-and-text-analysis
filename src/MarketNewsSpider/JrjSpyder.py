@@ -3,13 +3,11 @@
 """
 金融界：http://www.jrj.com.cn
 股票频道全部新闻：http://stock.jrj.com.cn/xwk/202012/20201203_1.shtml
+author xuanyuansen
 """
 from MarketNewsSpider.BasicSpyder import Spyder
-
-from Utils import utils
-from Utils import config
+from Utils import utils, config
 import time
-import json
 import datetime
 import logging
 
@@ -138,7 +136,7 @@ class JrjSpyder(Spyder):
                                     logging.info("[QUIT] {}".format(a.string))
 
     def get_realtime_news(self, interval=60):
-        # crawled_urls_list = []
+        crawled_urls_list = []
         is_change_date = False
         last_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
@@ -208,13 +206,13 @@ class JrjSpyder(Spyder):
                                 else:
                                     # 有返回但是article为null的情况
                                     # article_specific_date, article = result
-                                    self.process_article(result, a["href"], a.string, today_date, True)
+                                    self.process_article(result, a["href"], a.string, today_date, None, True)
                                 self.terminated_amount = 0  # 爬取结束后重置该参数
                             else:
                                 logging.info("[QUIT] {}".format(a.string))
-                            # crawled_urls_list.append(a["href"])
+                            crawled_urls_list.append(a["href"])
                             self.redis_client.lpush(
                                 config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, a["href"]
                             )
-            # logging.info("sleep {} secs then request again ... ".format(interval))
+            logging.info("sleep {} secs then request again ... ".format(interval))
             time.sleep(interval)

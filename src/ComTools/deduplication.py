@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
 from Utils.database import Database
 from Utils import utils
 from Utils import config

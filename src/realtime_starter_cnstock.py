@@ -1,15 +1,13 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
-import time
 import redis
-import logging
 import threading
 
 from Utils import config
 from Utils.database import Database
 
-from Killua.denull import DeNull
-from Killua.deduplication import Deduplication
+from ComTools.denull import DeNull
+from ComTools.deduplication import Deduplication
 
 from MarketNewsSpider.CnStockSpyder import CnStockSpyder
 
@@ -27,15 +25,17 @@ obj = Database()
 df = obj.get_data(
     config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK, keys=["Date", "Category"]
 )
-
-cnstock_spyder = CnStockSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
+print(df.shape)
+print(df[df.shape[0]-100:])
+cn_stock_spyder = CnStockSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
 # 先补充历史数据，比如已爬取数据到2020-12-01，但是启动实时爬取程序在2020-12-23，则先
 # 自动补充爬取2020-12-02至2020-12-23的新闻数据
 for url_to_be_crawled, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
     # 查询type_chn的最近一条数据的时间
-    latets_date_in_db = max(df[df.Category == type_chn]["Date"].to_list())
-    cnstock_spyder.get_historical_news(
-        url_to_be_crawled, category_chn=type_chn, start_date=latets_date_in_db
+    print(type_chn)
+    latest_date_in_db = max(df[df["Category"] == type_chn]["Date"].to_list())
+    cn_stock_spyder.get_historical_news(
+        url_to_be_crawled, category_chn=type_chn, start_date=latest_date_in_db
     )
 
 Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
@@ -45,7 +45,7 @@ DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
 thread_list = []
 for url, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
     thread = threading.Thread(
-        target=cnstock_spyder.get_realtime_news, args=(url, type_chn, 60)
+        target=cn_stock_spyder.get_realtime_news, args=(url, type_chn, 60)
     )
     thread_list.append(thread)
 for thread in thread_list:
