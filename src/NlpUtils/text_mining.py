@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix
 from bson.objectid import ObjectId
-import src.TextAnalysis.text_processing as tp
+import NlpUtils.text_processing as tp
 from gensim import corpora
 
 from sklearn import svm
@@ -42,7 +42,7 @@ class TextMining(object):
         self.PORT = kwarg["PORT"]
         self.ConnDB()
         self.tp = tp.TextProcessing(
-            os.getcwd() + "\\" + "Chinese_Stop_Words.txt",
+            os.getcwd() + "\\" + "chinese_stop_words.txt",
             os.getcwd() + "\\" + "finance_dict.txt",
         )
         if not os.path.exists(os.getcwd() + "\\" + "stock_dict_file"):

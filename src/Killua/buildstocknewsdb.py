@@ -7,8 +7,8 @@ import akshare as ak
 from Utils import config
 from Utils.database import Database
 
-from Leorio.tokenization import Tokenization
-from Leorio.topicmodelling import TopicModelling
+from NlpUtils.tokenization import Tokenization
+from NlpUtils.topicmodelling import TopicModelling
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +20,17 @@ logging.basicConfig(
 class GenStockNewsDB(object):
     def __init__(self):
         self.database = Database()
+        # self.name_code_symbol_df = self.database.get_data(
+        #     config.STOCK_DATABASE_NAME,
+        #     config.COLLECTION_NAME_STOCK_BASIC_INFO,
+        #     keys=["name", "code", "symbol"],
+        # )
+        #
+        # _symbol = self.name_code_symbol_df['symbol'].tolist()
+        # _name = self.name_code_symbol_df['name'].tolist()
+        # _code = self.name_code_symbol_df['code'].tolist()
+        # self.symbol_name = dict([ele for ele in zip(_symbol, _name)])
+        # self.symbol_code = dict([ele for ele in zip(_symbol, _code)])
         # 获取从1990-12-19至2020-12-31股票交易日数据
         self.trade_date = ak.tool_trade_date_hist_sina()["trade_date"].tolist()
         self.label_range = {
@@ -57,50 +68,75 @@ class GenStockNewsDB(object):
             )
             tokenization.update_news_database_rows(database_name, collection_name)
         # 创建stock_code为名称的collection
-        stock_symbol_list = self.database.get_data(
-            config.STOCK_DATABASE_NAME,
-            config.COLLECTION_NAME_STOCK_BASIC_INFO,
-            keys=["symbol"],
-        )["symbol"].to_list()
+        # stock_symbol_list所有的股票代码
+        # stock_symbol_list = self.database.get_data(
+        #     config.STOCK_DATABASE_NAME,
+        #     config.COLLECTION_NAME_STOCK_BASIC_INFO,
+        #     keys=["symbol"],
+        # )["symbol"].to_list()
+
+        #  目前已经有的明细股票数据表col_names
         col_names = self.database.connect_database(
             config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE
         ).list_collection_names(session=None)
-        for symbol in stock_symbol_list:
-            if symbol not in col_names:
-                # if int(symbol[2:]) > 837:
-                _collection = self.database.get_collection(
-                    config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, symbol
-                )
+
+        # 迭代器
+        for row in self.database.get_collection(
+                database_name, collection_name
+        ).find():
+            logging.info(row)
+            # 先去遍历原始数据
+            related_stocks = row["RelatedStockCodes"].split(" ")
+            if len(related_stocks) <= 6:
+                continue
+            for t_stock in related_stocks:
+                try:
+                    if int(t_stock) >= 600000:
+                        t_symbol = 'sh{0}'.format(t_stock)
+                    else:
+                        t_symbol = 'sz{0}'.format(t_stock)
+                except Exception as e:
+                    print(related_stocks)
+                    print(e)
+                    break
+                # for symbol in stock_symbol_list:
                 _tmp_num_stat = 0
-                for row in self.database.get_collection(
-                    database_name, collection_name
-                ).find():  # 迭代器
-                    if symbol[2:] in row["RelatedStockCodes"].split(" "):
+                if t_symbol not in col_names:
+                    # 创建明细股票数据表symbol
+                    # if int(symbol[2:]) > 837:
+                    _collection = self.database.get_collection(
+                        config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, t_symbol
+                    )
+
+                    if _collection.name:
                         # 返回新闻发布后n天的标签
-                        _tmp_dict = {}
-                        for label_days, key_name in self.label_range.items():
-                            _tmp_res = self._label_news(
-                                datetime.datetime.strptime(
-                                    row["Date"].split(" ")[0], "%Y-%m-%d"
-                                ),
-                                symbol,
-                                label_days,
-                            )
-                            _tmp_dict.update({key_name: _tmp_res})
+                        # _tmp_dict = {}
+                        # for label_days, key_name in self.label_range.items():
+                        #     _tmp_res = self._label_news(
+                        #         datetime.datetime.strptime(
+                        #             row["Date"].split(" ")[0], "%Y-%m-%d"
+                        #         ),
+                        #         t_symbol,
+                        #         label_days,
+                        #     )
+                        #     _tmp_dict.update({key_name: _tmp_res})
                         _data = {
                             "Date": row["Date"],
                             "Url": row["Url"],
                             "Title": row["Title"],
                             "Article": row["Article"],
+                            "WordsFrequent": row["WordsFrequent"],
                             "OriDB": database_name,
                             "OriCOL": collection_name,
+                            "Symbol": t_symbol,
+                            "Code": t_stock,
                         }
-                        _data.update(_tmp_dict)
+                        # _data.update(_tmp_dict)
                         _collection.insert_one(_data)
                         _tmp_num_stat += 1
                 logging.info(
                     "there are {} news mentioned {} in {} collection need to be fetched ... ".format(
-                        _tmp_num_stat, symbol, collection_name
+                        _tmp_num_stat, t_symbol, collection_name
                     )
                 )
             # else:
@@ -160,25 +196,6 @@ class GenStockNewsDB(object):
                                     symbol,
                                 )
                             )
-                            #
-                            # if symbol.encode() in self.redis_client.lrange("stock_news_num_over_{}".format(config.MINIMUM_STOCK_NEWS_NUM_FOR_ML), 0, -1):
-                            #     label_name = "3DaysLabel"
-                            #     # classifier_save_path = "{}_classifier.pkl".format(symbol)
-                            #     ori_dict_path = "{}_docs_dict.dict".format(symbol)
-                            #     bowvec_save_path = "{}_bowvec.mm".format(symbol)
-                            #
-                            #     topicmodelling = TopicModelling()
-                            #     chn_label = topicmodelling.classify_stock_news(data["Article"],
-                            #                                                    config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE,
-                            #                                                    symbol,
-                            #                                                    label_name=label_name,
-                            #                                                    topic_model_type="lsi",
-                            #                                                    classifier_model="rdforest",  # rdforest / svm
-                            #                                                    ori_dict_path=ori_dict_path,
-                            #                                                    bowvec_save_path=bowvec_save_path)
-                            #     logging.info(
-                            #         "document '{}...' was classified with label '{}' for symbol {} ... ".format(
-                            #             data["Article"][:20], chn_label, symbol))
 
                     self.redis_client.rpop(config.CACHE_NEWS_LIST_NAME)
                     logging.info(

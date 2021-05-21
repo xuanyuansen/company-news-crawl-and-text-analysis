@@ -6,7 +6,7 @@ from crawler_jrj import WebCrawlFromjrj
 from crawler_cnstock import WebCrawlFromcnstock
 from crawler_stcn import WebCrawlFromstcn
 
-import src.Text_Analysis.text_mining as tm
+import NlpUtils.text_mining as tm
 
 
 def crawlers(web):

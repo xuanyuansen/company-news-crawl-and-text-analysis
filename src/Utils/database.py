@@ -1,3 +1,5 @@
+import traceback
+
 from pymongo import MongoClient
 import pandas as pd
 
@@ -6,17 +8,18 @@ class Database(object):
     def __init__(self, ip="localhost", port=27017):
         self.ip = ip
         self.port = port
-        self.conn = MongoClient(self.ip, self.port)
+        self.conn = MongoClient(self.ip, self.port,  maxPoolSize=200)
+        self.collection = None
 
     def connect_database(self, database_name):
         return self.conn[database_name]
 
     def get_collection(self, database_name, collection_name):
-        return self.connect_database(database_name).get_collection(collection_name)
+        self.collection = self.connect_database(database_name).get_collection(collection_name)
+        return self.collection
 
     def insert_data(self, database_name, collection_name, data_dict):
-        database = self.conn[database_name]
-        collection = database.get_collection(collection_name)
+        collection = self.get_collection(database_name, collection_name)
         collection.insert_one(data_dict)
 
     def update_row(self, database_name, collection_name, query, new_values):
@@ -77,7 +80,9 @@ class Database(object):
                     else:
                         break
             return pd.DataFrame(_dict)
-        except Exception:
+        except Exception as ex:
+            print("出现如下异常%s" % ex)
+            traceback.print_exc()
             return None
 
     def drop_db(self, database):

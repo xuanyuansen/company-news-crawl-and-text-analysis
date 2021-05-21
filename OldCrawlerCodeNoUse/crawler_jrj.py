@@ -15,7 +15,7 @@ import datetime
 from concurrent import futures
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-import src.Text_Analysis.text_mining as tm
+import NlpUtils.text_mining as tm
 from bson.objectid import ObjectId
 
 

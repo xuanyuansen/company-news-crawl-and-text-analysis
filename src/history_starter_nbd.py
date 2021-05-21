@@ -10,7 +10,7 @@ from MarketNewsSpider.NbdSpyder import NbdSpyder
 
 # 1. 爬取历史数据
 nbd_spyder = NbdSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_NBD)
-nbd_spyder.get_historical_news(start_page=684)
+nbd_spyder.get_historical_news(start_page=10)
 
 # 2. 针对历史数据进行去重清洗
 Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()

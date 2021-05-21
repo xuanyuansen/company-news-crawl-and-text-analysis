@@ -37,3 +37,6 @@ pip install https://github.com/lancopku/pkuseg-python/archive/master.zip
 
 chrome driver
 https://stackoverflow.com/questions/47148872/webdrivers-executable-may-have-wrong-permissions-please-see-https-sites-goo
+
+sudo launchctl limit maxfiles 64000 64000
+https://docs.mongodb.com/manual/reference/ulimit/

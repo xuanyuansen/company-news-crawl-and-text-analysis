@@ -10,7 +10,7 @@ from Utils import utils
 from Utils import config
 from Utils.database import Database
 
-from Leorio.tokenization import Tokenization
+from NlpUtils.tokenization import Tokenization
 
 import re
 import time
@@ -45,7 +45,8 @@ class NbdSpyder(Spyder):
     def get_url_info(self, url):
         try:
             bs = utils.html_parser(url)
-        except Exception:
+        except Exception as e:
+            print(e.__traceback__)
             return False
         span_list = bs.find_all("span")
         part = bs.find_all("p")

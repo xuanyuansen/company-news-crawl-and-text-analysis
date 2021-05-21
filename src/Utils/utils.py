@@ -107,7 +107,7 @@ def html_parser(url):
 
 def get_chn_stop_words(path):
     """Load the stop words txt file."""
-    stopwords = [line.strip() for line in open(path, "r").readlines()]
+    stopwords = [line.strip() for line in open(path, "r", encoding="unicode_escape").readlines()]
 
     return stopwords
 

@@ -12,7 +12,7 @@ import time, re, requests
 from concurrent import futures
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-import src.Text_Analysis.text_mining as tm
+import NlpUtils.text_mining as tm
 
 
 class WebCrawlFromcnstock(object):

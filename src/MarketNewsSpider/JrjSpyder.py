@@ -10,7 +10,7 @@ from Utils import utils
 from Utils import config
 from Utils.database import Database
 
-from Leorio.tokenization import Tokenization
+from NlpUtils.tokenization import Tokenization
 
 import time
 import json
@@ -217,9 +217,10 @@ class JrjSpyder(Spyder):
                                             article_specific_date, article = result
                                         self.is_article_prob = 0.5
                                         if article != "":
-                                            related_stock_codes_list = self.tokenization.find_relevant_stock_codes_in_article(
-                                                article, name_code_dict
-                                            )
+                                            related_stock_codes_list, cut_words_json = \
+                                                self.tokenization.find_relevant_stock_codes_in_article(
+                                                    article, name_code_dict
+                                                )
                                             data = {
                                                 "Date": article_specific_date,
                                                 "Url": a["href"],
@@ -228,6 +229,7 @@ class JrjSpyder(Spyder):
                                                 "RelatedStockCodes": " ".join(
                                                     related_stock_codes_list
                                                 ),
+                                                "WordsFrequent": cut_words_json,
                                             }
                                             # self.col.insert_one(data)
                                             self.db_obj.insert_data(

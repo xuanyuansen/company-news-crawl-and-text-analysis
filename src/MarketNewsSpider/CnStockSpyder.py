@@ -16,7 +16,7 @@ from Utils.database import Database
 from Killua.denull import DeNull
 from Killua.deduplication import Deduplication
 
-from Leorio.tokenization import Tokenization
+from NlpUtils.tokenization import Tokenization
 
 import re
 import time

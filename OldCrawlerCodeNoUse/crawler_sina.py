@@ -12,9 +12,7 @@ import time, re, requests
 from concurrent import futures
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-import src.Text_Analysis.text_mining as tm
-
-
+import NlpUtils.text_mining as tm
 
 
 class WebCrawlFromSina(object):
@@ -261,7 +259,8 @@ class WebCrawlFromSina(object):
                     if (
                         "href" in a.attrs
                         and a.string
-                        and a["href"].find("https://finance.sina.com.cn/stock/ggzz/") != -1
+                        and a["href"].find("https://finance.sina.com.cn/stock/ggzz/")
+                        != -1
                     ):
                         (
                             summary,
@@ -307,7 +306,8 @@ class WebCrawlFromSina(object):
                     if (
                         "href" in a.attrs
                         and a.string
-                        and a["href"].find("https://finance.sina.com.cn/stock/ggzz/") != -1
+                        and a["href"].find("https://finance.sina.com.cn/stock/ggzz/")
+                        != -1
                     ):
                         if a["href"] not in AddressLst:
                             (

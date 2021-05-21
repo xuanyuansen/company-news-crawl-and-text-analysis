@@ -4,10 +4,8 @@ Created on Fri Feb 23 12:37:46 2018
 
 @author: Damon Li
 """
-
-import numpy as np
-
-import jieba, os
+import jieba
+import os
 from gensim import corpora, similarities, models, matutils, utils
 
 
@@ -252,7 +250,7 @@ class TextProcessing(object):
 
 if __name__ == "__main__":
     tp = TextProcessing(
-        os.getcwd() + "\\" + "Chinese_Stop_Words.txt",
+        os.getcwd() + "\\" + "chinese_stop_words.txt",
         os.getcwd() + "\\" + "finance_dict.txt",
     )
     doc = [

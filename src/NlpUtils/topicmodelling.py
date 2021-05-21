@@ -4,8 +4,8 @@ import time
 from Utils import config
 from Utils import utils
 from Utils.database import Database
-from Leorio.tokenization import Tokenization
-from MachineLearningUtils.classifier import Classifier
+from NlpUtils.tokenization import Tokenization
+from NlpUtils.classifier import Classifier
 
 from sklearn import preprocessing
 

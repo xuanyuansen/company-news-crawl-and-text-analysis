@@ -1,3 +1,10 @@
+# -*- coding:utf-8 -*-
+# remind install clang on mac with cmd, xcode-select --install
+# https://blog.csdn.net/coreylam/article/details/40213109
+import platform
+os_type = platform.system()
+print(os_type)
+
 MONGODB_IP = "localhost"
 MONGODB_PORT = 27017
 REDIS_IP = "localhost"
@@ -7,7 +14,8 @@ THREAD_NUMS_FOR_SPYDER = 4
 DATABASE_NAME = "finnewshunter"
 
 COLLECTION_NAME_CNSTOCK = "cnstock"
-CHROME_DRIVER = "./info/chromedriver"
+
+CHROME_DRIVER = "./info/chromedriver_mac" if os_type == 'Darwin' else "./info/chromedriver"
 # WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK = {"https://company.cnstock.com/company/scp_gsxw": "公司聚焦",
 #                                        "https://ggjd.cnstock.com/gglist/search/qmtbbdj": "公告解读",
 #                                        "https://ggjd.cnstock.com/gglist/search/ggkx": "公告快讯",
@@ -57,7 +65,7 @@ RDFOREST_TUNED_PARAMTERS = {
 }
 CLASSIFIER_SCORE_LIST = ["f1_weighted"]
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
-CHN_STOP_WORDS_PATH = "./info/Chinese_Stop_Words.txt"
+CHN_STOP_WORDS_PATH = "./info/chinese_stop_words.txt"
 
 CACHE_NEWS_REDIS_DB_ID = 0
 CACHE_NEWS_LIST_NAME = "cache_news_waiting_for_classification"
