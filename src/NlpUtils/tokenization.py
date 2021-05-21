@@ -55,7 +55,7 @@ class Tokenization(object):
 
     def cut_words(self, ori_text):
         ori_text = re.sub('[’!"#$%&\'()*+,-./:;<=>?@，。★、…【】《》？“”‘！\\[\\]^_`{|}~\\s]+', "", ori_text)
-        print(ori_text)
+        # print(ori_text)
         out_str = list()
         sentence_seg = None
         if self.import_module == "jieba":
@@ -91,14 +91,12 @@ class Tokenization(object):
                     info_dict[word] = 1
                 else:
                     info_dict[word] = value+1
-                try:
-                    stock_codes_set.append(stock_name_code_dict[word])
-                except Exception as e:
-                    print(e)
-                    pass
+
+                if stock_name_code_dict.get(word) is not None:
+                    stock_codes_set.append(stock_name_code_dict.get(word))
 
         info_dict_sorted = dict(sorted(info_dict.items(), key=lambda item: item[1], reverse=True))
-        info_dict_sorted_json = json.dumps(info_dict_sorted)
+        info_dict_sorted_json = json.dumps(info_dict_sorted, ensure_ascii=False)
         return list(set(stock_codes_set)), info_dict_sorted_json
 
     def update_news_database_rows(

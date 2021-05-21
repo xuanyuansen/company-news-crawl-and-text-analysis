@@ -11,6 +11,7 @@ REDIS_IP = "localhost"
 REDIS_PORT = 6379
 THREAD_NUMS_FOR_SPYDER = 4
 
+SEG_METHOD = "jieba"
 DATABASE_NAME = "finnewshunter"
 
 COLLECTION_NAME_CNSTOCK = "cnstock"

@@ -8,13 +8,8 @@ from MarketNewsSpider.BasicSpyder import Spyder
 
 from Utils import utils
 from Utils import config
-from Utils.database import Database
-
-from NlpUtils.tokenization import Tokenization
-
 import time
 import json
-import redis
 import datetime
 import logging
 
@@ -27,25 +22,15 @@ logging.basicConfig(
 
 class JrjSpyder(Spyder):
     def __init__(self, database_name, collection_name):
-        super(JrjSpyder, self).__init__()
-        self.db_obj = Database()
-        self.col = self.db_obj.conn[database_name].get_collection(collection_name)
-        self.terminated_amount = 0
-        self.db_name = database_name
-        self.col_name = collection_name
-        self.tokenization = Tokenization(
-            import_module="jieba", user_dict=config.USER_DEFINED_DICT_PATH
-        )
-        self.redis_client = redis.StrictRedis(
-            host=config.REDIS_IP,
-            port=config.REDIS_PORT,
-            db=config.CACHE_NEWS_REDIS_DB_ID,
-        )
+        super().__init__(database_name, collection_name)
+        self.max_rej_amounts = config.JRJ_MAX_REJECTED_AMOUNTS
+        self.record_fail_path = config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH
 
     def get_url_info(self, url, specific_date):
         try:
             bs = utils.html_parser(url)
-        except Exception:
+        except Exception as e:
+            logging.warning("html parse fail {0}".format(e))
             return False
         date = ""
         for span in bs.find_all("span"):
@@ -64,22 +49,21 @@ class JrjSpyder(Spyder):
                 and not p.find_all("i")
                 and not p.find_all("span")
             ):
-                # if p.contents[0] != "jrj_final_daohang_start1" and p.attrs == {} and \
-                #         not p.find_all("input") and not p.find_all("a", attrs={"class": "red"}) and not p.find_all("i"):
                 article += (
                     p.text.replace("\r", "").replace("\n", "").replace("\u3000", "")
                 )
 
         return [date, article]
 
-    def get_historical_news(self, url, start_date=None, end_date=None):
-        name_code_df = self.db_obj.get_data(
-            config.STOCK_DATABASE_NAME,
-            config.COLLECTION_NAME_STOCK_BASIC_INFO,
-            keys=["name", "code"],
+    def from_url_2_a_list(self, url, date, num):
+        _url = "{}/{}/{}_{}.shtml".format(
+            url, date.replace("-", "")[0:6], date.replace("-", ""), str(num)
         )
-        name_code_dict = dict(name_code_df.values)
+        bs = utils.html_parser(_url)
+        a_list = bs.find_all("a")
+        return a_list
 
+    def get_historical_news(self, url, start_date=None, end_date=None):
         crawled_urls_list = []
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -114,11 +98,7 @@ class JrjSpyder(Spyder):
                 )
                 max_pages_num = utils.search_max_pages_num(first_url, date)
                 for num in range(1, max_pages_num + 1):
-                    _url = "{}/{}/{}_{}.shtml".format(
-                        url, date.replace("-", "")[0:6], date.replace("-", ""), str(num)
-                    )
-                    bs = utils.html_parser(_url)
-                    a_list = bs.find_all("a")
+                    a_list = self.from_url_2_a_list(url, date, num)
                     for a in a_list:
                         if (
                             "href" in a.attrs
@@ -140,32 +120,10 @@ class JrjSpyder(Spyder):
                                 ):
                                     result = self.get_url_info(a["href"], date)
                                     while not result:
-                                        self.terminated_amount += 1
-                                        if (
-                                            self.terminated_amount
-                                            > config.JRJ_MAX_REJECTED_AMOUNTS
-                                        ):
-                                            # 始终无法爬取的URL保存起来
-                                            with open(
-                                                config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                "a+",
-                                            ) as file:
-                                                file.write("{}\n".format(a["href"]))
-                                            logging.info(
-                                                "rejected by remote server longer than {} minutes, "
-                                                "and the failed url has been written in path {}".format(
-                                                    config.JRJ_MAX_REJECTED_AMOUNTS,
-                                                    config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                )
-                                            )
+                                        terminated = self.fail_scrap(a["href"])
+                                        if terminated:
                                             break
-                                        logging.info(
-                                            "rejected by remote server, request {} again after "
-                                            "{} seconds...".format(
-                                                a["href"], 60 * self.terminated_amount
-                                            )
-                                        )
-                                        time.sleep(60 * self.terminated_amount)
+                                        self.fail_sleep(a["href"])
                                         result = self.get_url_info(a["href"], date)
                                     if not result:
                                         # 爬取失败的情况
@@ -173,89 +131,17 @@ class JrjSpyder(Spyder):
                                             "[FAILED] {} {}".format(a.string, a["href"])
                                         )
                                     else:
-                                        # 有返回但是article为null的情况
-                                        article_specific_date, article = result
-                                        while (
-                                            article == ""
-                                            and self.is_article_prob >= 0.1
-                                        ):
-                                            self.is_article_prob -= 0.1
-                                            result = self.get_url_info(a["href"], date)
-                                            while not result:
-                                                self.terminated_amount += 1
-                                                if (
-                                                    self.terminated_amount
-                                                    > config.JRJ_MAX_REJECTED_AMOUNTS
-                                                ):
-                                                    # 始终无法爬取的URL保存起来
-                                                    with open(
-                                                        config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                        "a+",
-                                                    ) as file:
-                                                        file.write(
-                                                            "{}\n".format(a["href"])
-                                                        )
-                                                    logging.info(
-                                                        "rejected by remote server longer than {} minutes, "
-                                                        "and the failed url has been written in path {}".format(
-                                                            config.JRJ_MAX_REJECTED_AMOUNTS,
-                                                            config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                        )
-                                                    )
-                                                    break
-                                                logging.info(
-                                                    "rejected by remote server, request {} again after "
-                                                    "{} seconds...".format(
-                                                        a["href"],
-                                                        60 * self.terminated_amount,
-                                                    )
-                                                )
-                                                time.sleep(60 * self.terminated_amount)
-                                                result = self.get_url_info(
-                                                    a["href"], date
-                                                )
-                                            article_specific_date, article = result
-                                        self.is_article_prob = 0.5
-                                        if article != "":
-                                            related_stock_codes_list, cut_words_json = \
-                                                self.tokenization.find_relevant_stock_codes_in_article(
-                                                    article, name_code_dict
-                                                )
-                                            data = {
-                                                "Date": article_specific_date,
-                                                "Url": a["href"],
-                                                "Title": a.string,
-                                                "Article": article,
-                                                "RelatedStockCodes": " ".join(
-                                                    related_stock_codes_list
-                                                ),
-                                                "WordsFrequent": cut_words_json,
-                                            }
-                                            # self.col.insert_one(data)
-                                            self.db_obj.insert_data(
-                                                self.db_name, self.col_name, data
-                                            )
-                                            logging.info(
-                                                "[SUCCESS] {} {} {}".format(
-                                                    article_specific_date,
-                                                    a.string,
-                                                    a["href"],
-                                                )
-                                            )
+                                        self.process_article(result, a["href"], a.string, date)
+
                                     self.terminated_amount = 0  # 爬取结束后重置该参数
                                 else:
                                     logging.info("[QUIT] {}".format(a.string))
 
     def get_realtime_news(self, interval=60):
-        name_code_df = self.db_obj.get_data(
-            config.STOCK_DATABASE_NAME,
-            config.COLLECTION_NAME_STOCK_BASIC_INFO,
-            keys=["name", "code"],
-        )
-        name_code_dict = dict(name_code_df.values)
         # crawled_urls_list = []
         is_change_date = False
         last_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
         while True:
             today_date = datetime.datetime.now().strftime("%Y-%m-%d")
             if today_date != last_date:
@@ -308,32 +194,11 @@ class JrjSpyder(Spyder):
                             ):
                                 result = self.get_url_info(a["href"], today_date)
                                 while not result:
-                                    self.terminated_amount += 1
-                                    if (
-                                        self.terminated_amount
-                                        > config.JRJ_MAX_REJECTED_AMOUNTS
-                                    ):
-                                        # 始终无法爬取的URL保存起来
-                                        with open(
-                                            config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                            "a+",
-                                        ) as file:
-                                            file.write("{}\n".format(a["href"]))
-                                        logging.info(
-                                            "rejected by remote server longer than {} minutes, "
-                                            "and the failed url has been written in path {}".format(
-                                                config.JRJ_MAX_REJECTED_AMOUNTS,
-                                                config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                            )
-                                        )
+                                    terminated = self.fail_scrap(a["href"])
+                                    if terminated:
                                         break
-                                    logging.info(
-                                        "rejected by remote server, request {} again after "
-                                        "{} seconds...".format(
-                                            a["href"], 60 * self.terminated_amount
-                                        )
-                                    )
-                                    time.sleep(60 * self.terminated_amount)
+                                    self.fail_sleep(a["href"])
+                                    # result = self.get_url_info(a["href"], date)
                                     result = self.get_url_info(a["href"], today_date)
                                 if not result:
                                     # 爬取失败的情况
@@ -342,85 +207,8 @@ class JrjSpyder(Spyder):
                                     )
                                 else:
                                     # 有返回但是article为null的情况
-                                    article_specific_date, article = result
-                                    while article == "" and self.is_article_prob >= 0.1:
-                                        self.is_article_prob -= 0.1
-                                        result = self.get_url_info(
-                                            a["href"], today_date
-                                        )
-                                        while not result:
-                                            self.terminated_amount += 1
-                                            if (
-                                                self.terminated_amount
-                                                > config.JRJ_MAX_REJECTED_AMOUNTS
-                                            ):
-                                                # 始终无法爬取的URL保存起来
-                                                with open(
-                                                    config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                    "a+",
-                                                ) as file:
-                                                    file.write("{}\n".format(a["href"]))
-                                                logging.info(
-                                                    "rejected by remote server longer than {} minutes, "
-                                                    "and the failed url has been written in path {}".format(
-                                                        config.JRJ_MAX_REJECTED_AMOUNTS,
-                                                        config.RECORD_JRJ_FAILED_URL_TXT_FILE_PATH,
-                                                    )
-                                                )
-                                                break
-                                            logging.info(
-                                                "rejected by remote server, request {} again after "
-                                                "{} seconds...".format(
-                                                    a["href"],
-                                                    60 * self.terminated_amount,
-                                                )
-                                            )
-                                            time.sleep(60 * self.terminated_amount)
-                                            result = self.get_url_info(
-                                                a["href"], today_date
-                                            )
-                                        article_specific_date, article = result
-                                    self.is_article_prob = 0.5
-                                    if article != "":
-                                        related_stock_codes_list = self.tokenization.find_relevant_stock_codes_in_article(
-                                            article, name_code_dict
-                                        )
-                                        self.db_obj.insert_data(
-                                            self.db_name,
-                                            self.col_name,
-                                            {
-                                                "Date": article_specific_date,
-                                                "Url": a["href"],
-                                                "Title": a.string,
-                                                "Article": article,
-                                                "RelatedStockCodes": " ".join(
-                                                    related_stock_codes_list
-                                                ),
-                                            },
-                                        )
-                                        self.redis_client.lpush(
-                                            config.CACHE_NEWS_LIST_NAME,
-                                            json.dumps(
-                                                {
-                                                    "Date": article_specific_date,
-                                                    "Url": a["href"],
-                                                    "Title": a.string,
-                                                    "Article": article,
-                                                    "RelatedStockCodes": " ".join(
-                                                        related_stock_codes_list
-                                                    ),
-                                                    "OriDB": config.DATABASE_NAME,
-                                                    "OriCOL": config.COLLECTION_NAME_JRJ,
-                                                }
-                                            ),
-                                        )
-                                        logging.info(
-                                            "[SUCCESS] {} {} {}".format(
-                                                article_specific_date,
-                                                a.string,
-                                                a["href"],
-                                            )
-                                        )
+                                    # article_specific_date, article = result
+                                    self.process_article(result, a["href"], a.string, today_date, True)
                                 self.terminated_amount = 0  # 爬取结束后重置该参数
                             else:
                                 logging.info("[QUIT] {}".format(a.string))
@@ -430,28 +218,3 @@ class JrjSpyder(Spyder):
                             )
             # logging.info("sleep {} secs then request again ... ".format(interval))
             time.sleep(interval)
-
-
-# """
-# Example-1:
-# 爬取历史新闻数据
-# """
-# if __name__ == "__main__":
-#     jrj_spyder = JrjSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ)
-#     jrj_spyder.get_historical_news(config.WEBSITES_LIST_TO_BE_CRAWLED_JRJ, start_date="2015-01-01")
-#
-#     Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ).run()
-#     DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ).run()
-
-
-# """
-# Example-2:
-# 爬取实时新闻数据
-# """
-# if __name__ == '__main__':
-#     from Utils import config
-#     from MarketNewsSpider.jrjspyder import JrjSpyder
-#
-#     jrj_spyder = JrjSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ)
-#     jrj_spyder.get_historical_news(config.WEBSITES_LIST_TO_BE_CRAWLED_JRJ)  # 补充爬虫数据到最新日期
-#     jrj_spyder.get_realtime_news()
