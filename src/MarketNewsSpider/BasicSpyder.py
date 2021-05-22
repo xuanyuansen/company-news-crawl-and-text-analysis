@@ -64,8 +64,12 @@ class Spyder(object):
         )
         time.sleep(60 * self.terminated_amount)
 
-    def process_article(self, init_result, url, title, date, category_chn=None, is_real_time: bool = False):
+    def process_article(self, init_result, url, title, date,
+                        category_chn=None,
+                        is_real_time: bool = False,
+                        force_update: bool = False):
         # 有返回但是article为null的情况
+        logging.info("param category_chn {0} is real time {1}  force update {2}".format(category_chn, is_real_time, force_update))
         article_specific_date, article = init_result
         child_method = getattr(self, 'get_url_info')  # 获取子类的out()方法
         while article == "" and self.is_article_prob >= 0.1:
@@ -98,16 +102,42 @@ class Spyder(object):
                 "WordsFrequent": cut_words_json,
             }
             # result_f = self.col.find_one(old_data)
-            logging.info(cut_words_json)
+            # logging.info(cut_words_json)
             if self.col_name == config.COLLECTION_NAME_CNSTOCK:
                 plus_data = {
                     "Category": category_chn,
                 }
-                # if result_f is not None:
-                # logging.info("id is {0}".format(result_f["_id"]))
-                # self.db_obj.update_row(self.db_name, self.col_name, old_data, new_data)
-                # else:
-                self.db_obj.insert_data(
+
+                if force_update:
+                    craw_data = {
+                        "Date": article_specific_date,
+                        "Url": url,
+                        "Title": title,
+                        "Article": article,
+                        "RelatedStockCodes": " ".join(
+                            related_stock_codes_list
+                        ),
+                        "Category": category_chn,
+                    }
+                    new_data = dict({"WordsFrequent": cut_words_json})
+                    result_f = self.db_obj.get_data(self.db_name, self.col_name, query=dict({"Url": url}))
+                    if result_f is not None:
+                        logging.info("data find id is {0} {1}".format(result_f["_id"],
+                                                                      type(result_f["_id"])))
+
+                        update_result = self.db_obj.update_row(
+                            self.db_name, self.col_name, dict({"Url": url}), new_data)
+
+                        logging.info('update done,result {3}, para {0} {1} {2} '.format(result_f["_id"], craw_data,
+                                                                                        new_data,
+                                                                                        update_result.raw_result))
+                    else:
+                        logging.warning("not found {0}, direct insert data".format(dict({"Url": url})))
+                        self.db_obj.insert_data(
+                            self.db_name, self.col_name, dict(craw_data, **new_data)
+                        )
+                else:
+                    self.db_obj.insert_data(
                         self.db_name, self.col_name, dict(old_data, **plus_data)
                     )
             else:

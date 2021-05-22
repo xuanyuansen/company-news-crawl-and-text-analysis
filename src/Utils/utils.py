@@ -6,6 +6,17 @@ from bs4 import BeautifulSoup
 from scipy.sparse import csr_matrix
 
 
+def merge_dict(a, b):
+    for k, v in b.items():
+        # print(k, v)
+        value = a.get(k)
+        if value is None:
+            a[k] = v
+        else:
+            a[k] += v
+    return True
+
+
 def generate_pages_list(total_pages, range, init_page_id):
     page_list = list()
     k = init_page_id

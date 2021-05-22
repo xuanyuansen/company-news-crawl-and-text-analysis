@@ -17,9 +17,12 @@ sys.path.append(os.getcwd())
 cn_stock_spyder = CnStockSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
 for url_to_be_crawled, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
     logging.info("start crawling {} ...".format(url_to_be_crawled))
-    cn_stock_spyder.get_historical_news(url_to_be_crawled, category_chn=type_chn)
+    cn_stock_spyder.get_historical_news(url_to_be_crawled,
+                                        category_chn=type_chn,
+                                        start_date=None,
+                                        force_update=True)
     logging.info("finished ...")
-    time.sleep(10)
+    time.sleep(5)
 
 # 2. 针对历史数据进行去重清洗
 Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()

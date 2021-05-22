@@ -61,7 +61,7 @@ class NbdSpyder(Spyder):
                 and aa["click-statistic"].find("Article_") != -1 \
                 and aa["href"].find("http://www.nbd.com.cn/articles/") != -1
 
-    def get_historical_news(self, start_page=684):
+    def get_historical_news(self, start_page=684, force_update: bool = False):
         date_list = self.db_obj.get_data(self.db_name, self.col_name, keys=["Date"])[
             "Date"
         ].to_list()

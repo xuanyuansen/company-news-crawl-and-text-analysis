@@ -1,3 +1,4 @@
+import logging
 import traceback
 
 from pymongo import MongoClient
@@ -27,7 +28,8 @@ class Database(object):
         assert isinstance(new_values, dict)
         database = self.conn[database_name]
         collection = database.get_collection(collection_name)
-        collection.update_one(query, {"$set": new_values})
+        result = collection.update_one(query, {"$set": new_values})
+        return result
 
     def get_data(
         self,
@@ -54,40 +56,51 @@ class Database(object):
             assert isinstance(max_data_request, int)
         else:
             max_data_request = float("inf")
-        try:
-            if len(keys) != 0:
-                _dict = {_key: [] for _key in keys}
-                data = collection.find(query) if len(query) != 0 else collection.find()
-                for _id, row in enumerate(data):
-                    if _id + 1 <= max_data_request:
-                        for _key in keys:
-                            # print("key is {0}, row is {1}".format(_key, row))
-                            if row.get(_key) is not None:
-                                _dict[_key].append(row[_key])
-                            else:
-                                _dict[_key].append("null")
-                    else:
-                        break
-            else:
-                # data = collection.find()
-                data = collection.find(query) if len(query) != 0 else collection.find()
-                data_keys = list(
-                    next(data).keys()
-                )  # ['_id', 'Date', 'PageId', 'Url', 'Title', 'Article', 'RelevantStockCodes']
-                _dict = {_key: [] for _key in data_keys}
-                for _id, row in enumerate(
-                    collection.find(query) if len(query) != 0 else collection.find()
-                ):
-                    if _id + 1 <= max_data_request:
-                        for _key in data_keys:
+
+        if len(keys) != 0:
+            _dict = {_key: [] for _key in keys}
+            data = collection.find(query) if len(query) != 0 else collection.find()
+            for _id, row in enumerate(data):
+                if _id + 1 <= max_data_request:
+                    for _key in keys:
+                        # print("key is {0}, row is {1}".format(_key, row))
+                        if row.get(_key) is not None:
                             _dict[_key].append(row[_key])
-                    else:
-                        break
-            return pd.DataFrame(_dict)
-        except Exception as ex:
-            print("出现如下异常{0}, keys {1}, data {2}".format(ex, keys, query))
-            traceback.print_exc()
-            return None
+                        else:
+                            _dict[_key].append("null")
+                else:
+                    break
+            logging.info("fine done")
+        else:
+            # data = collection.find()
+            data = collection.find(query) if len(query) != 0 else collection.find()
+            data_list = list(data)
+            data_length = len(data_list)
+            if data_length == 0:
+                logging.warning('no data found with query {0} data {1} {2}'.format(query, data, data_length))
+                return None
+            else:
+                logging.info('query {0} data {1} data length is {2}'.format(query, data, data_length))
+            data_keys = list(
+                data_list[0].keys()
+            )  # ['_id', 'Date', 'PageId', 'Url', 'Title', 'Article', 'RelevantStockCodes']
+            _dict = {_key: [] for _key in data_keys}
+            # print(_dict)
+            for _id, row in enumerate(
+                collection.find(query) if len(query) != 0 else collection.find()
+            ):
+                if _id + 1 <= max_data_request:
+                    for _key in data_keys:
+                        _dict[_key].append(row[_key])
+                else:
+                    break
+        # logging.info('find done {0}'.format(_dict))
+        return pd.DataFrame(_dict)
+        # except Exception as ex:
+        #     print("出现如下异常{0}, keys {1}, data {2}, query {3}".format(ex, keys, data, query))
+        #     print('{0}'.format(ex))
+        #     print(traceback.print_exc())
+        #     return None
 
     def drop_db(self, database):
         self.conn.drop_database(database)

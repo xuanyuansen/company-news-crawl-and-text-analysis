@@ -32,6 +32,7 @@ class Deduplication(object):
             min(date_list).split(" ")[0],
             max(date_list).split(" ")[0],
         )
+        logging.info('remove duplication, {0} {1}'.format(start_date, end_date))
         for _date in utils.get_date_list_from_range(start_date, end_date):
             # 获取特定时间对应的数据并根据URL去重
             # logging.info(_date)

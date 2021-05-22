@@ -60,11 +60,14 @@ class CnStockSpyder(Spyder):
 
         return [date, article]
 
-    def get_historical_news(self, url, category_chn=None, start_date=None):
+    def get_historical_news(self, url, category_chn=None,
+                            start_date=None,
+                            force_update: bool = False):
         """
         :param url: 爬虫网页
         :param category_chn: 所属类别, 中文字符串, 包括'公司聚焦', '公告解读', '公告快讯', '利好公告'
         :param start_date: 数据库中category_chn类别新闻最近一条数据的时间
+        :param force_update: force update
         """
         assert category_chn is not None
         driver = webdriver.Chrome(executable_path=config.CHROME_DRIVER)
@@ -94,7 +97,7 @@ class CnStockSpyder(Spyder):
             bs = BeautifulSoup(driver.page_source, "html.parser")
             for li in bs.find_all("li", attrs={"class": ["newslist"]}):
                 a = li.find_all("h2")[0].find("a")
-                if a["href"] not in crawled_urls_list:
+                if a["href"] not in crawled_urls_list or force_update:
                     result = self.get_url_info(a["href"], start_date)
                     while not result:
                         terminated = self.fail_scrap(a["href"])
@@ -107,7 +110,9 @@ class CnStockSpyder(Spyder):
                         # 爬取失败的情况
                         logging.info("[FAILED] {} {}".format(a["title"], a["href"]))
                     else:
-                        self.process_article(result, a["href"], a.string, start_date, category_chn)
+                        self.process_article(result, a["href"], a.string, start_date, category_chn,
+                                             is_real_time=False,
+                                             force_update=force_update)
         else:
             # 当start_date不为None时，补充历史数据
             is_click_button = True
@@ -148,8 +153,11 @@ class CnStockSpyder(Spyder):
                         # 爬取失败的情况
                         logging.info("[FAILED] {} {}".format(a["title"], a["href"]))
                     else:
-                        # 有返回但是article为null的情况
-                        self.process_article(result, a["href"], a.string, start_date, category_chn)
+                        self.process_article(result, a["href"], a.string,
+                                             start_date,
+                                             category_chn,
+                                             is_real_time=False,
+                                             force_update=force_update)
                 else:
                     break
         driver.quit()
