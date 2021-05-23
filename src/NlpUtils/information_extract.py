@@ -8,6 +8,7 @@ from Utils.database import Database
 from Utils import utils
 import logging
 import random
+import pandas as pd
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +25,8 @@ class InformationExtract(object):
         self.vocabulary = None
         self.df = None
         self.excel_name = './info/word_seg_all.xlsx'
+        self.label_excel = "./info/word_seg_all_with_label"
+        self.label = None
 
     def get_count(self, collection_name):
         return self.db_obj.get_collection(self.db_name, collection_name).find().count()
@@ -39,6 +42,11 @@ class InformationExtract(object):
         for element in data_list:
             utils.merge_dict(start_dict, json.loads(element))
         return start_dict
+
+    # 从文件获得标签
+    def load_seg_word_label(self):
+        self.label = pd.read_excel(self.label_excel)
+        return
 
     def write_excel(self, word_dict_sort, threshold: int = 10):
 

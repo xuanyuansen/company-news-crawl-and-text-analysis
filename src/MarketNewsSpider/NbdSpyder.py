@@ -87,6 +87,7 @@ class NbdSpyder(Spyder):
                                     break
                                 self.fail_sleep(a["href"])
                                 result = self.get_url_info(a["href"], "")
+                                logging.info("没有历史数据, in while loop result {0}".format(result))
                             if not result:
                                 # 爬取失败的情况
                                 logging.info(
@@ -114,6 +115,7 @@ class NbdSpyder(Spyder):
                                 break
                             self.fail_sleep(a["href"])
                             result = self.get_url_info(a["href"], "")
+                            logging.info("有历史数据, in while loop result {0}".format(result))
                         if not result:
                             # 爬取失败的情况
                             logging.info("[FAILED] {} {}".format(a.string, a["href"]))
@@ -127,6 +129,8 @@ class NbdSpyder(Spyder):
                                 break
                 if not is_stop:
                     page_start_id += 1
+                logging.info("有历史数据, in while loop result, page_start_id{0} page_url {1}"
+                             .format(page_start_id, page_url))
 
     def get_realtime_news(self, interval=60):
         page_url = "{}/1".format(config.WEBSITES_LIST_TO_BE_CRAWLED_NBD)
