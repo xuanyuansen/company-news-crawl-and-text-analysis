@@ -4,6 +4,7 @@ import json
 from sklearn import metrics
 from xlsxwriter import Workbook
 import Utils.config as config
+from NlpUtils.tokenization import Tokenization
 from Utils.database import Database
 from Utils import utils
 import logging
@@ -25,8 +26,40 @@ class InformationExtract(object):
         self.vocabulary = None
         self.df = None
         self.excel_name = './info/word_seg_all.xlsx'
-        self.label_excel = "./info/word_seg_all_with_label"
+        self.label_excel = "./info/word_seg_all_with_label.xlsx"
         self.label = None
+        self.label_pos = dict()
+        self.label_neg = dict()
+        self.label_middle = dict()
+        self.cn_stock_df = None
+        self.jrj_df = None
+        self.nbd_df = None
+        self.__load_seg_word_label()
+        self.token = Tokenization()
+
+    def __inner_title_cut(self, title):
+        info_dict = dict()
+        for word in self.token.cut_words(title):
+            value = info_dict.get(word)
+            if value is None:
+                info_dict[word] = 1
+            else:
+                info_dict[word] = value + 1
+        return info_dict
+
+    def get_data(self):
+        self.cn_stock_df = self.__inner_get_data(self.collections[0])
+        self.jrj_df = self.__inner_get_data(self.collections[1])
+        self.nbd_df = self.__inner_get_data(self.collections[2])
+
+    def __inner_get_data(self, collection_name):
+        df = self.db_obj.get_data(self.db_name, collection_name)
+        df['WordsFrequent'] = df.apply(lambda row: json.loads(row['WordsFrequent']), axis=1)
+        df['TitleFrequent'] = df.apply(lambda row: self.__inner_title_cut(row['Title']), axis=1)
+        df['WordsFrequent'] = df.apply(lambda row: dict(row['TitleFrequent'], **row['WordsFrequent']), axis=1)
+        df['RuleLabel'] = df.apply(lambda row: self.from_seg_words_to_cnt(row['WordsFrequent']), axis=1)
+        df['PosRatio'] = df.apply(lambda row: row['RuleLabel'][0], axis=1)
+        return df.sort_values(by=['PosRatio'], ascending=True)
 
     def get_count(self, collection_name):
         return self.db_obj.get_collection(self.db_name, collection_name).find().count()
@@ -44,9 +77,34 @@ class InformationExtract(object):
         return start_dict
 
     # 从文件获得标签
-    def load_seg_word_label(self):
-        self.label = pd.read_excel(self.label_excel)
-        return
+    def __load_seg_word_label(self):
+        self.label = pd.read_excel(self.label_excel, na_values=0)
+        self.label['label'].fillna(0, inplace=True)
+        # data = self.label[self.label['label'] != 0]
+        for _, row in self.label.iterrows():
+            # print(row[2])
+            if row[2] == 1:
+                self.label_pos[row[0]] = 1
+            elif row[2] == -1:
+                self.label_neg[row[0]] = -1
+            else:
+                self.label_middle[row[0]] = 0
+        print('pos size {0}'.format(len(self.label_pos)))
+        print('neg size {0}'.format(len(self.label_neg)))
+        return True
+
+    def from_seg_words_to_cnt(self, seg_words: dict):
+        pos_cnt = 0
+        neg_cnt = 0
+        mid_cnt = 0
+        for k, v in seg_words.items():
+            if self.label_pos.get(k) is not None:
+                pos_cnt += v
+            elif self.label_neg.get(k) is not None:
+                neg_cnt += v
+            else:
+                mid_cnt += v
+        return pos_cnt/float(pos_cnt+neg_cnt) if pos_cnt+neg_cnt > 0 else 0.0, (pos_cnt, neg_cnt, mid_cnt)
 
     def write_excel(self, word_dict_sort, threshold: int = 10):
 

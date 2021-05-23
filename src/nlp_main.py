@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
-
+import sys
 from NlpUtils.information_extract import InformationExtract, random_sequence, calculate_result
 from NlpUtils.tokenization import Tokenization
 from Utils.utils import set_display
@@ -10,20 +10,32 @@ if __name__ == '__main__':
     set_display()
     token_niz = Tokenization()
     info_extract = InformationExtract()
-    result = info_extract.get_collection_word_seg(info_extract.collections[0])
-    for element in info_extract.collections:
-        print("{0} data count {1}".format(element, info_extract.get_count(element)))
+    # result = info_extract.get_collection_word_seg(info_extract.collections[0])
+    # for element in info_extract.collections:
+    # print("{0} data count {1}".format(element, info_extract.get_count(element)))
 
-    all_word = info_extract.get_all_word_dictionary()
-    print(all_word)
-    info_extract.write_excel(all_word)
+    # info_extract.load_seg_word_label()
+    print(info_extract.label[0:100])
+    print(info_extract.label_pos)
+    print(info_extract.label_neg)
+    #
+    # all_word = info_extract.get_all_word_dictionary()
+    # print(all_word)
+
+    info_extract.get_data()
+    # print(info_extract.jrj_df[['Date', 'Title', 'Article', 'RuleLabel']][:200])
+    # print(info_extract.nbd_df[['Date', 'Title', 'Article', 'RuleLabel']][:200])
+    # print(info_extract.cn_stock_df[['Date', 'Title', 'Article', 'RuleLabel']][:200])
+
+    # sys.exit(0)
+    # info_extract.write_excel(all_word)
     # print(result)
     # 读数据
     # 从原始文本进行分类
     # filename = 'data/sms_spam.csv'
-    data = info_extract.df
+    data = info_extract.cn_stock_df
 
-    data['text_cut'] = data.apply(lambda row: " ".join(token_niz.cut_words(row['Article'])), axis=1)
+    data['text_cut'] = data.apply(lambda row: " ".join(token_niz.cut_words(row['Title']+row['Article'])), axis=1)
     # print(data[0:100])
     print(data.groupby('Category').size())
     print(data.shape)
