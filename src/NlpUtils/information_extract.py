@@ -47,6 +47,25 @@ class InformationExtract(object):
                 info_dict[word] = value + 1
         return info_dict
 
+    # 准备二分类数据的标签，标签来源两种。
+    # 正面label，利好公告，加上人工规则提取出的好样本 pos_ratio>0.6 and pos_cnt>5
+    # 负面label，人工规则提取出的负样本，neg_ratio>0.6 and neg_cnt>5
+    # 这两部分数据分为训练集和测试集，然后拿模型来预测不好判断的数据。
+    @staticmethod
+    def __inner_set_data_label(row):
+        keys = row.keys().tolist()
+        if ('Category' in keys and row['Category'] == '利好公告') \
+                or (row['PosRatio'] > 0.6 and row['RuleLabel'][1][0] > 6):
+            return 'good_news'
+        elif row['PosRatio'] < 0.4 and row['RuleLabel'][1][1] > 6:
+            return 'bad_news'
+        else:
+            return 'unknown'
+
+    def get_train_data(self, columns: list):
+        self.df = pd.concat([self.cn_stock_df[columns], self.jrj_df[columns], self.nbd_df[columns]], axis=0)
+        return True
+
     def get_data(self):
         self.cn_stock_df = self.__inner_get_data(self.collections[0])
         self.jrj_df = self.__inner_get_data(self.collections[1])
@@ -59,6 +78,7 @@ class InformationExtract(object):
         df['WordsFrequent'] = df.apply(lambda row: dict(row['TitleFrequent'], **row['WordsFrequent']), axis=1)
         df['RuleLabel'] = df.apply(lambda row: self.from_seg_words_to_cnt(row['WordsFrequent']), axis=1)
         df['PosRatio'] = df.apply(lambda row: row['RuleLabel'][0], axis=1)
+        df['ClassifyLabel'] = df.apply(lambda row: self.__inner_set_data_label(row), axis=1)
         return df.sort_values(by=['PosRatio'], ascending=True)
 
     def get_count(self, collection_name):
@@ -104,7 +124,7 @@ class InformationExtract(object):
                 neg_cnt += v
             else:
                 mid_cnt += v
-        return pos_cnt/float(pos_cnt+neg_cnt) if pos_cnt+neg_cnt > 0 else 0.0, (pos_cnt, neg_cnt, mid_cnt)
+        return pos_cnt / float(pos_cnt + neg_cnt) if pos_cnt + neg_cnt > 0 else 0.0, (pos_cnt, neg_cnt, mid_cnt)
 
     def write_excel(self, word_dict_sort, threshold: int = 10):
 
