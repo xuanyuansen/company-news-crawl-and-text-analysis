@@ -62,7 +62,7 @@ class JrjSpyder(Spyder):
         return a_list
 
     def get_historical_news(self, url, start_date=None, end_date=None, force_update: bool = False):
-        crawled_urls_list = []
+        crawled_urls_list = self.extract_data(["Url"])[0]
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y-%m-%d")
 

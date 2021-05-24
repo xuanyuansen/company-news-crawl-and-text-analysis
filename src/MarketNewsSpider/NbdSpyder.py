@@ -62,75 +62,40 @@ class NbdSpyder(Spyder):
                 and aa["href"].find("http://www.nbd.com.cn/articles/") != -1
 
     def get_historical_news(self, start_page=684, force_update: bool = False):
-        date_list = self.db_obj.get_data(self.db_name, self.col_name, keys=["Date"])[
-            "Date"
-        ].to_list()
+        crawled_urls_list = self.extract_data(["Url"])[0]
 
-        if len(date_list) == 0:
-            # 说明没有历史数据，从头开始爬取
-            crawled_urls_list = []
-            page_urls = [
-                "{}/{}".format(config.WEBSITES_LIST_TO_BE_CRAWLED_NBD, page_id)
-                for page_id in range(start_page, 0, -1)
-            ]
-            for page_url in page_urls:
-                bs = utils.html_parser(page_url)
-                a_list = bs.find_all("a")
-                for a in a_list:
-                    if NbdSpyder.condition(a):
-                        if a["href"] not in crawled_urls_list:
-                            result = self.get_url_info(a["href"], "")
-                            while not result:
-                                # self.terminated_amount += 1
-                                terminated = self.fail_scrap(a["href"])
-                                if terminated:
-                                    break
-                                self.fail_sleep(a["href"])
-                                result = self.get_url_info(a["href"], "")
-                                logging.info("没有历史数据, in while loop result {0}".format(result))
-                            if not result:
-                                # 爬取失败的情况
-                                logging.info(
-                                    "[FAILED] {} {}".format(a.string, a["href"])
-                                )
-                            else:
-                                # 有返回但是article为null的情况
-                                self.process_article(result, a["href"], a.string, "")
-        else:
-            is_stop = False
-            start_date = max(date_list)
-            page_start_id = 1
-            while not is_stop:
-                page_url = "{}/{}".format(
-                    config.WEBSITES_LIST_TO_BE_CRAWLED_NBD, page_start_id
-                )
-                bs = utils.html_parser(page_url)
-                a_list = bs.find_all("a")
-                for a in a_list:
-                    if NbdSpyder.condition(a):
+        page_urls = [
+            "{}/{}".format(config.WEBSITES_LIST_TO_BE_CRAWLED_NBD, page_id)
+            for page_id in range(start_page, 0, -1)
+        ]
+        success = 0
+        for page_url in page_urls:
+            bs = utils.html_parser(page_url)
+            a_list = bs.find_all("a")
+            for a in a_list:
+                if NbdSpyder.condition(a):
+                    if a["href"] not in crawled_urls_list or force_update:
                         result = self.get_url_info(a["href"], "")
                         while not result:
+                            # self.terminated_amount += 1
                             terminated = self.fail_scrap(a["href"])
                             if terminated:
                                 break
                             self.fail_sleep(a["href"])
                             result = self.get_url_info(a["href"], "")
-                            logging.info("有历史数据, in while loop result {0}".format(result))
+                            logging.info("in while loop result {0}".format(result))
                         if not result:
                             # 爬取失败的情况
-                            logging.info("[FAILED] {} {}".format(a.string, a["href"]))
+                            logging.info(
+                                "[FAILED] {} {}".format(a.string, a["href"])
+                            )
                         else:
                             # 有返回但是article为null的情况
-                            date, article = result
-                            if date > start_date:
-                                self.process_article(result, a["href"], a.string, date)
-                            else:
-                                is_stop = True
-                                break
-                if not is_stop:
-                    page_start_id += 1
-                logging.info("有历史数据, in while loop result, page_start_id{0} page_url {1}"
-                             .format(page_start_id, page_url))
+                            success += 1
+                            self.process_article(result, a["href"], a.string, "")
+
+            logging.info("page_start{0} page_end {1}, success {2}"
+                         .format(page_urls[0], page_urls[len(page_urls)-1], success))
 
     def get_realtime_news(self, interval=60):
         page_url = "{}/1".format(config.WEBSITES_LIST_TO_BE_CRAWLED_NBD)

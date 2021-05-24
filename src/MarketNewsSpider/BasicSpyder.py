@@ -69,7 +69,8 @@ class Spyder(object):
                         is_real_time: bool = False,
                         force_update: bool = False):
         # 有返回但是article为null的情况
-        logging.info("param category_chn {0} is real time {1}  force update {2}".format(category_chn, is_real_time, force_update))
+        logging.info("param category_chn {0} is real time {1}  force update {2}"
+                     .format(category_chn, is_real_time, force_update))
         article_specific_date, article = init_result
         child_method = getattr(self, 'get_url_info')  # 获取子类的out()方法
         while article == "" and self.is_article_prob >= 0.1:

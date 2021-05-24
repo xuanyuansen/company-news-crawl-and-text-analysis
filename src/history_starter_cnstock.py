@@ -14,21 +14,21 @@ sys.path.append(os.getcwd())
 
 
 # 1. 爬取历史数据
-# cn_stock_spyder = CnStockSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
-# for url_to_be_crawled, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
-#     logging.info("start crawling {} ...".format(url_to_be_crawled))
-#     cn_stock_spyder.get_historical_news(url_to_be_crawled,
-#                                         category_chn=type_chn,
-#                                         start_date=None,
-#                                         force_update=True)
-#     logging.info("finished ...")
-#     time.sleep(5)
-#
-# # 2. 针对历史数据进行去重清洗
-# Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
-#
-# # 3. 将历史数据中包含null值的行去掉
-# DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
+cn_stock_spyder = CnStockSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
+for url_to_be_crawled, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
+    logging.info("start crawling {} ...".format(url_to_be_crawled))
+    cn_stock_spyder.get_historical_news(url_to_be_crawled,
+                                        category_chn=type_chn,
+                                        start_date='2021-05-23',
+                                        force_update=False)
+    logging.info("finished ...")
+    time.sleep(5)
+
+# 2. 针对历史数据进行去重清洗
+Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
+
+# 3. 将历史数据中包含null值的行去掉
+DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
 
 # 4. 创建新的数据库，针对每一个股票，将所有涉及该股票的新闻都保存在新的数据库，并贴好"利好","利空"和"中性"标签
 gen_stock_news_db = GenStockNewsDB()

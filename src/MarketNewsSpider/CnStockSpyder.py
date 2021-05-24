@@ -140,7 +140,7 @@ class CnStockSpyder(Spyder):
             bs = BeautifulSoup(driver.page_source, "html.parser")
             for li in bs.find_all("li", attrs={"class": ["newslist"]}):
                 a = li.find_all("h2")[0].find("a")
-                if a["href"] != tmp_a:
+                if a["href"] != tmp_a and a["href"] not in crawled_urls_list or force_update:
                     result = self.get_url_info(a["href"], "")
                     while not result:
                         terminated = self.fail_scrap(a["href"])
