@@ -19,7 +19,7 @@ for url_to_be_crawled, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.it
     logging.info("start crawling {} ...".format(url_to_be_crawled))
     cn_stock_spyder.get_historical_news(url_to_be_crawled,
                                         category_chn=type_chn,
-                                        start_date='2021-05-23',
+                                        start_date='2021-05-01',
                                         force_update=False)
     logging.info("finished ...")
     time.sleep(5)
