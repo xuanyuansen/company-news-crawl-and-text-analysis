@@ -2,6 +2,9 @@
 import json
 
 from sklearn import metrics
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
 from xlsxwriter import Workbook
 import Utils.config as config
 from NlpUtils.tokenization import Tokenization
@@ -36,6 +39,27 @@ class InformationExtract(object):
         self.nbd_df = None
         self.__load_seg_word_label()
         self.token = Tokenization()
+        self.bayes_model = None
+        self.svm_model = None
+        self.vocabulary = None
+        self.count_vector_rise = None
+        self.tfidf_transformer = TfidfTransformer()
+
+    def predict_score(self, text):
+        text = " ".join(self.token.cut_words(text))
+        counts_to_predict_data = self.count_vector_rise.fit_transform([text])
+        to_predict_data = self.tfidf_transformer.fit(counts_to_predict_data).transform(counts_to_predict_data)
+        prob_nb = self.bayes_model.predict_proba(to_predict_data)
+        # logging.info("prob_nb is {0}".format(prob_nb))
+        prob_svm = self.svm_model.predict_proba(to_predict_data)
+        # logging.info("prob svm is {0}".format(prob_svm))
+        bad_score = prob_nb[0][0] + prob_svm[0][0]
+        good_score = prob_nb[0][1] + prob_svm[0][1]
+
+        if bad_score > good_score:
+            return "利空", 0.5*bad_score
+        else:
+            return "利好", 0.5*good_score
 
     def __inner_title_cut(self, title):
         info_dict = dict()
@@ -46,6 +70,64 @@ class InformationExtract(object):
             else:
                 info_dict[word] = value + 1
         return info_dict
+
+    def build_2_class_classify_model(self):
+        self.get_data()
+        res = self.get_train_data(['Title', 'Article', 'ClassifyLabel'])
+        if res:
+            data = self.df
+        else:
+            raise Exception
+        data['text_cut'] = data.apply(lambda row: " ".join(self.token.cut_words(row['Title'] + row['Article'])), axis=1)
+        # print(data[0:100])
+        # to_predict_data = data[data['ClassifyLabel'] == 'unknown']
+        data = data[data['ClassifyLabel'] != 'unknown']
+        print(data.groupby('ClassifyLabel').size())
+        print(data.shape)
+        # 拆分训练数据集和测试数据集
+        size = data.shape[0]
+        sequence = random_sequence(round(size * 0.3), size)
+        sms_train_mask = [sequence[i] == 0 for i in range(size)]
+        sms_train = data[sms_train_mask]
+        sms_test_mask = [sequence[i] == 1 for i in range(size)]
+        sms_test = data[sms_test_mask]
+
+        # 文本转换成TF-IDF向量
+        train_labels = sms_train['ClassifyLabel'].values
+        train_features = sms_train['text_cut'].values
+        count_v1 = CountVectorizer(max_df=0.8, decode_error='ignore')
+        counts_train = count_v1.fit_transform(train_features)
+        self.vocabulary = count_v1.vocabulary_
+        # print(count_v1.get_feature_names())
+        # repr(counts_train.shape)
+        tfidf_train = self.tfidf_transformer.fit(counts_train).transform(counts_train)
+
+        test_labels = sms_test['ClassifyLabel'].values
+        test_features = sms_test['text_cut'].values
+        self.count_vector_rise = CountVectorizer(vocabulary=self.vocabulary, max_df=0.8, decode_error='ignore')
+        counts_test = self.count_vector_rise.fit_transform(test_features)
+        tfidf_test = self.tfidf_transformer.fit(counts_test).transform(counts_test)
+
+        # 训练
+        self.bayes_model = MultinomialNB(alpha=0.01)
+        self.bayes_model.fit(tfidf_train, train_labels)
+        # 预测
+        predict_result = self.bayes_model.predict(tfidf_test)
+        print(self.bayes_model.predict_proba(tfidf_test))
+        # 正确率
+        correct = [test_labels[i] == predict_result[i] for i in range(len(predict_result))]
+        r = len(predict_result)
+        t = correct.count(True)
+        f = correct.count(False)
+        logging.info("测试集大小{0} 分类正确{1} 分类错误{2} 准确率{3}".format(r, t, f, t / float(r)))
+        logging.info(self.bayes_model.score(tfidf_test, test_labels))
+
+        # svm
+        self.svm_model = SVC(kernel='linear', probability=True)  # default with 'rbf'
+        self.svm_model.fit(tfidf_train, train_labels)
+        pred = self.svm_model.predict(tfidf_test)
+        calculate_result(test_labels, pred)
+        return True
 
     # 准备二分类数据的标签，标签来源两种。
     # 正面label，利好公告，加上人工规则提取出的好样本 pos_ratio>0.6 and pos_cnt>5
@@ -205,7 +287,7 @@ def calculate_result(actual, pred):
     # average Please choose another average setting, one of [None, 'micro', 'macro', 'weighted'].
     m_precision = metrics.precision_score(actual, pred, average=None)
     m_recall = metrics.recall_score(actual, pred, average=None)
-    print('predict info:')
-    print('precision:{0}'.format(m_precision))
-    print('recall:{0}'.format(m_recall))
-    print('f1-score:{0}'.format(metrics.f1_score(actual, pred, average=None)))
+    logging.info('predict info:')
+    logging.info('precision:{0}'.format(m_precision))
+    logging.info('recall:{0}'.format(m_recall))
+    logging.info('f1-score:{0}'.format(metrics.f1_score(actual, pred, average=None)))

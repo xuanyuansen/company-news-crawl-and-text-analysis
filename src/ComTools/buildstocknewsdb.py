@@ -4,13 +4,9 @@ import json
 import redis
 import logging
 import datetime
-import akshare as ak
-
+from NlpUtils.information_extract import InformationExtract
 from Utils import config
-from Utils.database import Database
-
 from NlpUtils.tokenization import Tokenization
-from NlpUtils.topicmodelling import TopicModelling
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,28 +17,12 @@ logging.basicConfig(
 
 class GenStockNewsDB(object):
     def __init__(self):
-        self.database = Database()
-        # self.name_code_symbol_df = self.database.get_data(
-        #     config.STOCK_DATABASE_NAME,
-        #     config.COLLECTION_NAME_STOCK_BASIC_INFO,
-        #     keys=["name", "code", "symbol"],
-        # )
-        #
-        # _symbol = self.name_code_symbol_df['symbol'].tolist()
-        # _name = self.name_code_symbol_df['name'].tolist()
-        # _code = self.name_code_symbol_df['code'].tolist()
-        # self.symbol_name = dict([ele for ele in zip(_symbol, _name)])
-        # self.symbol_code = dict([ele for ele in zip(_symbol, _code)])
+        self.information_extractor = InformationExtract()
+        self.information_extractor.build_2_class_classify_model()
+        self.database = self.information_extractor.db_obj
+        self.col_names = []
         # 获取从1990-12-19至2020-12-31股票交易日数据
-        self.trade_date = ak.tool_trade_date_hist_sina()["trade_date"].tolist()
-        self.label_range = {
-            3: "3DaysLabel",
-            5: "5DaysLabel",
-            10: "10DaysLabel",
-            15: "15DaysLabel",
-            30: "30DaysLabel",
-            60: "60DaysLabel",
-        }
+        # self.trade_date = ak.tool_trade_date_hist_sina()["trade_date"].tolist()
         self.redis_client = redis.StrictRedis(
             host=config.REDIS_IP,
             port=config.REDIS_PORT,
@@ -56,6 +36,50 @@ class GenStockNewsDB(object):
         )
         self._stock_news_nums_stat()
 
+    def get_current_all_stock(self):
+        self.col_names = self.database.connect_database(
+            config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE
+        ).list_collection_names(session=None)
+        return True
+
+    def __insert_data_to_db(self, database_name, collection_name, row, stock_code, is_redis: bool = False):
+        symbol = 'sh{0}'.format(stock_code) if int(stock_code) >= 600000 \
+            else 'sz{0}'.format(stock_code)
+        _collection = self.database.get_collection(config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, symbol)
+        url_list = list(_collection.find({"Url": row["Url"]}))
+        if len(url_list) > 0:
+            # logging.warning("{0} news already in db {1}, res is {2}, skip".format(row["Url"], stock_code, url_list))
+            return False, len(url_list)
+        _judge = self.information_extractor.predict_score(row["Title"] + row["Article"])
+        if is_redis:
+            _data = {
+                "Date": row["Date"],
+                "Url": row["Url"],
+                "Title": row["Title"],
+                "Article": row["Article"],
+                "OriDB": row["OriDB"],
+                "OriCOL": row["OriCOL"],
+                "Symbol": symbol,
+                "Code": stock_code,
+                "Label": _judge[0],
+                "Score": _judge[1],
+            }
+        else:
+            _data = {
+                "Date": row["Date"],
+                "Url": row["Url"],
+                "Title": row["Title"],
+                "Article": row["Article"],
+                "OriDB": database_name,
+                "OriCOL": collection_name,
+                "Symbol": symbol,
+                "Code": stock_code,
+                "Label": _judge[0],
+                "Score": _judge[1],
+            }
+        _collection.insert_one(_data)
+        return True, 0
+
     def get_all_news_about_specific_stock(self, database_name, collection_name):
         # 获取collection_name的key值，看是否包含RelatedStockCodes，如果没有说明，没有做将新闻中所涉及的
         # 股票代码保存在新的一列
@@ -64,85 +88,30 @@ class GenStockNewsDB(object):
                 self.database.get_collection(database_name, collection_name).find()
             ).keys()
         )
+        logging.info("all_news_keys_cnt in {0} is {1}".format(collection_name, len(_keys_list)))
         if "RelatedStockCodes" not in _keys_list:
-            tokenization = Tokenization(
-                import_module="jieba", user_dict="./info/finance_dict.txt"
-            )
+            tokenization = Tokenization(import_module="jieba", user_dict="./info/finance_dict.txt")
             tokenization.update_news_database_rows(database_name, collection_name)
-        # 创建stock_code为名称的collection
-        # stock_symbol_list所有的股票代码
-        # stock_symbol_list = self.database.get_data(
-        #     config.STOCK_DATABASE_NAME,
-        #     config.COLLECTION_NAME_STOCK_BASIC_INFO,
-        #     keys=["symbol"],
-        # )["symbol"].to_list()
-
-        #  目前已经有的明细股票数据表col_names
-        col_names = self.database.connect_database(
-            config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE
-        ).list_collection_names(session=None)
 
         # 迭代器
-        for row in self.database.get_collection(
-                database_name, collection_name
-        ).find():
-            logging.info(row)
+        _tmp_num_stat = 0
+        already_in_news_cnt = 0
+        for row in self.database.get_collection(database_name, collection_name).find():
+            # logging.info(row)
             # 先去遍历原始数据
-            related_stocks = row["RelatedStockCodes"].split(" ")
-            if len(related_stocks) <= 6:
+            if row["RelatedStockCodes"] == "":
+                logging.warning("{0} no related code in {1}".format(row["RelatedStockCodes"], row["Url"]))
                 continue
-            for t_stock in related_stocks:
-                try:
-                    if int(t_stock) >= 600000:
-                        t_symbol = 'sh{0}'.format(t_stock)
-                    else:
-                        t_symbol = 'sz{0}'.format(t_stock)
-                except Exception as e:
-                    print(related_stocks)
-                    print(e)
-                    break
-                # for symbol in stock_symbol_list:
-                _tmp_num_stat = 0
-                if t_symbol not in col_names:
-                    # 创建明细股票数据表symbol
-                    # if int(symbol[2:]) > 837:
-                    _collection = self.database.get_collection(
-                        config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, t_symbol
-                    )
+            for stock_code in row["RelatedStockCodes"].split(" "):
+                # 将新闻分别送进相关股票数据库
+                res = self.__insert_data_to_db(database_name, collection_name, row, stock_code)
+                if res[0]:
+                    _tmp_num_stat += 1
+                else:
+                    already_in_news_cnt += res[1]
 
-                    if _collection.name:
-                        # 返回新闻发布后n天的标签
-                        # _tmp_dict = {}
-                        # for label_days, key_name in self.label_range.items():
-                        #     _tmp_res = self._label_news(
-                        #         datetime.datetime.strptime(
-                        #             row["Date"].split(" ")[0], "%Y-%m-%d"
-                        #         ),
-                        #         t_symbol,
-                        #         label_days,
-                        #     )
-                        #     _tmp_dict.update({key_name: _tmp_res})
-                        _data = {
-                            "Date": row["Date"],
-                            "Url": row["Url"],
-                            "Title": row["Title"],
-                            "Article": row["Article"],
-                            "WordsFrequent": row["WordsFrequent"],
-                            "OriDB": database_name,
-                            "OriCOL": collection_name,
-                            "Symbol": t_symbol,
-                            "Code": t_stock,
-                        }
-                        # _data.update(_tmp_dict)
-                        _collection.insert_one(_data)
-                        _tmp_num_stat += 1
-                logging.info(
-                    "there are {} news mentioned {} in {} collection need to be fetched ... ".format(
-                        _tmp_num_stat, t_symbol, collection_name
-                    )
-                )
-            # else:
-            #     logging.info("{} has fetched all related news from {}...".format(symbol, collection_name))
+        logging.info("there are {0} news mentioned in {1} collection insert ... already_in_news_cnt {2}"
+                     .format(_tmp_num_stat, collection_name, already_in_news_cnt))
 
     def listen_redis_queue(self):
         # 监听redis消息队列，当新的实时数据过来时，根据"RelatedStockCodes"字段，将新闻分别保存到对应的股票数据库
@@ -155,133 +124,30 @@ class GenStockNewsDB(object):
                 crawled_url_today = set()
                 self.redis_client.set("today_date", date_now)
             if self.redis_client.llen(config.CACHE_NEWS_LIST_NAME) != 0:
-                data = json.loads(
+                row = json.loads(
                     self.redis_client.lindex(config.CACHE_NEWS_LIST_NAME, -1)
                 )
-                if data["Url"] not in crawled_url_today:  # 排除重复插入冗余文本
-                    crawled_url_today.update({data["Url"]})
-                    if data["RelatedStockCodes"] != "":
-                        for stock_code in data["RelatedStockCodes"].split(" "):
+                if row["Url"] not in crawled_url_today:  # 排除重复插入冗余文本
+                    crawled_url_today.update({row["Url"]})
+                    if row["RelatedStockCodes"] != "":
+                        for stock_code in row["RelatedStockCodes"].split(" "):
                             # 将新闻分别送进相关股票数据库
-                            symbol = (
-                                "sh{}".format(stock_code)
-                                if stock_code[0] == "6"
-                                else "sz{}".format(stock_code)
-                            )
-                            _collection = self.database.get_collection(
-                                config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, symbol
-                            )
-                            _tmp_dict = {}
-                            for label_days, key_name in self.label_range.items():
-                                _tmp_res = self._label_news(
-                                    datetime.datetime.strptime(
-                                        data["Date"].split(" ")[0], "%Y-%m-%d"
-                                    ),
-                                    symbol,
-                                    label_days,
+                            if self.__insert_data_to_db("", "", row, stock_code, True):
+                                logging.info(
+                                    "the real-time fetched news {}, which was saved in [DB:{} - COL:{}] ...".format(
+                                        row["Title"],
+                                        config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE,
+                                        stock_code,
+                                    )
                                 )
-                                _tmp_dict.update({key_name: _tmp_res})
-                            _data = {
-                                "Date": data["Date"],
-                                "Url": data["Url"],
-                                "Title": data["Title"],
-                                "Article": data["Article"],
-                                "OriDB": data["OriDB"],
-                                "OriCOL": data["OriCOL"],
-                            }
-                            _data.update(_tmp_dict)
-                            _collection.insert_one(_data)
-                            logging.info(
-                                "the real-time fetched news {}, which was saved in [DB:{} - COL:{}] ...".format(
-                                    data["Title"],
-                                    config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE,
-                                    symbol,
-                                )
-                            )
-
                     self.redis_client.rpop(config.CACHE_NEWS_LIST_NAME)
                     logging.info(
                         "now pop {} from redis queue of [DB:{} - KEY:{}] ... ".format(
-                            data["Title"],
+                            row["Title"],
                             config.CACHE_NEWS_REDIS_DB_ID,
                             config.CACHE_NEWS_LIST_NAME,
                         )
                     )
-
-    def _label_news(self, date, symbol, n_days):
-        """
-        :param date: 类型datetime.datetime，表示新闻发布的日期，只包括年月日，不包括具体时刻，如datetime.datetime(2015, 1, 5, 0, 0)
-        :param symbol: 类型str，表示股票标的，如sh600000
-        :param n_days: 类型int，表示根据多少天后的价格设定标签，如新闻发布后n_days天，如果收盘价格上涨，则认为该则新闻是利好消息
-        """
-        # 计算新闻发布当天经过n_days天后的具体年月日
-        this_date_data = self.database.get_data(
-            config.STOCK_DATABASE_NAME, symbol, query={"date": date}
-        )
-        # 考虑情况：新闻发布日期是非交易日，因此该日期没有价格数据，则往前寻找，比如新闻发布日期是2020-12-12是星期六，
-        # 则考虑2020-12-11日的收盘价作为该新闻发布时的数据
-        tmp_date = date
-        if this_date_data is None:
-            i = 1
-            while this_date_data is None and i <= 10:
-                tmp_date -= datetime.timedelta(days=i)
-                # 判断日期是否是交易日，如果是再去查询数据库；如果this_date_data还是NULL值，则说明数据库没有该交易日数据
-                if tmp_date.strftime("%Y-%m-%d") in self.trade_date:
-                    this_date_data = self.database.get_data(
-                        config.STOCK_DATABASE_NAME, symbol, query={"date": tmp_date}
-                    )
-                i += 1
-        try:
-            close_price_this_date = this_date_data["close"][0]
-        except Exception:
-            close_price_this_date = None
-        # 考虑情况：新闻发布后n_days天是非交易日，或者没有采集到数据，因此向后寻找，如新闻发布日期是2020-12-08，5天
-        # 后的日期是2020-12-13是周日，因此将2020-12-14日周一的收盘价作为n_days后的数据
-        new_date = date + datetime.timedelta(days=n_days)
-        n_days_later_data = self.database.get_data(
-            config.STOCK_DATABASE_NAME, symbol, query={"date": new_date}
-        )
-        if n_days_later_data is None:
-            i = 1
-            while n_days_later_data is None and i <= 10:
-                new_date = date + datetime.timedelta(days=n_days + i)
-                if new_date.strftime("%Y-%m-%d") in self.trade_date:
-                    n_days_later_data = self.database.get_data(
-                        config.STOCK_DATABASE_NAME, symbol, query={"date": new_date}
-                    )
-                i += 1
-        try:
-            close_price_n_days_later = n_days_later_data["close"][0]
-        except Exception:
-            close_price_n_days_later = None
-        # 判断条件：
-        # （1）如果n_days个交易日后且n_days<=10天，则价格上涨(下跌)超过3%，则认为该新闻是利好(利空)消息；如果价格在3%的范围内，则为中性消息
-        # （2）如果n_days个交易日后且10<n_days<=15天，则价格上涨(下跌)超过5%，则认为该新闻是利好(利空)消息；如果价格在5%的范围内，则为中性消息
-        # （3）如果n_days个交易日后且15<n_days<=30天，则价格上涨(下跌)超过10%，则认为该新闻是利好(利空)消息；如果价格在10%的范围内，则为中性消息
-        # （4）如果n_days个交易日后且30<n_days<=60天，则价格上涨(下跌)超过15%，则认为该新闻是利好(利空)消息；如果价格在15%的范围内，则为中性消息
-        # Note：中性消息定义为，该消息迅速被市场消化，并没有持续性影响
-        param = 0.01
-        if n_days <= 10:
-            param = 0.03
-        elif 10 < n_days <= 15:
-            param = 0.05
-        elif 15 < n_days <= 30:
-            param = 0.10
-        elif 30 < n_days <= 60:
-            param = 0.15
-        if close_price_this_date is not None and close_price_n_days_later is not None:
-            if (
-                close_price_n_days_later - close_price_this_date
-            ) / close_price_this_date > param:
-                return "利好"
-            elif (
-                close_price_n_days_later - close_price_this_date
-            ) / close_price_this_date < -param:
-                return "利空"
-            else:
-                return "中性"
-        else:
-            return ""
 
     def _stock_news_nums_stat(self):
         cols_list = self.database.connect_database(
@@ -300,12 +166,5 @@ class GenStockNewsDB(object):
                     ),
                     sym,
                 )
-
-
-if __name__ == "__main__":
-    gen_stock_news_db = GenStockNewsDB()
-    # gen_stock_news_db.get_all_news_about_specific_stock(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK)
-    # gen_stock_news_db.get_all_news_about_specific_stock(config.DATABASE_NAME, config.COLLECTION_NAME_NBD)
-    # gen_stock_news_db.get_all_news_about_specific_stock(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ)
 
     # gen_stock_news_db.listen_redis_queue()
