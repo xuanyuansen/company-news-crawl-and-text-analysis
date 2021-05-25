@@ -7,14 +7,9 @@ import redis
 import logging
 import datetime
 from MarketNewsSpider.BasicSpyder import Spyder
-
 from pandas._libs.tslibs.timestamps import Timestamp
-
-from Utils.database import Database
 from Utils import config
-
 import akshare as ak
-
 import tushare as ts
 
 ts.set_token(config.TUSHARE_TOKEN)
@@ -28,8 +23,8 @@ logging.basicConfig(
 
 class StockInfoSpyder(Spyder):
     def __init__(self, database_name, collection_name):
-        super(StockInfoSpyder, self).__init__()
-        self.db_obj = Database()
+        super().__init__(database_name, collection_name)
+        # self.db_obj = Database()
         self.col_basic_info = self.db_obj.get_collection(database_name, collection_name)
         self.database_name = database_name
         self.collection_name = collection_name

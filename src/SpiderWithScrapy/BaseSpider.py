@@ -5,7 +5,7 @@ from Utils import config
 from scrapy import Spider
 from scrapy.http import Request
 import logging
-from functools import wraps
+# from functools import wraps
 
 
 logging.basicConfig(
@@ -15,19 +15,19 @@ logging.basicConfig(
 )
 
 
-def singleton(f):
-    instance = {}
-
-    @wraps(f)
-    def get_instance(*args, **kwargs):
-        if f not in instance:
-            instance[f] = f(*args, **kwargs)
-        return instance[f]
-
-    return get_instance
-
-
-@singleton
+# def singleton(f):
+#     instance = {}
+#
+#     @wraps(f)
+#     def get_instance(*args, **kwargs):
+#         if f not in instance:
+#             instance[f] = f(*args, **kwargs)
+#         return instance[f]
+#
+#     return get_instance
+#
+#
+# @singleton
 class BaseSpider(Spider):
     def __init__(self):
         super().__init__()

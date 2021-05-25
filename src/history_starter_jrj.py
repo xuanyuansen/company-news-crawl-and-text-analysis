@@ -11,7 +11,7 @@ from MarketNewsSpider.JrjSpyder import JrjSpyder
 # 1. 爬取历史数据
 jrj_spyder = JrjSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ)
 jrj_spyder.get_historical_news(
-    config.WEBSITES_LIST_TO_BE_CRAWLED_JRJ, start_date="2021-05-23"
+    config.WEBSITES_LIST_TO_BE_CRAWLED_JRJ, start_date="2021-05-20"
 )
 
 # 2. 针对历史数据进行去重清洗

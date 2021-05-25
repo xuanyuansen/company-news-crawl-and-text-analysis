@@ -18,7 +18,7 @@ DOWNLOAD_DELAY = 3
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,
     'scrapy.downloadermiddlewares.redirect.RedirectMiddleware': None,
-    'middlewares.IPProxyMiddleware': 100,
+    # 'middlewares.IPProxyMiddleware': 100,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 101,
 }
 
