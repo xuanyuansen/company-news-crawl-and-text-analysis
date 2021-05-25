@@ -170,6 +170,7 @@ class Spyder(object):
                         "Category": category_chn,
                     })
                     data = dict(data, **plus)
+                # 实时数据插入redis
                 self.redis_client.lpush(
                     config.CACHE_NEWS_LIST_NAME,
                     json.dumps(

@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
+import time
+
 import redis
 from Utils import config
 from ComTools.buildstocknewsdb import GenStockNewsDB
@@ -15,4 +17,6 @@ redis_client.lpush(
 )
 
 gen_stock_news_db = GenStockNewsDB()
-gen_stock_news_db.listen_redis_queue()
+while True:
+    gen_stock_news_db.listen_redis_queue()
+    time.sleep(60)

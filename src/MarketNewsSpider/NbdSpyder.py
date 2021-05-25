@@ -9,6 +9,7 @@ from Utils import utils, config
 import re
 import time
 import logging
+import datetime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -110,14 +111,24 @@ class NbdSpyder(Spyder):
             "Date"
         ].to_list()
         latest_date = max(date_list)
+        is_change_date = False
+        last_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
         while True:
-            # 每隔一定时间轮询该网址
-            # if len(crawled_urls) > 100:
-            #     # 防止list过长，内存消耗大，维持list在100条
-            #     crawled_urls.pop(0)
-            if self.redis_client.llen(config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME) > 100:
-                # 防止缓存list过长，内存消耗大，维持list在100条
-                self.redis_client.rpop(config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME)
+            today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+            if today_date != last_date:
+                is_change_date = True
+                last_date = today_date
+            # 新的一天开始清除所有数据
+            if is_change_date:
+                # crawled_urls_list = []
+                utils.batch_lpop(
+                    self.redis_client,
+                    config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME,
+                    self.redis_client.llen(config.CACHE_SAVED_NEWS_NBD_TODAY_VAR_NAME),
+                )
+                is_change_date = False
+
             bs = utils.html_parser(page_url)
             a_list = bs.find_all("a")
             for a in a_list:

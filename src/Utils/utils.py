@@ -5,6 +5,46 @@ import numpy as np
 from bs4 import BeautifulSoup
 from scipy.sparse import csr_matrix
 import pandas as pd
+from email.header import Header  # 用于构建邮件头
+import smtplib  # smtp lib 用于邮件的发信动作
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+
+
+def send_mail(topic, content, _file_name=None):
+    from_address = '327778924@qq.com'
+    password = 'scaimxedcfevbhga'
+    toaddrs = 'wangliaofan1988@163.com'
+
+    text_part = MIMEText(content, 'plain', 'utf-8')
+    m = MIMEMultipart()
+    m.attach(text_part)
+    # imageFile = '1.png'
+    # imageApart = MIMEImage(open(imageFile, 'rb').read(), imageFile.split('.')[-1])
+    # imageApart.add_header('Content-Disposition', 'attachment', filename=imageFile)
+    if _file_name is not None:
+        csv_part = MIMEApplication(open(_file_name, 'rb').read())
+        csv_part.add_header('Content-Disposition', 'attachment', filename=_file_name)
+        m.attach(csv_part)
+    # zipFile = '算法设计与分析基础第3版PDF.zip'
+    # zipApart = MIMEApplication(open(zipFile, 'rb').read())
+    # zipApart.add_header('Content-Disposition', 'attachment', filename=zipFile)
+
+    # 邮件头信息
+    m['From'] = Header(from_address)
+    m['To'] = Header(toaddrs)
+    m['Subject'] = Header(topic)
+
+    try:
+        # 开启发信服务，这里使用的是加密传输
+        server = smtplib.SMTP('smtp.qq.com')
+        server.login(from_address, password)
+        server.sendmail(from_address, toaddrs, m.as_string())
+        # print('success')
+        server.quit()
+    except smtplib.SMTPException as e:
+        print('error:', e)  # 打印错误
 
 
 def set_display():

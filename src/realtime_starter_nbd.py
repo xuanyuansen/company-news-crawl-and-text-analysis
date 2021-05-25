@@ -24,4 +24,4 @@ nbd_spyder = NbdSpyder(config.DATABASE_NAME, config.COLLECTION_NAME_NBD)
 Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
 DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
 
-nbd_spyder.get_realtime_news()
+nbd_spyder.get_realtime_news(interval=120)

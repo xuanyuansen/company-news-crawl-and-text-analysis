@@ -133,6 +133,7 @@ class JrjSpyder(Spyder):
                     "[FAILED] {} {}".format(a.string, a["href"])
                 )
             else:
+                # 这里会写入总的redis
                 self.process_article(result, a["href"], a.string, date, None, real_time)
 
             self.terminated_amount = 0  # 爬取结束后重置该参数
@@ -150,14 +151,16 @@ class JrjSpyder(Spyder):
             if today_date != last_date:
                 is_change_date = True
                 last_date = today_date
+            # 新的一天开始清除所有数据
             if is_change_date:
-                # crawled_urls_list = []
+                crawled_urls_list = []
                 utils.batch_lpop(
                     self.redis_client,
                     config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME,
                     self.redis_client.llen(config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME),
                 )
                 is_change_date = False
+
             _url = "{}/{}/{}_1.shtml".format(
                 config.WEBSITES_LIST_TO_BE_CRAWLED_JRJ,
                 today_date.replace("-", "")[0:6],
@@ -175,14 +178,15 @@ class JrjSpyder(Spyder):
                 a_list = bs.find_all("a")
                 for a in a_list:
                     if self.__condition(a, today_date):
-                        # if a["href"] not in crawled_urls_list:
-                        if a["href"] not in self.redis_client.lrange(
-                            config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, 0, -1
-                        ):
-                            self.__inner_get(a, today_date, True)
-                            crawled_urls_list.append(a["href"])
-                            self.redis_client.lpush(
-                                config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, a["href"]
-                            )
+                        if a["href"] not in crawled_urls_list:
+                            if a["href"] not in self.redis_client.lrange(
+                                config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, 0, -1
+                            ):
+                                self.__inner_get(a, today_date, True)
+                                crawled_urls_list.append(a["href"])
+                                self.redis_client.lpush(
+                                    config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, a["href"]
+                                )
+                time.sleep(10)
             logging.info("sleep {} secs then request again ... ".format(interval))
             time.sleep(interval)
