@@ -61,6 +61,16 @@ class JrjSpyder(Spyder):
         a_list = bs.find_all("a")
         return a_list
 
+    @staticmethod
+    def __condition(a, date):
+        res = "href" in a.attrs and a.string and a["href"].find(
+            "/{}/{}/".format(
+                date.replace("-", "")[:4],
+                date.replace("-", "")[4:6],
+            )
+        ) != -1
+        return res
+
     def get_historical_news(self, url, start_date=None, end_date=None, force_update: bool = False):
         crawled_urls_list = self.extract_data(["Url"])[0]
         if end_date is None:
@@ -98,42 +108,37 @@ class JrjSpyder(Spyder):
                 for num in range(1, max_pages_num + 1):
                     a_list = self.from_url_2_a_list(url, date, num)
                     for a in a_list:
-                        if (
-                            "href" in a.attrs
-                            and a.string
-                            and a["href"].find(
-                                "/{}/{}/".format(
-                                    date.replace("-", "")[:4],
-                                    date.replace("-", "")[4:6],
-                                )
-                            )
-                            != -1
-                        ):
+                        if self.__condition(a, date):
                             if a["href"] not in crawled_urls_list:
-                                # 如果标题不包含"收盘","报于"等字样，即可写入数据库，因为包含这些字样标题的新闻多为机器自动生成
-                                if (
-                                    a.string.find("收盘") == -1
-                                    and a.string.find("报于") == -1
-                                    and a.string.find("新三板挂牌上市") == -1
-                                ):
-                                    result = self.get_url_info(a["href"], date)
-                                    while not result:
-                                        terminated = self.fail_scrap(a["href"])
-                                        if terminated:
-                                            break
-                                        self.fail_sleep(a["href"])
-                                        result = self.get_url_info(a["href"], date)
-                                    if not result:
-                                        # 爬取失败的情况
-                                        logging.info(
-                                            "[FAILED] {} {}".format(a.string, a["href"])
-                                        )
-                                    else:
-                                        self.process_article(result, a["href"], a.string, date)
+                                self.__inner_get(a, date, False)
+        return
 
-                                    self.terminated_amount = 0  # 爬取结束后重置该参数
-                                else:
-                                    logging.info("[QUIT] {}".format(a.string))
+    def __inner_get(self, a, date, real_time: bool = False):
+        # 如果标题不包含"收盘","报于"等字样，即可写入数据库，因为包含这些字样标题的新闻多为机器自动生成
+        if (
+                a.string.find("收盘") == -1
+                and a.string.find("报于") == -1
+                and a.string.find("新三板挂牌上市") == -1
+        ):
+            result = self.get_url_info(a["href"], date)
+            while not result:
+                terminated = self.fail_scrap(a["href"])
+                if terminated:
+                    break
+                self.fail_sleep(a["href"])
+                result = self.get_url_info(a["href"], date)
+            if not result:
+                # 爬取失败的情况
+                logging.info(
+                    "[FAILED] {} {}".format(a.string, a["href"])
+                )
+            else:
+                self.process_article(result, a["href"], a.string, date, None, real_time)
+
+            self.terminated_amount = 0  # 爬取结束后重置该参数
+        else:
+            logging.info("[QUIT] {}".format(a.string))
+        return True
 
     def get_realtime_news(self, interval=60):
         crawled_urls_list = []
@@ -169,47 +174,12 @@ class JrjSpyder(Spyder):
                 bs = utils.html_parser(_url)
                 a_list = bs.find_all("a")
                 for a in a_list:
-                    if (
-                        "href" in a.attrs
-                        and a.string
-                        and a["href"].find(
-                            "/{}/{}/".format(
-                                today_date.replace("-", "")[:4],
-                                today_date.replace("-", "")[4:6],
-                            )
-                        )
-                        != -1
-                    ):
+                    if self.__condition(a, today_date):
                         # if a["href"] not in crawled_urls_list:
                         if a["href"] not in self.redis_client.lrange(
                             config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, 0, -1
                         ):
-                            # 如果标题不包含"收盘","报于"等字样，即可写入数据库，因为包含这些字样标题的新闻多为机器自动生成
-                            if (
-                                a.string.find("收盘") == -1
-                                and a.string.find("报于") == -1
-                                and a.string.find("新三板挂牌上市") == -1
-                            ):
-                                result = self.get_url_info(a["href"], today_date)
-                                while not result:
-                                    terminated = self.fail_scrap(a["href"])
-                                    if terminated:
-                                        break
-                                    self.fail_sleep(a["href"])
-                                    # result = self.get_url_info(a["href"], date)
-                                    result = self.get_url_info(a["href"], today_date)
-                                if not result:
-                                    # 爬取失败的情况
-                                    logging.info(
-                                        "[FAILED] {} {}".format(a.string, a["href"])
-                                    )
-                                else:
-                                    # 有返回但是article为null的情况
-                                    # article_specific_date, article = result
-                                    self.process_article(result, a["href"], a.string, today_date, None, True)
-                                self.terminated_amount = 0  # 爬取结束后重置该参数
-                            else:
-                                logging.info("[QUIT] {}".format(a.string))
+                            self.__inner_get(a, today_date, True)
                             crawled_urls_list.append(a["href"])
                             self.redis_client.lpush(
                                 config.CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME, a["href"]

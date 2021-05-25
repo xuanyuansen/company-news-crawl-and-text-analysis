@@ -45,7 +45,7 @@ DeNull(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
 thread_list = []
 for url, type_chn in config.WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK.items():
     thread = threading.Thread(
-        target=cn_stock_spyder.get_realtime_news, args=(url, type_chn, 60)
+        target=cn_stock_spyder.get_realtime_news, args=(url, type_chn, 300)
     )
     thread_list.append(thread)
 for thread in thread_list:

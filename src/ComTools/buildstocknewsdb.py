@@ -80,7 +80,7 @@ class GenStockNewsDB(object):
         _collection.insert_one(_data)
         return True, 0
 
-    def get_all_news_about_specific_stock(self, database_name, collection_name):
+    def get_all_news_about_specific_stock(self, database_name, collection_name, start_date=None):
         # 获取collection_name的key值，看是否包含RelatedStockCodes，如果没有说明，没有做将新闻中所涉及的
         # 股票代码保存在新的一列
         _keys_list = list(
@@ -96,7 +96,12 @@ class GenStockNewsDB(object):
         # 迭代器
         _tmp_num_stat = 0
         already_in_news_cnt = 0
-        for row in self.database.get_collection(database_name, collection_name).find():
+        if start_date:
+            data_to_process = self.database.get_collection(database_name, collection_name) \
+                .find({"Date": {"$gt": start_date}})
+        else:
+            data_to_process = self.database.get_collection(database_name, collection_name).find()
+        for row in data_to_process:
             # logging.info(row)
             # 先去遍历原始数据
             if row["RelatedStockCodes"] == "":
@@ -155,10 +160,10 @@ class GenStockNewsDB(object):
         ).list_collection_names(session=None)
         for sym in cols_list:
             if (
-                self.database.get_collection(
-                    config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, sym
-                ).estimated_document_count()
-                > config.MINIMUM_STOCK_NEWS_NUM_FOR_ML
+                    self.database.get_collection(
+                        config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, sym
+                    ).estimated_document_count()
+                    > config.MINIMUM_STOCK_NEWS_NUM_FOR_ML
             ):
                 self.redis_client.lpush(
                     "stock_news_num_over_{}".format(

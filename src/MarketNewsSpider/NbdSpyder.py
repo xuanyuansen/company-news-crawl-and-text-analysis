@@ -104,12 +104,7 @@ class NbdSpyder(Spyder):
                 page_url, interval
             )
         )
-        name_code_df = self.db_obj.get_data(
-            config.STOCK_DATABASE_NAME,
-            config.COLLECTION_NAME_STOCK_BASIC_INFO,
-            keys=["name", "code"],
-        )
-        name_code_dict = dict(name_code_df.values)
+        # name_code_dict = dict(name_code_df.values)
         # crawled_urls = []
         date_list = self.db_obj.get_data(self.db_name, self.col_name, keys=["Date"])[
             "Date"
