@@ -38,7 +38,7 @@ class InformationExtract(object):
         self.jrj_df = None
         self.nbd_df = None
         self.__load_seg_word_label()
-        self.token = Tokenization()
+        self.token = Tokenization(import_module=config.SEG_METHOD, user_dict=config.USER_DEFINED_DICT_PATH)
         self.bayes_model = None
         self.svm_model = None
         self.vocabulary = None
