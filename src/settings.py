@@ -13,7 +13,7 @@ DEFAULT_REQUEST_HEADERS = {
 
 CONCURRENT_REQUESTS = 10
 
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
 
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,

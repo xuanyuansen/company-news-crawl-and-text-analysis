@@ -2,6 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 # https://blog.csdn.net/coreylam/article/details/40213109
 import platform
+
 os_type = platform.system()
 print(os_type)
 
@@ -75,3 +76,51 @@ CACHE_RECORED_OPENED_PYTHON_PROGRAM_DB_ID = 0
 CACHE_RECORED_OPENED_PYTHON_PROGRAM_VAR = "opened_python_scripts"
 
 MINIMUM_STOCK_NEWS_NUM_FOR_ML = 1000
+
+STCN_DJSJ = dict({'name': 'djsj_spider',
+                  'start_url': 'https://data.stcn.com/djsj/index.html',
+                  'key_word': 'djsj',
+                  'key_word_chn': '独家数据',
+                  'base_url': 'https://data.stcn.com/'})
+STCN_DJJD = dict({'name': 'djjd_spider',
+                  'start_url': 'https://stock.stcn.com/djjd/index.html',
+                  'key_word': 'djjd',
+                  'key_word_chn': '独家解读',
+                  'base_url': 'https://stock.stcn.com/'})
+
+STCN_JIGOU = dict({'name': 'jigou_spider',
+                   'start_url': 'https://finance.stcn.com/index.html',
+                   'key_word': 'jigou',
+                   'key_word_chn': '机构',
+                   'base_url': 'https://finance.stcn.com/'})
+
+# https://kuaixun.stcn.com/egs/index.html 股市
+STCN_KX_EGS = dict({'name': 'egs_spider',
+                    'start_url': 'https://kuaixun.stcn.com/egs/index.html',
+                    'key_word': 'egs',
+                    'key_word_chn': '快讯',
+                    'base_url': 'https://kuaixun.stcn.com/'})
+
+STCN_KX_REPORT = dict({'name': 'report_spider',
+                       'start_url': 'https://kuaixun.stcn.com/yb/index.html',
+                       'key_word': 'yb',
+                       'key_word_chn': '研报',
+                       'base_url': 'https://kuaixun.stcn.com/'})
+
+STCN_COMPANY_TRENDS = dict({'name': 'company_trends_spider',
+                            'start_url': 'https://company.stcn.com/gsdt/index.html',
+                            'key_word': 'gsdt',
+                            'key_word_chn': '公司动态',
+                            'base_url': 'https://company.stcn.com/'})
+
+STCN_COMPANY_NEWS = dict({'name': 'company_news_spider',
+                          'start_url': 'https://company.stcn.com/gsxw/index.html',
+                          'key_word': 'gsxw',
+                          'key_word_chn': '公司新闻',
+                          'base_url': 'https://company.stcn.com/'})
+
+STCN_DEEP_NEWS = dict({'name': 'company_deep_spider',
+                       'start_url': 'https://news.stcn.com/sd/index.html',
+                       'key_word': 'sd',
+                       'key_word_chn': '深度',
+                       'base_url': 'https://news.stcn.com/'})

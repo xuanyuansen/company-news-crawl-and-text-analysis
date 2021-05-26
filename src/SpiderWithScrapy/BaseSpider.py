@@ -29,14 +29,14 @@ logging.basicConfig(
 #
 # @singleton
 class BaseSpider(Spider):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,):
         self.GenStockNewsDB = GenStockNewsDB(force_train_model=False)
         self.name_code_df = self.GenStockNewsDB.database.get_data(
             config.STOCK_DATABASE_NAME,
             config.COLLECTION_NAME_STOCK_BASIC_INFO,
             keys=["name", "code"],
         )
+        super().__init__()
 
     def start_requests(self):
         start_url = getattr(self, 'start_url')
