@@ -56,27 +56,29 @@ class Tokenization(object):
     def cut_words(self, ori_text):
         ori_text = re.sub('[’!"#$%&\'()*+,-./:;<=>?@，。★、…【】《》？“”‘！\\[\\]^_`{|}~\\s]+', "", ori_text)
         # print(ori_text)
-        out_str = list()
+        # out_str = list()
         sentence_seg = None
         if self.import_module == "jieba":
-            if self.user_dict:
-                jieba.load_userdict(self.user_dict)
             sentence_seg = list(jieba.cut(ori_text))
         elif self.import_module == "pkuseg":
             seg = pkuseg.pkuseg(user_dict=self.user_dict)  # 添加自定义词典
             sentence_seg = seg.cut(ori_text)  # 进行分词
-        if sentence_seg:
-            for word in sentence_seg:
-                if (
-                        word not in self.stop_words_list
-                        and word != "\t"
-                        and utils.is_contain_chn(word)
-                        and len(word) >= 1
-                ):
-                    out_str.append(word)
-            return out_str
-        else:
-            return False
+
+        out_str = [word if (word not in self.stop_words_list
+                            and word != "\t"
+                            and utils.is_contain_chn(word)
+                            and len(word) >= 1) else '' for word in sentence_seg]
+        out_str = list(filter(lambda a: a != '', out_str))
+        # if sentence_seg:
+        #     for word in sentence_seg:
+        #         if (
+        #                 word not in self.stop_words_list
+        #                 and word != "\t"
+        #                 and utils.is_contain_chn(word)
+        #                 and len(word) >= 1
+        #         ):
+        #             out_str.append(word)
+        return out_str
 
     # 返回文章中的代码以及切词的结果
     # 切词的结果是词，以及词出现的次数，用json格式存储

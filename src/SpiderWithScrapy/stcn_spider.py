@@ -6,6 +6,7 @@ Author: wangshuai
 Mail: xxx@163.com
 Created Time: 2021/05/25
 """
+import logging
 import re
 
 from bs4 import BeautifulSoup
@@ -26,7 +27,7 @@ class StcnSpider(BaseSpider):
     def __init__(self):
         self.name = 'djjd_spider'
         self.start_url: str = 'https://stock.stcn.com/djjd/index.html'
-        self.end_page: int = 20
+        self.end_page: int = 2
         self.key_word = 'djjd'
         self.base_url = 'https://stock.stcn.com/'
         self.is_article_prob = 0.5
@@ -35,30 +36,35 @@ class StcnSpider(BaseSpider):
     def parse(self, response):
         bs = BeautifulSoup(response.text, "lxml")
 
-        a_list = bs.find_all("a")
-        for a in a_list:
-            if a["href"].contains(self.key_word):
-                sub_url = a["href"].string
-                yield Request(self.base_url + sub_url[1:len(sub_url)],
-                              callback=self.parse_further_information,
-                              dont_filter=True,
-                              meta=response.meta)
+        ul_list = bs.find_all("ul")
+        for ul in ul_list:
+
+            if ul.get("id") == "news_list2":
+                logging.info("type {0} ul is {1}".format(type(ul), ul))
+                for li in ul.find_all("li"):
+                    date = li.find_all("span")[0]
+                    # logging.info('data is {0} type {1} {2} type {3} {4} {5}'
+                    # .format(date, type(date), date.i, type(date.i), date, date.attrs))
+                    for a in li.find_all("a"):
+                        if a.get("title") is not None:
+                            sub_url = a["href"]
+                            title = a['title']
+                            yield Request(self.base_url + self.key_word + sub_url[1:len(sub_url)],
+                                          callback=self.parse_further_information,
+                                          dont_filter=True,
+                                          meta={'date_time': date, 'title': title})
 
     def parse_further_information(self, response):
         bs = BeautifulSoup(response.text, "lxml")
-        span_list = bs.find_all("span")
         part = bs.find_all("p")
         article = ""
-        date = ""
-        for span in span_list:
-            if "class" in span.attrs and span["class"] == ["auth_item"]:
-                date = span.text
-                break
+
         for paragraph in part:
-            chn_status = utils.count_chn(str(paragraph))
-            possible = chn_status[1]
-            if possible > self.is_article_prob:
-                article += str(paragraph)
+            if paragraph.get("style") == "text-align: left;":
+                chn_status = utils.count_chn(str(paragraph))
+                possible = chn_status[1]
+                if possible > self.is_article_prob:
+                    article += str(paragraph)
         while article.find("<") != -1 and article.find(">") != -1:
             string = article[article.find("<"): article.find(">") + 1]
             article = article.replace(string, "")
@@ -67,18 +73,18 @@ class StcnSpider(BaseSpider):
         article = " ".join(re.split(" +|\n+", article)).strip()
 
         related_stock_codes_list, cut_words_json = \
-            self.information_extractor.token.find_relevant_stock_codes_in_article(
-                article, self.name_code_dict
+            self.GenStockNewsDB.information_extractor.token.find_relevant_stock_codes_in_article(
+                article, dict(self.name_code_df.values)
             )
 
-        title = bs.find_all("h2")[0]
+        title = response.meta['title']
 
-        _judge = self.information_extractor.predict_score(title + article)
+        _judge = self.GenStockNewsDB.information_extractor.predict_score(title + article)
 
         i_item = TweetItem()
         i_item['_id'] = str(hash(response.url))
         i_item['Url'] = response.url
-        i_item['Date'] = date
+        i_item['Date'] = response.meta['date_time']
         i_item['Title'] = title
         i_item['RelatedStockCodes'] = " ".join(related_stock_codes_list)
         i_item['Article'] = article

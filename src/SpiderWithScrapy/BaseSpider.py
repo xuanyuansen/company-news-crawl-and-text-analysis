@@ -43,7 +43,7 @@ class BaseSpider(Spider):
         end_page = getattr(self, 'end_page')
         logging.info(start_url)
         url_start = [start_url]
-        urls_plus = [start_url.replace(".html", "_{0}.html".format(xid)) for xid in range(0, end_page)]
+        urls_plus = [start_url.replace(".html", "_{0}.html".format(xid)) for xid in range(1, end_page)]
         urls = url_start + urls_plus
         for url in urls:
             yield Request(url, callback=self.parse)

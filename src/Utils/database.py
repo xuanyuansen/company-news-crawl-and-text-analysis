@@ -94,7 +94,7 @@ class Database(object):
                         _dict[_key].append(row[_key])
                 else:
                     break
-        # logging.info('find done {0}'.format(_dict))
+        logging.info('find done {0}'.format(len(_dict)))
         return pd.DataFrame(_dict)
         # except Exception as ex:
         #     print("出现如下异常{0}, keys {1}, data {2}, query {3}".format(ex, keys, data, query))

@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import json
-
+import os
 from sklearn import metrics
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
@@ -13,6 +13,7 @@ from Utils import utils
 import logging
 import random
 import pandas as pd
+import joblib
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,6 +45,16 @@ class InformationExtract(object):
         self.vocabulary = None
         self.count_vector_rise = None
         self.tfidf_transformer = TfidfTransformer()
+        self.__inner_load_model()
+
+    def __inner_load_model(self):
+        if os.path.exists('./info/bayes_model.pkl'):
+            self.bayes_model = joblib.load('./info/bayes_model.pkl')
+            logging.info("bayes model load")
+        if os.path.exists('./info/svm_model.pkl'):
+            self.svm_model = joblib.load('./info/svm_model.pkl')
+            logging.info("svm model load")
+        return
 
     def predict_score(self, text):
         text = " ".join(self.token.cut_words(text))
@@ -72,16 +83,21 @@ class InformationExtract(object):
         return info_dict
 
     def build_2_class_classify_model(self):
+        if self.svm_model is not None and self.bayes_model is not None:
+            logging.info("model already load!!!")
+            return True
         self.get_data()
         res = self.get_train_data(['Title', 'Article', 'ClassifyLabel'])
+        logging.info('get train data done!')
         if res:
             data = self.df
         else:
             raise Exception
-        data['text_cut'] = data.apply(lambda row: " ".join(self.token.cut_words(row['Title'] + row['Article'])), axis=1)
-        # print(data[0:100])
-        # to_predict_data = data[data['ClassifyLabel'] == 'unknown']
+        # 先做数据筛选
         data = data[data['ClassifyLabel'] != 'unknown']
+        data['text_cut'] = data.apply(lambda row: " ".join(self.token.cut_words(row['Title'] + row['Article'])), axis=1)
+        logging.info('cut train data done!')
+        # to_predict_data = data[data['ClassifyLabel'] == 'unknown']
         print(data.groupby('ClassifyLabel').size())
         print(data.shape)
         # 拆分训练数据集和测试数据集
@@ -111,6 +127,7 @@ class InformationExtract(object):
         # 训练
         self.bayes_model = MultinomialNB(alpha=0.01)
         self.bayes_model.fit(tfidf_train, train_labels)
+        joblib.dump(self.bayes_model, './info/bayes_model.pkl')
         # 预测
         predict_result = self.bayes_model.predict(tfidf_test)
         print(self.bayes_model.predict_proba(tfidf_test))
@@ -125,6 +142,7 @@ class InformationExtract(object):
         # svm
         self.svm_model = SVC(kernel='linear', probability=True)  # default with 'rbf'
         self.svm_model.fit(tfidf_train, train_labels)
+        joblib.dump(self.svm_model, './info/svm_model.pkl')
         pred = self.svm_model.predict(tfidf_test)
         calculate_result(test_labels, pred)
         return True
@@ -191,8 +209,8 @@ class InformationExtract(object):
                 self.label_neg[row[0]] = -1
             else:
                 self.label_middle[row[0]] = 0
-        print('pos size {0}'.format(len(self.label_pos)))
-        print('neg size {0}'.format(len(self.label_neg)))
+        logging.info('pos word label size {0}'.format(len(self.label_pos)))
+        logging.info('neg word label size {0}'.format(len(self.label_neg)))
         return True
 
     def from_seg_words_to_cnt(self, seg_words: dict):
