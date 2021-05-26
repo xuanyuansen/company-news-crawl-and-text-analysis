@@ -4,6 +4,7 @@ from pymongo.errors import DuplicateKeyError
 from settings import MONGO_HOST, MONGO_PORT
 import logging
 
+
 class MongoDBPipeline(object):
     def __init__(self):
         client = pymongo.MongoClient(MONGO_HOST, MONGO_PORT)

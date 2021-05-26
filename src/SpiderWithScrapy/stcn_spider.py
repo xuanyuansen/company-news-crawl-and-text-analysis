@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from scrapy.http import Request
 from Utils import utils
 from SpiderWithScrapy.BaseSpider import BaseSpider
-from items import TweetItem
+from SpiderWithScrapy.items import TweetItem
 
 
 class StcnSpider(BaseSpider):
