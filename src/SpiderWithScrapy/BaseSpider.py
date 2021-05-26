@@ -31,7 +31,7 @@ logging.basicConfig(
 class BaseSpider(Spider):
     def __init__(self):
         super().__init__()
-        self.GenStockNewsDB = GenStockNewsDB()
+        self.GenStockNewsDB = GenStockNewsDB(force_train_model=False)
         self.name_code_df = self.GenStockNewsDB.database.get_data(
             config.STOCK_DATABASE_NAME,
             config.COLLECTION_NAME_STOCK_BASIC_INFO,

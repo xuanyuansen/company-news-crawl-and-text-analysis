@@ -11,7 +11,7 @@ ROBOTSTXT_OBEY = False
 DEFAULT_REQUEST_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:61.0) Gecko/20100101 Firefox/61.0'}
 
-CONCURRENT_REQUESTS = 4
+CONCURRENT_REQUESTS = 10
 
 DOWNLOAD_DELAY = 3
 

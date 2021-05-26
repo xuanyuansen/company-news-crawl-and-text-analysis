@@ -16,7 +16,7 @@ logging.basicConfig(
 
 
 class GenStockNewsDB(object):
-    def __init__(self):
+    def __init__(self, force_train_model: bool = False):
         self.information_extractor = InformationExtract()
         self.information_extractor.build_2_class_classify_model()
         self.database = self.information_extractor.db_obj

@@ -23,7 +23,7 @@ logging.basicConfig(
 
 
 class InformationExtract(object):
-    def __init__(self):
+    def __init__(self, force_train_model: bool = False):
         self.db_name = config.DATABASE_NAME
         self.db_obj = Database()
         self.collections = [config.COLLECTION_NAME_CNSTOCK, config.COLLECTION_NAME_JRJ, config.COLLECTION_NAME_NBD]
@@ -45,7 +45,9 @@ class InformationExtract(object):
         self.vocabulary = None
         self.count_vector_rise = None
         self.tfidf_transformer = TfidfTransformer()
-        self.__inner_load_model()
+        self.force_train = force_train_model
+        if not self.force_train:
+            self.__inner_load_model()
 
     def __inner_load_model(self):
         if os.path.exists('./info/bayes_model.pkl'):
@@ -54,6 +56,9 @@ class InformationExtract(object):
         if os.path.exists('./info/svm_model.pkl'):
             self.svm_model = joblib.load('./info/svm_model.pkl')
             logging.info("svm model load")
+        if os.path.exists('./info/count_vector_rizer.pkl'):
+            self.count_vector_rise = joblib.load('./info/count_vector_rizer.pkl')
+            logging.info("count vector rizer load")
         return
 
     def predict_score(self, text):
@@ -83,8 +88,8 @@ class InformationExtract(object):
         return info_dict
 
     def build_2_class_classify_model(self):
-        if self.svm_model is not None and self.bayes_model is not None:
-            logging.info("model already load!!!")
+        if self.svm_model is not None and self.bayes_model is not None and self.count_vector_rise is not None:
+            logging.info("model and vocabulary already load!!!")
             return True
         self.get_data()
         res = self.get_train_data(['Title', 'Article', 'ClassifyLabel'])
@@ -121,6 +126,7 @@ class InformationExtract(object):
         test_labels = sms_test['ClassifyLabel'].values
         test_features = sms_test['text_cut'].values
         self.count_vector_rise = CountVectorizer(vocabulary=self.vocabulary, max_df=0.8, decode_error='ignore')
+        joblib.dump(self.count_vector_rise, './info/count_vector_rizer.pkl')
         counts_test = self.count_vector_rise.fit_transform(test_features)
         tfidf_test = self.tfidf_transformer.fit(counts_test).transform(counts_test)
 
