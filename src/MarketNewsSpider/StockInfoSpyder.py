@@ -195,4 +195,3 @@ class StockInfoSpyder(Spyder):
                                 )
                             )
                         self.redis_client.set("is_today_updated", "1")
-        # TODO:当更新股票价格数据后，接着应该更新股票新闻数据库标签

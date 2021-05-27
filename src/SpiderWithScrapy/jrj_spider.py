@@ -8,15 +8,8 @@ from scrapy.http import Request
 
 class JrjSpider(BaseSpider):
     def __init__(self, name, key_word, key_word_chn, start_url, base_url, end_page: int = 20):
-        self.name = name
-        self.start_url: str = start_url
-        self.end_page: int = end_page
-        self.key_word = key_word
-        self.key_word_chn = key_word_chn
-        self.base_url = base_url
-        self.is_article_prob = 0.5
+        super().__init__(name, key_word, key_word_chn, start_url, base_url, end_page)
         logging.info("name is {}".format(self.name))
-        super().__init__()
 
     def start_requests(self):
         start_url = getattr(self, 'start_url')

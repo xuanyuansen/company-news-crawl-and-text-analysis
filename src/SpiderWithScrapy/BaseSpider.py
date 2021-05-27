@@ -14,10 +14,17 @@ logging.basicConfig(
 
 
 class BaseSpider(Spider):
-    def __init__(self, ):
+    def __init__(self, name, key_word, key_word_chn, start_url, base_url, end_page):
+        self.name = name
+        self.start_url: str = start_url
+        self.end_page: int = end_page
+        self.key_word = key_word
+        self.key_word_chn = key_word_chn
+        self.base_url = base_url
+
         self.GenStockNewsDB = GenStockNewsDB(force_train_model=False)
         self.name_code_dict = dict((self.GenStockNewsDB.name_code_df[["name", "code"]]).values)
-        self.is_article_prob = 0.5
+
         super().__init__()
 
     def start_requests(self):
