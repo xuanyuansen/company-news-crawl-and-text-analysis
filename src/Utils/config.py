@@ -193,3 +193,10 @@ NET_EASE_STOCK_NEWS = dict({'name': 'net_ease_stock_specific_news_spider',
                             'key_word_chn': '个股资讯',
                             'base_url': 'http://money.163.com/',
                             'end_page': 11})
+
+EAST_MONEY_A_STOCK_NEWS = dict({'name': 'east_money_cn_stock_news_spider',
+                                'start_url': 'http://finance.eastmoney.com/a/cssgs.html',
+                                'key_word': 'stock_cn_news',
+                                'key_word_chn': 'A股公司',
+                                'base_url': 'ttp://finance.eastmoney.com/',
+                                'end_page': 2})

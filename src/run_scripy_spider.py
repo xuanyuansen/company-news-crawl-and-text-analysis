@@ -2,6 +2,7 @@ import os
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
+from SpiderWithScrapy.east_money_spider import EastMoneySpider
 from SpiderWithScrapy.net_ease_spider import NetEaseSpider
 from SpiderWithScrapy.stcn_spider import StcnSpider
 from SpiderWithScrapy.jrj_spider import JrjSpider
@@ -68,6 +69,12 @@ def add_net_ease_spider(process: CrawlerProcess):
     pass
 
 
+def add_east_money_spider(process: CrawlerProcess):
+    # http://finance.eastmoney.com/a/cssgs.html
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_A_STOCK_NEWS)
+    pass
+
+
 if __name__ == '__main__':
     os.environ['SCRAPY_SETTINGS_MODULE'] = f'settings'
     settings = get_project_settings()
@@ -76,7 +83,8 @@ if __name__ == '__main__':
     # add_stcn_spider(_process)
     # add_jrj_spider(_process)
     # add_nbd_spider(_process)
-    add_net_ease_spider(_process)
+    # add_net_ease_spider(_process)
+    add_east_money_spider(_process)
 
     _process.start()
 
