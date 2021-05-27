@@ -2,13 +2,11 @@ import os
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from SpiderWithScrapy.stcn_spider import StcnSpider
+from SpiderWithScrapy.jrj_spider import JrjSpider
 from Utils import config
 
-if __name__ == '__main__':
-    os.environ['SCRAPY_SETTINGS_MODULE'] = f'settings'
-    settings = get_project_settings()
-    process = CrawlerProcess(settings)
 
+def add_stcn_spider(process: CrawlerProcess):
     # 麻烦一些，格式不一样
     # https://news.stcn.com/sd/index_1.html 深度
     process.crawl(StcnSpider, **config.STCN_DEEP_NEWS)
@@ -31,7 +29,32 @@ if __name__ == '__main__':
 
     # https://finance.stcn.com/index_2.html 机构
     process.crawl(StcnSpider, **config.STCN_JIGOU)
+    pass
 
-    process.start()
+
+def add_jrj_spider(process: CrawlerProcess):
+    # http://stock.jrj.com.cn/invest/scgc.shtml 市场分析
+    # process.crawl(JrjSpider, **config.JRJ_INVEST_SCGC)
+    # http://stock.jrj.com.cn/list/stockssgs.shtml 上市公司
+    # process.crawl(JrjSpider, **config.JRJ_STOCK_SSGS)
+    # http://stock.jrj.com.cn/hotstock/gnjj.shtml 行业掘金
+    # process.crawl(JrjSpider, **config.JRJ_HOT_STOCK_GNJJ)
+    # http://stock.jrj.com.cn/list/stockgszx.shtml 股市资讯
+    # process.crawl(JrjSpider, **config.JRJ_STOCK_GU_SHI_NEWS)
+    # http://stock.jrj.com.cn/list/ztbyc.shtml 涨停板预测
+    process.crawl(JrjSpider, **config.JRJ_STOCK_ZHANG_TING_PREDICT)
+
+    pass
+
+
+if __name__ == '__main__':
+    os.environ['SCRAPY_SETTINGS_MODULE'] = f'settings'
+    settings = get_project_settings()
+    _process = CrawlerProcess(settings)
+
+    add_stcn_spider(_process)
+    add_jrj_spider(_process)
+
+    _process.start()
 
     pass

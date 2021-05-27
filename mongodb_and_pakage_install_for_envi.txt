@@ -40,3 +40,5 @@ https://stackoverflow.com/questions/47148872/webdrivers-executable-may-have-wron
 
 sudo launchctl limit maxfiles 64000 64000
 https://docs.mongodb.com/manual/reference/ulimit/
+
+https://github.com/explosion/spaCy/issues/6666

@@ -24,7 +24,6 @@ class StcnSpider(BaseSpider):
         self.key_word = key_word
         self.key_word_chn = key_word_chn
         self.base_url = base_url
-        self.is_article_prob = 0.5
         logging.info("name is {}".format(self.name))
         super().__init__()
 
@@ -43,6 +42,16 @@ class StcnSpider(BaseSpider):
             iter_url = ''
             logging.warning("not coded")
         return iter_url
+
+    def start_requests(self):
+        start_url = getattr(self, 'start_url')
+        end_page = getattr(self, 'end_page')
+        logging.info(start_url)
+        url_start = [start_url]
+        urls_plus = [start_url.replace(".html", "_{0}.html".format(xid)) for xid in range(1, end_page)]
+        urls = url_start + urls_plus
+        for url in urls:
+            yield Request(url, callback=self.parse)
 
     def parse(self, response):
         bs = BeautifulSoup(response.text, "lxml")
@@ -90,43 +99,7 @@ class StcnSpider(BaseSpider):
 
     def parse_further_information(self, response):
         bs = BeautifulSoup(response.text, "lxml")
-        part = bs.find_all("div", class_="txt_con")
-        article = ""
+        paragraphs = bs.find_all("div", class_="txt_con")
 
-        for paragraph in part:
-            # if paragraph.get("style") == "text-align: left;":
-            # logging.info({"type {} content{}".format(type(paragraph), paragraph)})
-            p_list = paragraph.find_all("p")
-            row_str = ""
-            for p in p_list:
-                row_str += p.text
-            if len(row_str) > 0:
-                chn_status = utils.count_chn(str(row_str))
-                possible = chn_status[1]
-                if possible > self.is_article_prob:
-                    article += row_str
-
-        while article.find("\u3000") != -1:
-            article = article.replace("\u3000", "")
-        article = " ".join(re.split(" +|\n+", article)).strip()
-
-        related_stock_codes_list, cut_words_json = \
-            self.GenStockNewsDB.information_extractor.token.find_relevant_stock_codes_in_article(
-                article, dict(self.name_code_df.values)
-            )
-
-        _judge = self.GenStockNewsDB.information_extractor.predict_score(response.meta['title'] + article)
-
-        i_item = TweetItem()
-        i_item['_id'] = str(hash(response.url))
-        i_item['Url'] = response.url
-        i_item['Date'] = response.meta['date_time']
-        i_item['Title'] = response.meta['title']
-        i_item['RelatedStockCodes'] = " ".join(related_stock_codes_list)
-        i_item['Article'] = article
-        i_item['WordsFrequent'] = cut_words_json
-        i_item['Category'] = self.key_word_chn
-        i_item['Label'] = _judge[0]
-        i_item['Score'] = _judge[1]
-        yield i_item
+        yield self.from_paragraphs_to_item(paragraphs, response)
     pass

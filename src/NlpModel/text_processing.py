@@ -250,7 +250,7 @@ class TextProcessing(object):
 
 if __name__ == "__main__":
     tp = TextProcessing(
-        os.getcwd() + "\\" + "chinese_stop_words.txt",
+        os.getcwd() + "\\" + "",
         os.getcwd() + "\\" + "finance_dict.txt",
     )
     doc = [

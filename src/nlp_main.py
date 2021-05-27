@@ -1,8 +1,8 @@
 import logging
 
 from sklearn.feature_extraction.text import CountVectorizer
-from NlpUtils.information_extract import InformationExtract
-from NlpUtils.tokenization import Tokenization
+from NlpModel.information_extract import InformationExtract
+from NlpModel.tokenization import Tokenization
 from Utils.utils import set_display
 
 if __name__ == '__main__':

@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
 import logging
-
 from Utils.database import Database
-from NlpUtils.tokenization import Tokenization
+from NlpModel.tokenization import Tokenization
 import redis
 from Utils import config
 import time

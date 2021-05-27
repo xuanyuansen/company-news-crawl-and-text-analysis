@@ -2,6 +2,8 @@
 
 BOT_NAME = 'spider'
 
+PYTHONHASHSEED=10
+
 SPIDER_MODULES = ['SpiderWithScrapy']
 NEWSPIDER_MODULE = 'SpiderWithScrapy'
 

@@ -7,7 +7,7 @@ import re
 import jieba
 import pkuseg
 import logging
-
+import spacy_pkuseg
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,64 +21,14 @@ class Tokenization(object):
         # self.database = Database().conn[config.DATABASE_NAME]  #.get_collection(config.COLLECTION_NAME_CNSTOCK)
         self.database = Database()
         self.import_module = import_module
+        if self.import_module == "jieba" and user_dict is not None:
+            jieba.load_userdict(user_dict)
+            logging.info("load user dict done")
         self.user_dict = user_dict
-        if self.user_dict:
-            self.update_user_dict(self.user_dict)
         if chn_stop_words_dir:
             self.stop_words_list = utils.get_chn_stop_words(chn_stop_words_dir)
         else:
             self.stop_words_list = list()
-
-    def update_user_dict(self, old_user_dict_dir, new_user_dict_dir=None):
-        # 将缺失的(或新的)股票名称、金融新词等，添加进金融词典中
-        word_list = []
-        with open(old_user_dict_dir, "r", encoding="utf-8") as file:
-            for row in file:
-                word_list.append(row.split("\n")[0].replace(" ", ""))
-        name_code_df = self.database.get_data(
-            config.STOCK_DATABASE_NAME,
-            config.COLLECTION_NAME_STOCK_BASIC_INFO,
-            keys=["name", "code"],
-        )
-        new_words_list = list(set(name_code_df["name"].tolist()))
-        for word in new_words_list:
-            raw_word = word.replace(" ", "")
-            if raw_word not in word_list:
-                word_list.append(raw_word)
-        new_user_dict_dir = (
-            old_user_dict_dir if not new_user_dict_dir else new_user_dict_dir
-        )
-        with open(new_user_dict_dir, "w", encoding="utf-8") as file:
-            for word in word_list:
-                file.write(word + "\n")
-        pass
-
-    def cut_words(self, ori_text):
-        ori_text = re.sub('[’!"#$%&\'()*+,-./:;<=>?@，。★、…【】《》？“”‘！\\[\\]^_`{|}~\\s]+', "", ori_text)
-        # print(ori_text)
-        # out_str = list()
-        sentence_seg = None
-        if self.import_module == "jieba":
-            sentence_seg = list(jieba.cut(ori_text))
-        elif self.import_module == "pkuseg":
-            seg = pkuseg.pkuseg(user_dict=self.user_dict)  # 添加自定义词典
-            sentence_seg = seg.cut(ori_text)  # 进行分词
-
-        out_str = [word if (word not in self.stop_words_list
-                            and word != "\t"
-                            and utils.is_contain_chn(word)
-                            and len(word) >= 1) else '' for word in sentence_seg]
-        out_str = list(filter(lambda a: a != '', out_str))
-        # if sentence_seg:
-        #     for word in sentence_seg:
-        #         if (
-        #                 word not in self.stop_words_list
-        #                 and word != "\t"
-        #                 and utils.is_contain_chn(word)
-        #                 and len(word) >= 1
-        #         ):
-        #             out_str.append(word)
-        return out_str
 
     # 返回文章中的代码以及切词的结果
     # 切词的结果是词，以及词出现的次数，用json格式存储
@@ -92,7 +42,7 @@ class Tokenization(object):
                 if value is None:
                     info_dict[word] = 1
                 else:
-                    info_dict[word] = value+1
+                    info_dict[word] = value + 1
 
                 if stock_name_code_dict.get(word) is not None:
                     stock_codes_set.append(stock_name_code_dict.get(word))
@@ -102,6 +52,49 @@ class Tokenization(object):
         f_codes = list(set(stock_codes_set))
         f_codes.sort()
         return f_codes, info_dict_sorted_json
+
+    def find_stock_code_and_name_in_article(self, article, stock_name_code_dict: dict):
+        # 直接从原始文档里面寻找，而非切词后再寻找
+        stock_codes_dict = dict()
+        for name, code in stock_name_code_dict.items():
+            if name in article:
+                stock_codes_dict[name] = code
+        stock_codes_dict_sorted = dict(sorted(stock_codes_dict.items(), key=lambda item: item[1], reverse=False))
+        f_codes_json = json.dumps(stock_codes_dict_sorted, ensure_ascii=False)
+
+        cut_words_lists = self.cut_words(article)
+        info_dict = dict()
+        if len(cut_words_lists) > 0:
+            for word in cut_words_lists:
+                value = info_dict.get(word)
+                if value is None:
+                    info_dict[word] = 1
+                else:
+                    info_dict[word] = value + 1
+
+        info_dict_sorted = dict(sorted(info_dict.items(), key=lambda item: item[1], reverse=True))
+        info_dict_sorted_json = json.dumps(info_dict_sorted, ensure_ascii=False)
+
+        return f_codes_json, info_dict_sorted_json
+
+    def cut_words(self, ori_text):
+        ori_text = re.sub('[’!"#$%&\'()*+,-./:;<=>?@，。★、…【】《》？“”‘！\\[\\]^_`{|}~\\s]+', "", ori_text)
+        # print(ori_text)
+        # out_str = list()
+        sentence_seg = None
+        if self.import_module == "jieba":
+            sentence_seg = list(jieba.cut(ori_text, HMM=True))
+        elif self.import_module == "pkuseg":
+            seg = spacy_pkuseg.pkuseg(user_dict=self.user_dict, postag=False)  # 添加自定义词典
+            sentence_seg = seg.cut(ori_text)  # 进行分词
+        else:
+            logging.warning("module not defined")
+        out_str = [word if (word not in self.stop_words_list
+                            and word != "\t"
+                            and utils.is_contain_chn(word)
+                            and len(word) >= 1) else '' for word in sentence_seg]
+        out_str = list(filter(lambda a: a != '', out_str))
+        return out_str
 
     def update_news_database_rows(
             self,
@@ -152,8 +145,8 @@ class Tokenization(object):
 if __name__ == "__main__":
     tokenization = Tokenization(
         import_module="jieba",
-        user_dict="../info/finance_dict.txt",
-        chn_stop_words_dir="../info/chinese_stop_words.txt",
+        user_dict="../info/finance_dict_weight.txt",
+        chn_stop_words_dir="../info/stopwords/",
     )
     documents_list = \
         [
@@ -162,9 +155,9 @@ if __name__ == "__main__":
             取有价值的信息。专业团队每周日至每周四晚8点准时“上新”，助您投资顺利！",
             "郭文仓到重点工程项目督导检查 2月2日,公司党委书记、董事长、总经理郭文仓,公司董事,\
             股份公司副总经理、总工程师、郭毅民,股份公司副总经理张国富、柴高贵及相关单位负责人到\
-            焦化厂煤场全封闭和干熄焦等重点工程项目建设工地督导检查施工进度和安全工作情况。"
+            焦化厂煤场全封闭和干熄焦等重点工程项目建设工地督导检查施工进度和安全工作情况。顺丰快递，上机数控"
         ]
     for text in documents_list:
         cut_words_list = tokenization.cut_words(text)
         print(cut_words_list)
-    tokenization.update_news_database_rows(config.DATABASE_NAME, "jrj")
+    # tokenization.update_news_database_rows(config.DATABASE_NAME, "jrj")

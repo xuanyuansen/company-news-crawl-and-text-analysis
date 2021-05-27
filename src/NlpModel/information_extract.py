@@ -7,7 +7,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
 from xlsxwriter import Workbook
 import Utils.config as config
-from NlpUtils.tokenization import Tokenization
+from NlpModel.tokenization import Tokenization
 from Utils.database import Database
 from Utils import utils
 import logging
@@ -39,7 +39,9 @@ class InformationExtract(object):
         self.jrj_df = None
         self.nbd_df = None
         self.__load_seg_word_label()
-        self.token = Tokenization(import_module=config.SEG_METHOD, user_dict=config.USER_DEFINED_DICT_PATH)
+        self.token = Tokenization(import_module=config.SEG_METHOD,
+                                  user_dict=config.USER_DEFINED_WEIGHT_DICT_PATH,
+                                  chn_stop_words_dir=config.CHN_STOP_WORDS_PATH)
         self.bayes_model = None
         self.svm_model = None
         self.vocabulary = None
@@ -50,8 +52,8 @@ class InformationExtract(object):
             self.__inner_load_model()
 
     def __inner_load_model(self):
-        if os.path.exists('./info/bayes_model.pkl'):
-            self.bayes_model = joblib.load('./info/bayes_model.pkl')
+        if os.path.exists(config.BAYES_MODEL_FILE):
+            self.bayes_model = joblib.load(config.BAYES_MODEL_FILE)
             logging.info("bayes model load")
         if os.path.exists('./info/svm_model.pkl'):
             self.svm_model = joblib.load('./info/svm_model.pkl')
@@ -133,7 +135,7 @@ class InformationExtract(object):
         # 训练
         self.bayes_model = MultinomialNB(alpha=0.01)
         self.bayes_model.fit(tfidf_train, train_labels)
-        joblib.dump(self.bayes_model, './info/bayes_model.pkl')
+        joblib.dump(self.bayes_model, config.BAYES_MODEL_FILE)
         # 预测
         predict_result = self.bayes_model.predict(tfidf_test)
         print(self.bayes_model.predict_proba(tfidf_test))

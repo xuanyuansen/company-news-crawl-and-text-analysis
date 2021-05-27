@@ -1,3 +1,4 @@
+import os
 import re
 import datetime
 import requests
@@ -166,10 +167,18 @@ def html_parser(url):
 
 
 def get_chn_stop_words(path):
-    """Load the stop words txt file."""
-    stopwords = [line.strip() for line in open(path, "r", encoding="unicode_escape").readlines()]
+    """Load the stop words from dir of txt file."""
+    stop_words_dict = dict()
+    for file in os.listdir(path):
+        stop_words = [line.strip() for line in open(path+file, "r", encoding="utf8").readlines()]
+        for word in stop_words:
+            value = stop_words_dict.get(word)
+            if value is None:
+                stop_words_dict[word] = 1
+            else:
+                stop_words_dict[word] += 1
 
-    return stopwords
+    return list(stop_words_dict.keys())
 
 
 def convert_to_csr_matrix(model_vector):
@@ -229,3 +238,9 @@ def batch_lpop(client, key, n):
     p.lrange(key, 0, n - 1)
     p.ltrim(key, n, -1)
     p.execute()
+
+
+if __name__ == '__main__':
+    stopwords = get_chn_stop_words("../info/stopwords/")
+    print(stopwords)
+    pass

@@ -31,14 +31,7 @@ WEBSITES_LIST_TO_BE_CRAWLED_CNSTOCK = {
 RECORD_CNSTOCK_FAILED_URL_TXT_FILE_PATH = "./info/cnstock_failed_urls.txt"
 CNSTOCK_MAX_REJECTED_AMOUNTS = 10
 
-COLLECTION_NAME_JRJ = "jrj"
-JRJ_DATE_RANGE = 100
-WEBSITES_LIST_TO_BE_CRAWLED_JRJ = "http://stock.jrj.com.cn/xwk"
-RECORD_JRJ_FAILED_URL_TXT_FILE_PATH = "./info/jrj_failed_urls.txt"
-JRJ_MAX_REJECTED_AMOUNTS = 10
-JRJ_REQUEST_DEFAULT_DATE = "2015-01-01"
-CACHE_SAVED_NEWS_JRJ_TODAY_VAR_NAME = "cache_news_queue_jrj"
-
+COLLECTION_NAME_JRJ = 'jrj'
 COLLECTION_NAME_NBD = "nbd"
 WEBSITES_LIST_TO_BE_CRAWLED_NBD = "http://stocks.nbd.com.cn/columns/275/page"
 RECORD_NBD_FAILED_URL_TXT_FILE_PATH = "./info/nbd_failed_urls.txt"
@@ -67,7 +60,8 @@ RDFOREST_TUNED_PARAMTERS = {
 }
 CLASSIFIER_SCORE_LIST = ["f1_weighted"]
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
-CHN_STOP_WORDS_PATH = "./info/chinese_stop_words.txt"
+USER_DEFINED_WEIGHT_DICT_PATH = "./info/finance_dict_weight.txt"
+CHN_STOP_WORDS_PATH = "./info/stopwords/"
 
 CACHE_NEWS_REDIS_DB_ID = 0
 CACHE_NEWS_LIST_NAME = "cache_news_waiting_for_classification"
@@ -77,50 +71,90 @@ CACHE_RECORED_OPENED_PYTHON_PROGRAM_VAR = "opened_python_scripts"
 
 MINIMUM_STOCK_NEWS_NUM_FOR_ML = 1000
 
-STCN_DJSJ = dict({'name': 'djsj_spider',
+# 机器学习
+BAYES_MODEL_FILE = './info/bayes_model.pkl'
+
+STCN_DJSJ = dict({'name': 'stcn_du_jia_data_spider',
                   'start_url': 'https://data.stcn.com/djsj/index.html',
                   'key_word': 'djsj',
                   'key_word_chn': '独家数据',
                   'base_url': 'https://data.stcn.com/'})
-STCN_DJJD = dict({'name': 'djjd_spider',
+STCN_DJJD = dict({'name': 'stcn_du_jia_jie_du_spider',
                   'start_url': 'https://stock.stcn.com/djjd/index.html',
                   'key_word': 'djjd',
                   'key_word_chn': '独家解读',
                   'base_url': 'https://stock.stcn.com/'})
 
-STCN_JIGOU = dict({'name': 'jigou_spider',
+STCN_JIGOU = dict({'name': 'stcn_ji_gou_buyer_spider',
                    'start_url': 'https://finance.stcn.com/index.html',
                    'key_word': 'jigou',
                    'key_word_chn': '机构',
                    'base_url': 'https://finance.stcn.com/'})
 
 # https://kuaixun.stcn.com/egs/index.html 股市
-STCN_KX_EGS = dict({'name': 'egs_spider',
+STCN_KX_EGS = dict({'name': 'stcn_egs_fast_info_spider',
                     'start_url': 'https://kuaixun.stcn.com/egs/index.html',
                     'key_word': 'egs',
                     'key_word_chn': '快讯',
                     'base_url': 'https://kuaixun.stcn.com/'})
 
-STCN_KX_REPORT = dict({'name': 'report_spider',
+STCN_KX_REPORT = dict({'name': 'stcn_company_report_spider',
                        'start_url': 'https://kuaixun.stcn.com/yb/index.html',
                        'key_word': 'yb',
                        'key_word_chn': '研报',
                        'base_url': 'https://kuaixun.stcn.com/'})
 
-STCN_COMPANY_TRENDS = dict({'name': 'company_trends_spider',
+STCN_COMPANY_TRENDS = dict({'name': 'stcn_company_latest_trends_spider',
                             'start_url': 'https://company.stcn.com/gsdt/index.html',
                             'key_word': 'gsdt',
                             'key_word_chn': '公司动态',
                             'base_url': 'https://company.stcn.com/'})
 
-STCN_COMPANY_NEWS = dict({'name': 'company_news_spider',
+STCN_COMPANY_NEWS = dict({'name': 'stcn_company_news_spider',
                           'start_url': 'https://company.stcn.com/gsxw/index.html',
                           'key_word': 'gsxw',
                           'key_word_chn': '公司新闻',
                           'base_url': 'https://company.stcn.com/'})
 
-STCN_DEEP_NEWS = dict({'name': 'company_deep_spider',
+STCN_DEEP_NEWS = dict({'name': 'stcn_company_deep_news_spider',
                        'start_url': 'https://news.stcn.com/sd/index.html',
                        'key_word': 'sd',
                        'key_word_chn': '深度',
                        'base_url': 'https://news.stcn.com/'})
+
+# JRJ
+JRJ_INVEST_SCGC = dict({'name': 'jrj_invest_market_analyze_spider',
+                        'start_url': 'http://stock.jrj.com.cn/invest/scgc.shtml',
+                        'key_word': 'invest_scgc',
+                        'key_word_chn': '市场分析',
+                        'base_url': 'http://stock.jrj.com.cn/invest/',
+                        'end_page': 2})
+
+JRJ_STOCK_SSGS = dict({'name': 'jrj_stock_shang_shi_gong_si_spider',
+                       'start_url': 'http://stock.jrj.com.cn/list/stockssgs.shtml',
+                       'key_word': 'stock_ss_gs',
+                       'key_word_chn': '上市公司',
+                       'base_url': 'http://stock.jrj.com.cn/',
+                       'end_page': 2})
+
+# http://stock.jrj.com.cn/hotstock/gnjj.shtml
+JRJ_HOT_STOCK_GNJJ = dict({'name': 'jrj_hot_stock_jue_jin_spider',
+                           'start_url': 'http://stock.jrj.com.cn/hotstock/gnjj.shtml',
+                           'key_word': 'hot_stock_jj',
+                           'key_word_chn': '行业掘金',
+                           'base_url': 'http://stock.jrj.com.cn/',
+                           'end_page': 2})
+
+JRJ_STOCK_GU_SHI_NEWS = dict({'name': 'jrj_stock_gu_shi_news_spider',
+                              'start_url': 'http://stock.jrj.com.cn/list/stockgszx.shtml',
+                              'key_word': 'stock_news',
+                              'key_word_chn': '股市资讯',
+                              'base_url': 'http://stock.jrj.com.cn/',
+                              'end_page': 2})
+
+JRJ_STOCK_ZHANG_TING_PREDICT = dict({'name': 'jrj_stock_zhang_ting_predict_spider',
+                                     'start_url': 'http://stock.jrj.com.cn/list/ztbyc.shtml',
+                                     'key_word': 'stock_zhang_ting',
+                                     'key_word_chn': '涨停板预测',
+                                     'base_url': 'http://stock.jrj.com.cn/',
+                                     'end_page': 2})

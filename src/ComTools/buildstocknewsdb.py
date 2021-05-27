@@ -4,9 +4,9 @@ import json
 import redis
 import logging
 import datetime
-from NlpUtils.information_extract import InformationExtract
+from NlpModel.information_extract import InformationExtract
 from Utils import config, utils
-from NlpUtils.tokenization import Tokenization
+from NlpModel.tokenization import Tokenization
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +20,7 @@ class GenStockNewsDB(object):
         self.information_extractor = InformationExtract()
         self.information_extractor.build_2_class_classify_model()
         self.database = self.information_extractor.db_obj
+        # used by redis
         self.name_code_df = self.database.get_data(config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO)
         self.col_names = []
         # 获取从1990-12-19至2020-12-31股票交易日数据
