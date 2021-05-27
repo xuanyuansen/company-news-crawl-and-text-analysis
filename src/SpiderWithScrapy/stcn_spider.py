@@ -7,13 +7,10 @@ Mail: xxx@163.com
 Created Time: 2021/05/25
 """
 import logging
-import re
 
 from bs4 import BeautifulSoup
 from scrapy.http import Request
-from Utils import utils
 from SpiderWithScrapy.BaseSpider import BaseSpider
-from SpiderWithScrapy.items import TweetItem
 
 
 class StcnSpider(BaseSpider):

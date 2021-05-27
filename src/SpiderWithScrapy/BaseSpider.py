@@ -4,7 +4,6 @@ from ComTools.buildstocknewsdb import GenStockNewsDB
 from scrapy import Spider
 import logging
 from SpiderWithScrapy.items import TweetItem
-from Utils import utils
 import hashlib
 
 logging.basicConfig(
@@ -33,7 +32,7 @@ class BaseSpider(Spider):
             p_list = paragraph.find_all("p")
             row_str = []
             for p in p_list:
-                row_str.append(p.text)
+                row_str.append(str(p.text).strip())
             if len(row_str) > 0:
                 article += "\n".join(row_str)
         # article = " ".join(re.split(" +|\n+", article)).strip()

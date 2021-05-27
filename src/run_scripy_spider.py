@@ -1,8 +1,11 @@
 import os
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+
+from SpiderWithScrapy.net_ease_spider import NetEaseSpider
 from SpiderWithScrapy.stcn_spider import StcnSpider
 from SpiderWithScrapy.jrj_spider import JrjSpider
+from SpiderWithScrapy.nbd_spider import NBDSpider
 from Utils import config
 
 
@@ -47,13 +50,33 @@ def add_jrj_spider(process: CrawlerProcess):
     pass
 
 
+def add_nbd_spider(process: CrawlerProcess):
+    # http://stocks.nbd.com.cn/columns/318  重磅推荐
+    # process.crawl(NBDSpider, **config.NBD_STOCK_IMPORTANT_NEWS)
+    # http://stocks.nbd.com.cn/columns/275 A股动态
+    # process.crawl(NBDSpider, **config.NBD_STOCK_TREND_A)
+    # http://stocks.nbd.com.cn/columns/476
+    # process.crawl(NBDSpider, **config.NBD_DAO_DA_INVEST_LOG)
+    # http://stocks.nbd.com.cn/columns/800  每经网首页>券商>火山财富
+    process.crawl(NBDSpider, **config.NBD_VOLCANO_FORTUNE_NEWS)
+    pass
+
+
+def add_net_ease_spider(process: CrawlerProcess):
+    # http://money.163.com/special/00251LR5/gptj.html 个股资讯
+    process.crawl(NetEaseSpider, **config.NET_EASE_STOCK_NEWS)
+    pass
+
+
 if __name__ == '__main__':
     os.environ['SCRAPY_SETTINGS_MODULE'] = f'settings'
     settings = get_project_settings()
     _process = CrawlerProcess(settings)
 
-    add_stcn_spider(_process)
-    add_jrj_spider(_process)
+    # add_stcn_spider(_process)
+    # add_jrj_spider(_process)
+    # add_nbd_spider(_process)
+    add_net_ease_spider(_process)
 
     _process.start()
 

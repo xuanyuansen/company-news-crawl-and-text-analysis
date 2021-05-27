@@ -158,3 +158,38 @@ JRJ_STOCK_ZHANG_TING_PREDICT = dict({'name': 'jrj_stock_zhang_ting_predict_spide
                                      'key_word_chn': '涨停板预测',
                                      'base_url': 'http://stock.jrj.com.cn/',
                                      'end_page': 2})
+
+NBD_STOCK_IMPORTANT_NEWS = dict({'name': 'nbd_stock_important_news_spider',
+                                 'start_url': 'http://stocks.nbd.com.cn/columns/318',
+                                 'key_word': 'stock_important_news',
+                                 'key_word_chn': '重磅推荐',
+                                 'base_url': 'http://stocks.nbd.com.cn/',
+                                 'end_page': 2})
+
+NBD_STOCK_TREND_A = dict({'name': 'nbd_stock_trend_a_spider',
+                          'start_url': 'http://stocks.nbd.com.cn/columns/275',
+                          'key_word': 'stock_trend_a',
+                          'key_word_chn': 'A股动态',
+                          'base_url': 'http://stocks.nbd.com.cn/',
+                          'end_page': 2})
+
+NBD_DAO_DA_INVEST_LOG = dict({'name': 'nbd_stock_dao_da_invest_log_spider',
+                              'start_url': 'http://stocks.nbd.com.cn/columns/476',
+                              'key_word': 'stock_dao_da_invest',
+                              'key_word_chn': '道达投资手记',
+                              'base_url': 'http://stocks.nbd.com.cn/',
+                              'end_page': 2})
+
+NBD_VOLCANO_FORTUNE_NEWS = dict({'name': 'nbd_stock_volcano_fortune_news_spider',
+                                 'start_url': 'http://stocks.nbd.com.cn/columns/800',
+                                 'key_word': 'stock_volcano_fortune',
+                                 'key_word_chn': '火山财富',
+                                 'base_url': 'http://stocks.nbd.com.cn/',
+                                 'end_page': 2})
+
+NET_EASE_STOCK_NEWS = dict({'name': 'net_ease_stock_specific_news_spider',
+                            'start_url': 'http://money.163.com/special/00251LR5/gptj.html',
+                            'key_word': 'stock_specific_news',
+                            'key_word_chn': '个股资讯',
+                            'base_url': 'http://money.163.com/',
+                            'end_page': 11})
