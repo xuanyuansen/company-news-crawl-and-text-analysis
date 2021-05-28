@@ -144,7 +144,7 @@ JRJ_INVEST_SCGC = dict(
         "key_word": "invest_scgc",
         "key_word_chn": "市场分析",
         "base_url": "http://stock.jrj.com.cn/invest/",
-        "end_page": 2,
+        "end_page": 11,
     }
 )
 
@@ -155,7 +155,7 @@ JRJ_STOCK_SSGS = dict(
         "key_word": "stock_ss_gs",
         "key_word_chn": "上市公司",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 2,
+        "end_page": 11,
     }
 )
 
@@ -167,7 +167,7 @@ JRJ_HOT_STOCK_GNJJ = dict(
         "key_word": "hot_stock_jj",
         "key_word_chn": "行业掘金",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 2,
+        "end_page": 11,
     }
 )
 
@@ -178,7 +178,7 @@ JRJ_STOCK_GU_SHI_NEWS = dict(
         "key_word": "stock_news",
         "key_word_chn": "股市资讯",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 2,
+        "end_page": 11,
     }
 )
 
@@ -189,7 +189,7 @@ JRJ_STOCK_ZHANG_TING_PREDICT = dict(
         "key_word": "stock_zhang_ting",
         "key_word_chn": "涨停板预测",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 2,
+        "end_page": 11,
     }
 )
 
@@ -200,7 +200,7 @@ NBD_STOCK_IMPORTANT_NEWS = dict(
         "key_word": "stock_important_news",
         "key_word_chn": "重磅推荐",
         "base_url": "http://stocks.nbd.com.cn/",
-        "end_page": 2,
+        "end_page": 20,
     }
 )
 
@@ -211,7 +211,7 @@ NBD_STOCK_TREND_A = dict(
         "key_word": "stock_trend_a",
         "key_word_chn": "A股动态",
         "base_url": "http://stocks.nbd.com.cn/",
-        "end_page": 2,
+        "end_page": 20,
     }
 )
 
@@ -222,7 +222,7 @@ NBD_DAO_DA_INVEST_LOG = dict(
         "key_word": "stock_dao_da_invest",
         "key_word_chn": "道达投资手记",
         "base_url": "http://stocks.nbd.com.cn/",
-        "end_page": 2,
+        "end_page": 20,
     }
 )
 
@@ -233,7 +233,7 @@ NBD_VOLCANO_FORTUNE_NEWS = dict(
         "key_word": "stock_volcano_fortune",
         "key_word_chn": "火山财富",
         "base_url": "http://stocks.nbd.com.cn/",
-        "end_page": 2,
+        "end_page": 20,
     }
 )
 NET_EASE_STOCK_NEWS_DB = "net_ease_news"
@@ -244,7 +244,7 @@ NET_EASE_STOCK_NEWS = dict(
         "key_word": "stock_specific_news",
         "key_word_chn": "个股资讯",
         "base_url": "http://money.163.com/",
-        "end_page": 11,
+        "end_page": 21,
     }
 )
 NET_EASE_MARKET_NEWS = dict(
@@ -254,7 +254,7 @@ NET_EASE_MARKET_NEWS = dict(
         "key_word": "stock_market_news",
         "key_word_chn": "市场资讯",
         "base_url": "http://money.163.com/",
-        "end_page": 11,
+        "end_page": 21,
     }
 )
 
@@ -266,7 +266,7 @@ EAST_MONEY_A_STOCK_NEWS = dict(
         "key_word": "stock_cn_company_news",
         "key_word_chn": "A股公司",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 2,
+        "end_page": 26,
     }
 )
 EAST_MONEY_A_MARKET_NEWS = dict(
@@ -276,7 +276,7 @@ EAST_MONEY_A_MARKET_NEWS = dict(
         "key_word": "cn_market_data_news",
         "key_word_chn": "市场数据",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 3,
+        "end_page": 26,
     }
 )
 EAST_MONEY_DEEP_INVESTIGATE_NEWS = dict(
@@ -286,7 +286,7 @@ EAST_MONEY_DEEP_INVESTIGATE_NEWS = dict(
         "key_word": "cn_stock_deep_investigate_news",
         "key_word_chn": "纵深调查",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 3,
+        "end_page": 26,
     }
 )
 EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS = dict(
@@ -296,7 +296,7 @@ EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS = dict(
         "key_word": "cn_industry_deep_review_news",
         "key_word_chn": "产业透视",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 3,
+        "end_page": 26,
     }
 )
 EAST_MONEY_STOCK_OPINION_NEWS = dict(
@@ -306,7 +306,7 @@ EAST_MONEY_STOCK_OPINION_NEWS = dict(
         "key_word": "cn_stock_opinion_news",
         "key_word_chn": "股市评论",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 3,
+        "end_page": 26,
     }
 )
 EAST_MONEY_BUSINESS_NEWS = dict(
@@ -316,7 +316,7 @@ EAST_MONEY_BUSINESS_NEWS = dict(
         "key_word": "cn_business_news",
         "key_word_chn": "商业资讯",
         "base_url": "http://finance.eastmoney.com/",
-        "end_page": 3,
+        "end_page": 26,
     }
 )
 
@@ -328,7 +328,7 @@ SHANG_HAI_STOCK_COMPANY_NEWS = dict(
         "key_word": "stock_company_news",
         "key_word_chn": "公司聚集",
         "base_url": "https://company.cnstock.com/",
-        "end_page": 2,
+        "end_page": 30,
     }
 )
 SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS = dict(
@@ -338,7 +338,7 @@ SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS = dict(
         "key_word": "stock_announcement_news",
         "key_word_chn": "公告解读",
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 2,
+        "end_page": 30,
     }
 )
 SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS = dict(
@@ -348,7 +348,7 @@ SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS = dict(
         "key_word": "stock_kuai_xun_news",
         "key_word_chn": "公告快讯",
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 2,
+        "end_page": 30,
     }
 )
 SHANG_HAI_STOCK_COMPANY_GOOD_NEWS = dict(
@@ -358,7 +358,7 @@ SHANG_HAI_STOCK_COMPANY_GOOD_NEWS = dict(
         "key_word": "stock_good_news",
         "key_word_chn": "利好公告",
         "base_url": "https://ggjd.cnstock.com/",
-        "end_page": 3,
+        "end_page": 30,
     }
 )
 SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
@@ -368,7 +368,7 @@ SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
         "key_word": "stock_industry_news",
         "key_word_chn": "产业聚焦",
         "base_url": "https://news.cnstock.com/",
-        "end_page": 3,
+        "end_page": 30,
     }
 )
 ZHONG_JIN_STOCK_NEWS_DB = 'zhong_jin_stock_news_db'
@@ -379,7 +379,7 @@ ZHONG_JIN_STOCK_NEWS = dict(
         "key_word": "stock_news",
         "key_word_chn": "个股资讯",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_MARKET_ANALYZE_NEWS = dict(
@@ -389,7 +389,7 @@ ZHONG_JIN_STOCK_MARKET_ANALYZE_NEWS = dict(
         "key_word": "stock_market_analyze_news",
         "key_word_chn": "市场测评",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_BAN_KUAI_SECTION_ANALYZE_NEWS = dict(
@@ -399,7 +399,7 @@ ZHONG_JIN_STOCK_BAN_KUAI_SECTION_ANALYZE_NEWS = dict(
         "key_word": "stock_ban_kuai_section_news",
         "key_word_chn": "板块聚焦",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_CHUANG_YE_BAN_NEWS = dict(
@@ -409,7 +409,7 @@ ZHONG_JIN_STOCK_CHUANG_YE_BAN_NEWS = dict(
         "key_word": "stock_ban_kuai_section_news",
         "key_word_chn": "创业板资讯",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_MARKET_SEEK_GOLD_NEWS = dict(
@@ -419,7 +419,7 @@ ZHONG_JIN_STOCK_MARKET_SEEK_GOLD_NEWS = dict(
         "key_word": "stock_market_seek_gold_news",
         "key_word_chn": "市场掘金",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_MARKET_VERY_IMPORTANT_NEWS = dict(
@@ -429,7 +429,7 @@ ZHONG_JIN_STOCK_MARKET_VERY_IMPORTANT_NEWS = dict(
         "key_word": "stock_market_very_important_news",
         "key_word_chn": "股市要闻",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS = dict(
@@ -439,6 +439,6 @@ ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS = dict(
         "key_word": "stock_market_main_force_trend_news",
         "key_word_chn": "主力动向",
         "base_url": "http://sc.stock.cnfol.com/",
-        "end_page": 3,
+        "end_page": 100,
     }
 )

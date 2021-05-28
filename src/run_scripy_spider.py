@@ -40,13 +40,13 @@ def add_stcn_spider(process: CrawlerProcess):
 
 def add_jrj_spider(process: CrawlerProcess):
     # http://stock.jrj.com.cn/invest/scgc.shtml 市场分析
-    # process.crawl(JrjSpider, **config.JRJ_INVEST_SCGC)
+    process.crawl(JrjSpider, **config.JRJ_INVEST_SCGC)
     # http://stock.jrj.com.cn/list/stockssgs.shtml 上市公司
-    # process.crawl(JrjSpider, **config.JRJ_STOCK_SSGS)
+    process.crawl(JrjSpider, **config.JRJ_STOCK_SSGS)
     # http://stock.jrj.com.cn/hotstock/gnjj.shtml 行业掘金
-    # process.crawl(JrjSpider, **config.JRJ_HOT_STOCK_GNJJ)
+    process.crawl(JrjSpider, **config.JRJ_HOT_STOCK_GNJJ)
     # http://stock.jrj.com.cn/list/stockgszx.shtml 股市资讯
-    # process.crawl(JrjSpider, **config.JRJ_STOCK_GU_SHI_NEWS)
+    process.crawl(JrjSpider, **config.JRJ_STOCK_GU_SHI_NEWS)
     # http://stock.jrj.com.cn/list/ztbyc.shtml 涨停板预测
     process.crawl(JrjSpider, **config.JRJ_STOCK_ZHANG_TING_PREDICT)
 
@@ -55,11 +55,11 @@ def add_jrj_spider(process: CrawlerProcess):
 
 def add_nbd_spider(process: CrawlerProcess):
     # http://stocks.nbd.com.cn/columns/318  重磅推荐
-    # process.crawl(NBDSpider, **config.NBD_STOCK_IMPORTANT_NEWS)
+    process.crawl(NBDSpider, **config.NBD_STOCK_IMPORTANT_NEWS)
     # http://stocks.nbd.com.cn/columns/275 A股动态
-    # process.crawl(NBDSpider, **config.NBD_STOCK_TREND_A)
+    process.crawl(NBDSpider, **config.NBD_STOCK_TREND_A)
     # http://stocks.nbd.com.cn/columns/476
-    # process.crawl(NBDSpider, **config.NBD_DAO_DA_INVEST_LOG)
+    process.crawl(NBDSpider, **config.NBD_DAO_DA_INVEST_LOG)
     # http://stocks.nbd.com.cn/columns/800  每经网首页>券商>火山财富
     process.crawl(NBDSpider, **config.NBD_VOLCANO_FORTUNE_NEWS)
     pass
@@ -67,7 +67,7 @@ def add_nbd_spider(process: CrawlerProcess):
 
 def add_net_ease_spider(process: CrawlerProcess):
     # http://money.163.com/special/00251LR5/gptj.html 个股资讯
-    # process.crawl(NetEaseSpider, **config.NET_EASE_STOCK_NEWS)
+    process.crawl(NetEaseSpider, **config.NET_EASE_STOCK_NEWS)
     process.crawl(NetEaseSpider, **config.NET_EASE_MARKET_NEWS)
     pass
 
@@ -85,10 +85,10 @@ def add_east_money_spider(process: CrawlerProcess):
 
 
 def add_shang_hai_stock_spider(process: CrawlerProcess):
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_GOOD_NEWS)
+    process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_NEWS)
+    process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS)
+    process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS)
+    process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_GOOD_NEWS)
     process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_INDUSTRY_NEWS)
     pass
 
@@ -110,12 +110,12 @@ if __name__ == "__main__":
     settings = get_project_settings()
     _process = CrawlerProcess(settings)
 
-    # add_stcn_spider(_process)
-    # add_jrj_spider(_process)
-    # add_nbd_spider(_process)
-    # add_net_ease_spider(_process)
-    # add_east_money_spider(_process)
-    # add_shang_hai_stock_spider(_process)
+    add_stcn_spider(_process)
+    add_jrj_spider(_process)
+    add_nbd_spider(_process)
+    add_net_ease_spider(_process)
+    add_east_money_spider(_process)
+    add_shang_hai_stock_spider(_process)
     add_zhong_jin_stock_spider(_process)
     _process.start()
 

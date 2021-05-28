@@ -161,6 +161,11 @@ class StockInfoSpyder(Spyder):
                     }
                 )
                 _tmp_dict.update({"turnover": stock_zh_a_spot_df.iloc[_id].turnover})
+                if _col.find_one({"_id": id_md5}) is not None:
+                    self.logger.info(
+                        "id already exist {0} {1}".format(id_md5, _tmp_dict)
+                    )
+                    continue
                 _col.insert_one(_tmp_dict)
 
                 self.logger.info(
