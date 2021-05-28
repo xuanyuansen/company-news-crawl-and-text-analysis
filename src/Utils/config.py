@@ -274,9 +274,9 @@ EAST_MONEY_A_STOCK_NEWS = dict(
 )
 EAST_MONEY_A_MARKET_NEWS = dict(
     {
-        "name": "east_money_cn_stock_market_news_spider",
+        "name": "east_money_cn_market_data_news_spider",
         "start_url": "http://stock.eastmoney.com/a/cscsj.html",
-        "key_word": "cn_stock_market_news",
+        "key_word": "cn_market_data_news",
         "key_word_chn": "市场数据",
         "base_url": "http://finance.eastmoney.com/",
         "end_page": 3,
@@ -317,7 +317,7 @@ EAST_MONEY_BUSINESS_NEWS = dict(
         "name": "east_money_cn_business_news_spider",
         "start_url": "http://biz.eastmoney.com/a/csyzx.html",
         "key_word": "cn_business_news",
-        "key_word_chn": "股市评论",
+        "key_word_chn": "商业资讯",
         "base_url": "http://finance.eastmoney.com/",
         "end_page": 3,
     }

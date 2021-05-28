@@ -31,7 +31,7 @@ class EastMoneySpider(BaseSpider):
         li_list = bs.find_all("div", class_="repeatList")
 
         for li in li_list:
-            div_list = li.find_all("div", class_="text text-no-img")
+            div_list = li.find_all("div", class_=["text text-no-img", "text"])
             self.logger.info("all sub li div count is {0}".format(len(div_list)))
             for div in div_list:
                 p_list = div.find_all("p")
