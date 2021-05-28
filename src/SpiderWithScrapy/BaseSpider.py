@@ -5,6 +5,7 @@ from ComTools.BuildStockNewsDb import GenStockNewsDB
 from scrapy import Spider
 from Utils.items import TweetItem
 import hashlib
+import re
 
 
 class BaseSpider(Spider):
@@ -33,11 +34,18 @@ class BaseSpider(Spider):
         for paragraph in paragraphs:
             p_list = paragraph.find_all("p")
             row_str = []
-            for p in p_list:
-                row_str.append(str(p.text).strip())
+            if len(p_list) < 1:
+                row_str.append(paragraph.text)
+            else:
+                for p in p_list:
+                    row_str.append(str(p.text).strip())
             if len(row_str) > 0:
                 article += "\n".join(row_str)
-        # article = " ".join(re.split(" +|\n+", article)).strip()
+        while article.find("\u3000") != -1:
+            article = article.replace("\u3000", "")
+        while article.find("\r\n") != -1:
+            article = article.replace("\r\n", "")
+        article = " ".join(re.split(" +|\n+", article)).strip()
 
         (
             related_stock_codes_json,

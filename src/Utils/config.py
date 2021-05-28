@@ -375,3 +375,14 @@ SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
         "end_page": 3,
     }
 )
+ZHONG_JIN_STOCK_NEWS_DB = 'zhong_jin_stock_news_db'
+ZHONG_JIN_STOCK_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_news_spider",
+        "start_url": "http://stock.cnfol.com/",
+        "key_word": "stock_news",
+        "key_word_chn": "A股",
+        "base_url": "http://stock.cnfol.com/",
+        "end_page": 100,
+    }
+)

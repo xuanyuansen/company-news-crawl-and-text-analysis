@@ -8,6 +8,7 @@ from SpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
 from SpiderWithScrapy.stcn_spider import StcnSpider
 from SpiderWithScrapy.jrj_spider import JrjSpider
 from SpiderWithScrapy.nbd_spider import NBDSpider
+from SpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
 from Utils import config
 
 
@@ -92,6 +93,15 @@ def add_shang_hai_stock_spider(process: CrawlerProcess):
     pass
 
 
+def add_zhong_jin_stock_spider(process: CrawlerProcess):
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_GOOD_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_NEWS)
+    pass
+
+
 if __name__ == "__main__":
     os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
     settings = get_project_settings()
@@ -101,8 +111,9 @@ if __name__ == "__main__":
     # add_jrj_spider(_process)
     # add_nbd_spider(_process)
     # add_net_ease_spider(_process)
-    add_east_money_spider(_process)
+    # add_east_money_spider(_process)
     # add_shang_hai_stock_spider(_process)
+    add_zhong_jin_stock_spider(_process)
     _process.start()
 
     pass
