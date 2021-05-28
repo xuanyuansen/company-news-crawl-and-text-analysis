@@ -1,6 +1,4 @@
 import logging
-import traceback
-
 from pymongo import MongoClient
 import pandas as pd
 
@@ -9,14 +7,16 @@ class Database(object):
     def __init__(self, ip="localhost", port=27017):
         self.ip = ip
         self.port = port
-        self.conn = MongoClient(self.ip, self.port,  maxPoolSize=200)
+        self.conn = MongoClient(self.ip, self.port, maxPoolSize=200)
         self.collection = None
 
     def connect_database(self, database_name):
         return self.conn[database_name]
 
     def get_collection(self, database_name, collection_name):
-        self.collection = self.connect_database(database_name).get_collection(collection_name)
+        self.collection = self.connect_database(database_name).get_collection(
+            collection_name
+        )
         return self.collection
 
     def insert_data(self, database_name, collection_name, data_dict):
@@ -31,6 +31,10 @@ class Database(object):
         result = collection.update_one(query, {"$set": new_values})
         return result
 
+    def query_fuzzy(self, _key, param):
+        # 模糊查询
+        return self.collection.find({_key: {"$regex": ".*{}.*".format(param)}})
+
     def get_data(
         self,
         database_name,
@@ -39,9 +43,6 @@ class Database(object):
         query=None,
         keys=None,
     ):
-        # e.g.:
-        # ExampleObj = Database()
-        # ExampleObj.get_data("finnewshunter", "nbd", query={"Date": {"$regex": "2014"}}, keys=["Url", "Title"])
         database = self.conn[database_name]
         collection = database.get_collection(collection_name)
         if query:
@@ -77,10 +78,18 @@ class Database(object):
             data_list = list(data)
             data_length = len(data_list)
             if data_length == 0:
-                logging.warning('no data found with query {0} data {1} {2}'.format(query, data, data_length))
+                logging.warning(
+                    "no data found with query {0} data {1} {2}".format(
+                        query, data, data_length
+                    )
+                )
                 return None
             else:
-                logging.info('query {0} data {1} data length is {2}'.format(query, data, data_length))
+                logging.info(
+                    "query {0} data {1} data length is {2}".format(
+                        query, data, data_length
+                    )
+                )
             data_keys = list(
                 data_list[0].keys()
             )  # ['_id', 'Date', 'PageId', 'Url', 'Title', 'Article', 'RelevantStockCodes']
@@ -94,24 +103,8 @@ class Database(object):
                         _dict[_key].append(row[_key])
                 else:
                     break
-        logging.info('find done {0}'.format(len(_dict)))
+        logging.info("find done {0}".format(len(_dict)))
         return pd.DataFrame(_dict)
-        # except Exception as ex:
-        #     print("出现如下异常{0}, keys {1}, data {2}, query {3}".format(ex, keys, data, query))
-        #     print('{0}'.format(ex))
-        #     print(traceback.print_exc())
-        #     return None
 
     def drop_db(self, database):
         self.conn.drop_database(database)
-
-
-"""
-from database import Database
-
-ExampleObj = Database()
-db = ExampleObj.connect_database("cnstock")
-col = ExampleObj.create_col(db, "cnstock_col")
-ExampleObj.insert_data(col, {'name': 'sena', "id": 136})
-ExampleObj.drop_db(db)
-"""

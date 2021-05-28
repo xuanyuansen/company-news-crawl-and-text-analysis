@@ -4,6 +4,7 @@ from scrapy.utils.project import get_project_settings
 
 from SpiderWithScrapy.east_money_spider import EastMoneySpider
 from SpiderWithScrapy.net_ease_spider import NetEaseSpider
+from SpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
 from SpiderWithScrapy.stcn_spider import StcnSpider
 from SpiderWithScrapy.jrj_spider import JrjSpider
 from SpiderWithScrapy.nbd_spider import NBDSpider
@@ -65,18 +66,34 @@ def add_nbd_spider(process: CrawlerProcess):
 
 def add_net_ease_spider(process: CrawlerProcess):
     # http://money.163.com/special/00251LR5/gptj.html 个股资讯
-    process.crawl(NetEaseSpider, **config.NET_EASE_STOCK_NEWS)
+    # process.crawl(NetEaseSpider, **config.NET_EASE_STOCK_NEWS)
+    process.crawl(NetEaseSpider, **config.NET_EASE_MARKET_NEWS)
     pass
 
 
 def add_east_money_spider(process: CrawlerProcess):
     # http://finance.eastmoney.com/a/cssgs.html
     process.crawl(EastMoneySpider, **config.EAST_MONEY_A_STOCK_NEWS)
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_A_MARKET_NEWS)
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_DEEP_INVESTIGATE_NEWS)
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS)
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_STOCK_OPINION_NEWS)
+    process.crawl(EastMoneySpider, **config.EAST_MONEY_BUSINESS_NEWS)
+
     pass
 
 
-if __name__ == '__main__':
-    os.environ['SCRAPY_SETTINGS_MODULE'] = f'settings'
+def add_shang_hai_stock_spider(process: CrawlerProcess):
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS)
+    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_GOOD_NEWS)
+    process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_INDUSTRY_NEWS)
+    pass
+
+
+if __name__ == "__main__":
+    os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
     settings = get_project_settings()
     _process = CrawlerProcess(settings)
 
@@ -85,7 +102,7 @@ if __name__ == '__main__':
     # add_nbd_spider(_process)
     # add_net_ease_spider(_process)
     add_east_money_spider(_process)
-
+    # add_shang_hai_stock_spider(_process)
     _process.start()
 
     pass

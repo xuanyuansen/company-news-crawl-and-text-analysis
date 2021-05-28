@@ -10,26 +10,24 @@ import Utils.config as config
 from NlpModel.tokenization import Tokenization
 from Utils.database import Database
 from Utils import utils
-import logging
 import random
 import pandas as pd
 import joblib
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-    datefmt="%a, %d %b %Y %H:%M:%S",
-)
-
 
 class InformationExtract(object):
     def __init__(self, force_train_model: bool = False):
+        self.logger = utils.get_logger()
         self.db_name = config.DATABASE_NAME
         self.db_obj = Database()
-        self.collections = [config.COLLECTION_NAME_CNSTOCK, config.COLLECTION_NAME_JRJ, config.COLLECTION_NAME_NBD]
+        self.collections = [
+            config.COLLECTION_NAME_CNSTOCK,
+            config.COLLECTION_NAME_JRJ,
+            config.COLLECTION_NAME_NBD,
+        ]
         self.vocabulary = None
         self.df = None
-        self.excel_name = './info/word_seg_all.xlsx'
+        self.excel_name = "./info/word_seg_all.xlsx"
         self.label_excel = "./info/word_seg_all_with_label.xlsx"
         self.label = None
         self.label_pos = dict()
@@ -39,9 +37,11 @@ class InformationExtract(object):
         self.jrj_df = None
         self.nbd_df = None
         self.__load_seg_word_label()
-        self.token = Tokenization(import_module=config.SEG_METHOD,
-                                  user_dict=config.USER_DEFINED_WEIGHT_DICT_PATH,
-                                  chn_stop_words_dir=config.CHN_STOP_WORDS_PATH)
+        self.token = Tokenization(
+            import_module=config.SEG_METHOD,
+            user_dict=config.USER_DEFINED_WEIGHT_DICT_PATH,
+            chn_stop_words_dir=config.CHN_STOP_WORDS_PATH,
+        )
         self.bayes_model = None
         self.svm_model = None
         self.vocabulary = None
@@ -54,19 +54,21 @@ class InformationExtract(object):
     def __inner_load_model(self):
         if os.path.exists(config.BAYES_MODEL_FILE):
             self.bayes_model = joblib.load(config.BAYES_MODEL_FILE)
-            logging.info("bayes model load")
-        if os.path.exists('./info/svm_model.pkl'):
-            self.svm_model = joblib.load('./info/svm_model.pkl')
-            logging.info("svm model load")
-        if os.path.exists('./info/count_vector_rizer.pkl'):
-            self.count_vector_rise = joblib.load('./info/count_vector_rizer.pkl')
-            logging.info("count vector rizer load")
+            self.logger.info("bayes model load")
+        if os.path.exists(config.SVM_MODEL_FILE):
+            self.svm_model = joblib.load(config.SVM_MODEL_FILE)
+            self.logger.info("svm model load")
+        if os.path.exists("./info/count_vector_rizer.pkl"):
+            self.count_vector_rise = joblib.load("./info/count_vector_rizer.pkl")
+            self.logger.info("count vector rizer load")
         return
 
     def predict_score(self, text):
         text = " ".join(self.token.cut_words(text))
         counts_to_predict_data = self.count_vector_rise.fit_transform([text])
-        to_predict_data = self.tfidf_transformer.fit(counts_to_predict_data).transform(counts_to_predict_data)
+        to_predict_data = self.tfidf_transformer.fit(counts_to_predict_data).transform(
+            counts_to_predict_data
+        )
         prob_nb = self.bayes_model.predict_proba(to_predict_data)
         # logging.info("prob_nb is {0}".format(prob_nb))
         prob_svm = self.svm_model.predict_proba(to_predict_data)
@@ -75,9 +77,9 @@ class InformationExtract(object):
         good_score = prob_nb[0][1] + prob_svm[0][1]
 
         if bad_score > good_score:
-            return "利空", 0.5*bad_score
+            return "利空", 0.5 * bad_score
         else:
-            return "利好", 0.5*good_score
+            return "利好", 0.5 * good_score
 
     def __inner_title_cut(self, title):
         info_dict = dict()
@@ -90,22 +92,29 @@ class InformationExtract(object):
         return info_dict
 
     def build_2_class_classify_model(self):
-        if self.svm_model is not None and self.bayes_model is not None and self.count_vector_rise is not None:
-            logging.info("model and vocabulary already load!!!")
+        if (
+            self.svm_model is not None
+            and self.bayes_model is not None
+            and self.count_vector_rise is not None
+        ):
+            self.logger.info("model and vocabulary already load!!!")
             return True
         self.get_data()
-        res = self.get_train_data(['Title', 'Article', 'ClassifyLabel'])
-        logging.info('get train data done!')
+        res = self.get_train_data(["Title", "Article", "ClassifyLabel"])
+        self.logger.info("get train data done!")
         if res:
             data = self.df
         else:
             raise Exception
         # 先做数据筛选
-        data = data[data['ClassifyLabel'] != 'unknown']
-        data['text_cut'] = data.apply(lambda row: " ".join(self.token.cut_words(row['Title'] + row['Article'])), axis=1)
-        logging.info('cut train data done!')
+        data = data[data["ClassifyLabel"] != "unknown"]
+        data["text_cut"] = data.apply(
+            lambda row: " ".join(self.token.cut_words(row["Title"] + row["Article"])),
+            axis=1,
+        )
+        self.logger.info("cut train data done!")
         # to_predict_data = data[data['ClassifyLabel'] == 'unknown']
-        print(data.groupby('ClassifyLabel').size())
+        print(data.groupby("ClassifyLabel").size())
         print(data.shape)
         # 拆分训练数据集和测试数据集
         size = data.shape[0]
@@ -116,19 +125,21 @@ class InformationExtract(object):
         sms_test = data[sms_test_mask]
 
         # 文本转换成TF-IDF向量
-        train_labels = sms_train['ClassifyLabel'].values
-        train_features = sms_train['text_cut'].values
-        count_v1 = CountVectorizer(max_df=0.8, decode_error='ignore')
+        train_labels = sms_train["ClassifyLabel"].values
+        train_features = sms_train["text_cut"].values
+        count_v1 = CountVectorizer(max_df=0.8, decode_error="ignore")
         counts_train = count_v1.fit_transform(train_features)
         self.vocabulary = count_v1.vocabulary_
         # print(count_v1.get_feature_names())
         # repr(counts_train.shape)
         tfidf_train = self.tfidf_transformer.fit(counts_train).transform(counts_train)
 
-        test_labels = sms_test['ClassifyLabel'].values
-        test_features = sms_test['text_cut'].values
-        self.count_vector_rise = CountVectorizer(vocabulary=self.vocabulary, max_df=0.8, decode_error='ignore')
-        joblib.dump(self.count_vector_rise, './info/count_vector_rizer.pkl')
+        test_labels = sms_test["ClassifyLabel"].values
+        test_features = sms_test["text_cut"].values
+        self.count_vector_rise = CountVectorizer(
+            vocabulary=self.vocabulary, max_df=0.8, decode_error="ignore"
+        )
+        joblib.dump(self.count_vector_rise, "./info/count_vector_rizer.pkl")
         counts_test = self.count_vector_rise.fit_transform(test_features)
         tfidf_test = self.tfidf_transformer.fit(counts_test).transform(counts_test)
 
@@ -140,19 +151,21 @@ class InformationExtract(object):
         predict_result = self.bayes_model.predict(tfidf_test)
         print(self.bayes_model.predict_proba(tfidf_test))
         # 正确率
-        correct = [test_labels[i] == predict_result[i] for i in range(len(predict_result))]
+        correct = [
+            test_labels[i] == predict_result[i] for i in range(len(predict_result))
+        ]
         r = len(predict_result)
         t = correct.count(True)
         f = correct.count(False)
-        logging.info("测试集大小{0} 分类正确{1} 分类错误{2} 准确率{3}".format(r, t, f, t / float(r)))
-        logging.info(self.bayes_model.score(tfidf_test, test_labels))
+        self.logger.info("测试集大小{0} 分类正确{1} 分类错误{2} 准确率{3}".format(r, t, f, t / float(r)))
+        self.logger.info(self.bayes_model.score(tfidf_test, test_labels))
 
         # svm
-        self.svm_model = SVC(kernel='linear', probability=True)  # default with 'rbf'
+        self.svm_model = SVC(kernel="linear", probability=True)  # default with 'rbf'
         self.svm_model.fit(tfidf_train, train_labels)
-        joblib.dump(self.svm_model, './info/svm_model.pkl')
+        joblib.dump(self.svm_model, config.SVM_MODEL_FILE)
         pred = self.svm_model.predict(tfidf_test)
-        calculate_result(test_labels, pred)
+        self.__calculate_result(test_labels, pred)
         return True
 
     # 准备二分类数据的标签，标签来源两种。
@@ -162,16 +175,20 @@ class InformationExtract(object):
     @staticmethod
     def __inner_set_data_label(row):
         keys = row.keys().tolist()
-        if ('Category' in keys and row['Category'] == '利好公告') \
-                or (row['PosRatio'] > 0.6 and row['RuleLabel'][1][0] > 6):
-            return 'good_news'
-        elif row['PosRatio'] < 0.4 and row['RuleLabel'][1][1] > 6:
-            return 'bad_news'
+        if ("Category" in keys and row["Category"] == "利好公告") or (
+            row["PosRatio"] > 0.6 and row["RuleLabel"][1][0] > 6
+        ):
+            return "good_news"
+        elif row["PosRatio"] < 0.4 and row["RuleLabel"][1][1] > 6:
+            return "bad_news"
         else:
-            return 'unknown'
+            return "unknown"
 
     def get_train_data(self, columns: list):
-        self.df = pd.concat([self.cn_stock_df[columns], self.jrj_df[columns], self.nbd_df[columns]], axis=0)
+        self.df = pd.concat(
+            [self.cn_stock_df[columns], self.jrj_df[columns], self.nbd_df[columns]],
+            axis=0,
+        )
         return True
 
     def get_data(self):
@@ -181,13 +198,23 @@ class InformationExtract(object):
 
     def __inner_get_data(self, collection_name):
         df = self.db_obj.get_data(self.db_name, collection_name)
-        df['WordsFrequent'] = df.apply(lambda row: json.loads(row['WordsFrequent']), axis=1)
-        df['TitleFrequent'] = df.apply(lambda row: self.__inner_title_cut(row['Title']), axis=1)
-        df['WordsFrequent'] = df.apply(lambda row: dict(row['TitleFrequent'], **row['WordsFrequent']), axis=1)
-        df['RuleLabel'] = df.apply(lambda row: self.from_seg_words_to_cnt(row['WordsFrequent']), axis=1)
-        df['PosRatio'] = df.apply(lambda row: row['RuleLabel'][0], axis=1)
-        df['ClassifyLabel'] = df.apply(lambda row: self.__inner_set_data_label(row), axis=1)
-        return df.sort_values(by=['PosRatio'], ascending=True)
+        df["WordsFrequent"] = df.apply(
+            lambda row: json.loads(row["WordsFrequent"]), axis=1
+        )
+        df["TitleFrequent"] = df.apply(
+            lambda row: self.__inner_title_cut(row["Title"]), axis=1
+        )
+        df["WordsFrequent"] = df.apply(
+            lambda row: dict(row["TitleFrequent"], **row["WordsFrequent"]), axis=1
+        )
+        df["RuleLabel"] = df.apply(
+            lambda row: self.from_seg_words_to_cnt(row["WordsFrequent"]), axis=1
+        )
+        df["PosRatio"] = df.apply(lambda row: row["RuleLabel"][0], axis=1)
+        df["ClassifyLabel"] = df.apply(
+            lambda row: self.__inner_set_data_label(row), axis=1
+        )
+        return df.sort_values(by=["PosRatio"], ascending=True)
 
     def get_count(self, collection_name):
         return self.db_obj.get_collection(self.db_name, collection_name).find().count()
@@ -207,7 +234,7 @@ class InformationExtract(object):
     # 从文件获得标签
     def __load_seg_word_label(self):
         self.label = pd.read_excel(self.label_excel, na_values=0)
-        self.label['label'].fillna(0, inplace=True)
+        self.label["label"].fillna(0, inplace=True)
         # data = self.label[self.label['label'] != 0]
         for _, row in self.label.iterrows():
             # print(row[2])
@@ -217,8 +244,8 @@ class InformationExtract(object):
                 self.label_neg[row[0]] = -1
             else:
                 self.label_middle[row[0]] = 0
-        logging.info('pos word label size {0}'.format(len(self.label_pos)))
-        logging.info('neg word label size {0}'.format(len(self.label_neg)))
+        self.logger.info("pos word label size {0}".format(len(self.label_pos)))
+        self.logger.info("neg word label size {0}".format(len(self.label_neg)))
         return True
 
     def from_seg_words_to_cnt(self, seg_words: dict):
@@ -232,11 +259,18 @@ class InformationExtract(object):
                 neg_cnt += v
             else:
                 mid_cnt += v
-        return pos_cnt / float(pos_cnt + neg_cnt) if pos_cnt + neg_cnt > 0 else 0.0, (pos_cnt, neg_cnt, mid_cnt)
+        return pos_cnt / float(pos_cnt + neg_cnt) if pos_cnt + neg_cnt > 0 else 0.0, (
+            pos_cnt,
+            neg_cnt,
+            mid_cnt,
+        )
 
     def write_excel(self, word_dict_sort, threshold: int = 10):
 
-        ordered_list = ["word", "count"]  # list object calls by index but dict object calls items randomly
+        ordered_list = [
+            "word",
+            "count",
+        ]  # list object calls by index but dict object calls items randomly
 
         wb = Workbook(self.excel_name)
         ws = wb.add_worksheet("Words")  # or leave it blank, default name is "Sheet 1"
@@ -245,7 +279,9 @@ class InformationExtract(object):
         first_row = 0
         for header in ordered_list:
             col = ordered_list.index(header)  # we are keeping order.
-            ws.write(first_row, col, header)  # we have written first row which is the header of worksheet also.
+            ws.write(
+                first_row, col, header
+            )  # we have written first row which is the header of worksheet also.
 
         row = 1
         for _key, _value in word_dict_sort.items():
@@ -262,19 +298,23 @@ class InformationExtract(object):
         for idx in range(1, len(all_word_dict)):
             utils.merge_dict(start_dict, all_word_dict[idx])
 
-        start_dict_sorted = dict(sorted(start_dict.items(), key=lambda item: item[1], reverse=True))
+        start_dict_sorted = dict(
+            sorted(start_dict.items(), key=lambda item: item[1], reverse=True)
+        )
         return start_dict_sorted
 
     def get_collection_word_seg(self, collection_name):
         self.df = self.db_obj.get_data(
             self.db_name,
             collection_name,
-            keys=["Url", "WordsFrequent", 'Category', 'Article'],
+            keys=["Url", "WordsFrequent", "Category", "Article"],
         )
         # print(self.df[0:10])
         wf = self.df["WordsFrequent"].tolist()
         urls = self.df["Url"].tolist()
-        df_data_dict_list = [(element[1], json.loads(element[0])) for element in zip(wf, urls)]
+        df_data_dict_list = [
+            (element[1], json.loads(element[0])) for element in zip(wf, urls)
+        ]
         # print(df_data_dict_list[0:10])
         start_dict = dict()
         for element in df_data_dict_list:
@@ -296,6 +336,14 @@ class InformationExtract(object):
     def get_vocabulary(self):
         return self.vocabulary
 
+    def __calculate_result(self, actual, pred):
+        # average Please choose another average setting, one of [None, 'micro', 'macro', 'weighted'].
+        m_precision = metrics.precision_score(actual, pred, average=None)
+        m_recall = metrics.recall_score(actual, pred, average=None)
+        self.logger.info("predict info:")
+        self.logger.info("precision:{0}".format(m_precision))
+        self.logger.info("recall:{0}".format(m_recall))
+        self.logger.info("f1-score:{0}".format(metrics.f1_score(actual, pred, average=None)))
     pass
 
 
@@ -307,13 +355,3 @@ def random_sequence(n, data_size):
         x = random.randrange(0, data_size - 1, 1)
         test_result[x] = 1
     return test_result
-
-
-def calculate_result(actual, pred):
-    # average Please choose another average setting, one of [None, 'micro', 'macro', 'weighted'].
-    m_precision = metrics.precision_score(actual, pred, average=None)
-    m_recall = metrics.recall_score(actual, pred, average=None)
-    logging.info('predict info:')
-    logging.info('precision:{0}'.format(m_precision))
-    logging.info('recall:{0}'.format(m_recall))
-    logging.info('f1-score:{0}'.format(metrics.f1_score(actual, pred, average=None)))

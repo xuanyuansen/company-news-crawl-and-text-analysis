@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import pymongo
 from pymongo.errors import DuplicateKeyError
+
+from Utils import config
 from settings import MONGO_HOST, MONGO_PORT
 import logging
 
@@ -8,14 +10,15 @@ import logging
 class MongoDBPipeline(object):
     def __init__(self):
         client = pymongo.MongoClient(MONGO_HOST, MONGO_PORT)
-        self.db_stcn = client['stcn']
-        self.db_jrj = client['jrj_news']  # 金融界
-        self.db_nbd = client['nbd_news']  # 每经网
-        self.db_net_ease = client['net_ease_news']  # 163
-        self.db_east_money = client['east_money_news']  # east money
+        self.db_stcn = client["stcn"]
+        self.db_jrj = client["jrj_news"]  # 金融界
+        self.db_nbd = client["nbd_news"]  # 每经网
+        self.db_net_ease = client[config.NET_EASE_STOCK_NEWS_DB]  # 163
+        self.db_east_money = client[config.EAST_MONEY_NEWS_DB]  # east money
+        self.db_shanghai_cn_stock = client[config.SHANG_HAI_STOCK_NEWS_DB]  # shanghai
 
     def process_item(self, item, spider):
-        col_name = str(spider.name).replace('spider', 'data')
+        col_name = str(spider.name).replace("spider", "data")
         if str(spider.name).startswith("jrj"):
             self.insert_item(self.db_jrj[col_name], item)
         elif str(spider.name).startswith("stcn"):
@@ -26,8 +29,10 @@ class MongoDBPipeline(object):
             self.insert_item(self.db_net_ease[col_name], item)
         elif str(spider.name).startswith("east_money"):
             self.insert_item(self.db_east_money[col_name], item)
+        elif str(spider.name).startswith("shanghai"):
+            self.insert_item(self.db_shanghai_cn_stock[col_name], item)
         else:
-            logging.info('wrong')
+            logging.info("wrong")
 
         return item
 
@@ -36,5 +41,5 @@ class MongoDBPipeline(object):
         try:
             collection.insert(dict(item))
         except DuplicateKeyError:
-            logging.warning('already in data base, {0}'.format(dict(item)))
+            logging.warning("already in data base, {0}".format(dict(item)))
             pass

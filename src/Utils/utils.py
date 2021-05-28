@@ -11,49 +11,55 @@ import smtplib  # smtp lib 用于邮件的发信动作
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+import logging
+
+
+def get_logger():
+    logger = logging.getLogger()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+        datefmt="%a, %d %b %Y %H:%M:%S",
+    )
+    return logger
 
 
 def send_mail(topic, content, _file_name=None):
-    from_address = '327778924@qq.com'
-    password = 'scaimxedcfevbhga'
-    toaddrs = 'wangliaofan1988@163.com'
+    from_address = "327778924@qq.com"
+    password = "scaimxedcfevbhga"
+    toaddrs = "wangliaofan1988@163.com"
 
-    text_part = MIMEText(content, 'plain', 'utf-8')
+    text_part = MIMEText(content, "plain", "utf-8")
     m = MIMEMultipart()
     m.attach(text_part)
-    # imageFile = '1.png'
-    # imageApart = MIMEImage(open(imageFile, 'rb').read(), imageFile.split('.')[-1])
-    # imageApart.add_header('Content-Disposition', 'attachment', filename=imageFile)
+
     if _file_name is not None:
-        csv_part = MIMEApplication(open(_file_name, 'rb').read())
-        csv_part.add_header('Content-Disposition', 'attachment', filename=_file_name)
+        csv_part = MIMEApplication(open(_file_name, "rb").read())
+        csv_part.add_header("Content-Disposition", "attachment", filename=_file_name)
         m.attach(csv_part)
-    # zipFile = '算法设计与分析基础第3版PDF.zip'
-    # zipApart = MIMEApplication(open(zipFile, 'rb').read())
-    # zipApart.add_header('Content-Disposition', 'attachment', filename=zipFile)
 
     # 邮件头信息
-    m['From'] = Header(from_address)
-    m['To'] = Header(toaddrs)
-    m['Subject'] = Header(topic)
+    m["From"] = Header(from_address)
+    m["To"] = Header(toaddrs)
+    m["Subject"] = Header(topic)
 
     try:
         # 开启发信服务，这里使用的是加密传输
-        server = smtplib.SMTP('smtp.qq.com')
+        server = smtplib.SMTP("smtp.qq.com")
         server.login(from_address, password)
         server.sendmail(from_address, toaddrs, m.as_string())
         # print('success')
         server.quit()
     except smtplib.SMTPException as e:
-        print('error:', e)  # 打印错误
+        print("error:", e)  # 打印错误
 
 
 def set_display():
     # 显示所有列
-    pd.set_option('display.max_columns', None)
+    pd.set_option("display.max_columns", None)
     # 显示所有行
-    pd.set_option('display.max_rows', None)
-    pd.set_option('max_colwidth', 500)
+    pd.set_option("display.max_rows", None)
+    pd.set_option("max_colwidth", 500)
 
 
 def merge_dict(a, b):
@@ -170,7 +176,9 @@ def get_chn_stop_words(path):
     """Load the stop words from dir of txt file."""
     stop_words_dict = dict()
     for file in os.listdir(path):
-        stop_words = [line.strip() for line in open(path+file, "r", encoding="utf8").readlines()]
+        stop_words = [
+            line.strip() for line in open(path + file, "r", encoding="utf8").readlines()
+        ]
         for word in stop_words:
             value = stop_words_dict.get(word)
             if value is None:
@@ -233,14 +241,14 @@ def is_contain_chn(word):
         return False
 
 
-def batch_lpop(client, key, n):
+def batch_loop(client, key, n):
     p = client.pipeline()
     p.lrange(key, 0, n - 1)
     p.ltrim(key, n, -1)
     p.execute()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     stopwords = get_chn_stop_words("../info/stopwords/")
     print(stopwords)
     pass

@@ -6,46 +6,44 @@ Author: wangshuai
 Mail: xxx@163.com
 Created Time: 2021/05/25
 """
-import logging
-
 from bs4 import BeautifulSoup
 from scrapy.http import Request
 from SpiderWithScrapy.BaseSpider import BaseSpider
 
 
 class StcnSpider(BaseSpider):
-    def __init__(self, name, key_word, key_word_chn, start_url, base_url, end_page: int = 20):
-        self.name = name
-        self.start_url: str = start_url
-        self.end_page: int = end_page
-        self.key_word = key_word
-        self.key_word_chn = key_word_chn
-        self.base_url = base_url
-        logging.info("name is {}".format(self.name))
-        super().__init__()
+    def __init__(
+        self, name, key_word, key_word_chn, start_url, base_url, end_page: int = 20
+    ):
+        super().__init__(name, key_word, key_word_chn, start_url, base_url, end_page)
 
     def __inner_get_sub_url(self, sub_url):
-        if (self.key_word == 'djjd' and self.key_word_chn == '独家解读') or \
-                (self.key_word == 'djsj' and self.key_word_chn == '独家数据') or \
-                (self.key_word == 'egs' and self.key_word_chn == '快讯') or\
-                (self.key_word == 'yb' and self.key_word_chn == '研报') or \
-                (self.key_word == 'gsdt' and self.key_word_chn == '公司动态') or \
-                (self.key_word == 'gsxw' and self.key_word_chn == '公司新闻') or \
-                (self.key_word == 'sd' and self.key_word_chn == '深度'):
-            iter_url = self.base_url + self.key_word + sub_url[1:len(sub_url)]
-        elif self.key_word == 'jigou' or self.key_word_chn == '机构':
+        if (
+            (self.key_word == "djjd" and self.key_word_chn == "独家解读")
+            or (self.key_word == "djsj" and self.key_word_chn == "独家数据")
+            or (self.key_word == "egs" and self.key_word_chn == "快讯")
+            or (self.key_word == "yb" and self.key_word_chn == "研报")
+            or (self.key_word == "gsdt" and self.key_word_chn == "公司动态")
+            or (self.key_word == "gsxw" and self.key_word_chn == "公司新闻")
+            or (self.key_word == "sd" and self.key_word_chn == "深度")
+        ):
+            iter_url = self.base_url + self.key_word + sub_url[1: len(sub_url)]
+        elif self.key_word == "jigou" or self.key_word_chn == "机构":
             iter_url = sub_url
         else:
-            iter_url = ''
-            logging.warning("not coded")
+            iter_url = ""
+            self.logger.warning("not coded")
         return iter_url
 
     def start_requests(self):
-        start_url = getattr(self, 'start_url')
-        end_page = getattr(self, 'end_page')
-        logging.info(start_url)
+        start_url = getattr(self, "start_url")
+        end_page = getattr(self, "end_page")
+        self.logger.info(start_url)
         url_start = [start_url]
-        urls_plus = [start_url.replace(".html", "_{0}.html".format(xid)) for xid in range(1, end_page)]
+        urls_plus = [
+            start_url.replace(".html", "_{0}.html".format(xid))
+            for xid in range(1, end_page)
+        ]
         urls = url_start + urls_plus
         for url in urls:
             yield Request(url, callback=self.parse)
@@ -54,23 +52,31 @@ class StcnSpider(BaseSpider):
         bs = BeautifulSoup(response.text, "lxml")
 
         # 深度新闻，特殊逻辑
-        if self.key_word == 'sd':
+        if self.key_word == "sd":
             ul_meta = bs.find_all("ul", class_="news_list")
 
             for li in ul_meta[0].find_all("li"):
                 _date_news = li.find_all("p", class_="sj")[0]
                 _time_news = li.find_all("span")[0]
                 _a = _time_news = li.find_all("a")[0]
-                title = _a['title']
+                title = _a["title"]
                 sub_url = _a["href"]
                 _sub_title = (li.find_all("p", class_="exp")[0]).text
-                logging.info("sub url is {0} title is {1}, sub title {2}".format(sub_url, title, _sub_title))
+                self.logger.info(
+                    "sub url is {0} title is {1}, sub title {2}".format(
+                        sub_url, title, _sub_title
+                    )
+                )
                 iter_url = self.__inner_get_sub_url(sub_url)
-                yield Request(iter_url,
-                              callback=self.parse_further_information,
-                              dont_filter=True,
-                              meta={'date_time': '{0} {1}'.format(_date_news.text, _time_news.text),
-                                    'title': title + _sub_title})
+                yield Request(
+                    iter_url,
+                    callback=self.parse_further_information,
+                    dont_filter=True,
+                    meta={
+                        "date_time": "{0} {1}".format(_date_news.text, _time_news.text),
+                        "title": title + _sub_title,
+                    },
+                )
 
         else:
             ul_list = bs.find_all("ul")
@@ -83,15 +89,22 @@ class StcnSpider(BaseSpider):
                         for a in li.find_all("a"):
                             if a.get("title") is not None:
                                 sub_url = a["href"]
-                                title = a['title']
-                                logging.info("sub url is {0} title is {1}".format(sub_url, title))
+                                title = a["title"]
+                                self.logger.info(
+                                    "sub url is {0} title is {1}".format(sub_url, title)
+                                )
                                 iter_url = self.__inner_get_sub_url(sub_url)
-                                yield Request(iter_url,
-                                              callback=self.parse_further_information,
-                                              dont_filter=True,
-                                              meta={'date_time':
-                                                    date.text.strip().replace('\n', '').replace('\t\t\t\t', ' '),
-                                                    'title': title})
+                                yield Request(
+                                    iter_url,
+                                    callback=self.parse_further_information,
+                                    dont_filter=True,
+                                    meta={
+                                        "date_time": date.text.strip()
+                                        .replace("\n", "")
+                                        .replace("\t\t\t\t", " "),
+                                        "title": title,
+                                    },
+                                )
         pass
 
     def parse_further_information(self, response):
@@ -99,4 +112,5 @@ class StcnSpider(BaseSpider):
         paragraphs = bs.find_all("div", class_="txt_con")
 
         yield self.from_paragraphs_to_item(paragraphs, response)
+
     pass

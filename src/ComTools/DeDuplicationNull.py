@@ -2,7 +2,6 @@
 # remind install clang on mac with cmd, xcode-select --install
 from Utils.database import Database
 from Utils import utils
-from Utils import config
 import logging
 
 logging.basicConfig(
@@ -32,7 +31,7 @@ class Deduplication(object):
             min(date_list).split(" ")[0],
             max(date_list).split(" ")[0],
         )
-        logging.info('remove duplication, {0} {1}'.format(start_date, end_date))
+        logging.info("remove duplication, {0} {1}".format(start_date, end_date))
         for _date in utils.get_date_list_from_range(start_date, end_date):
             # 获取特定时间对应的数据并根据URL去重
             # logging.info(_date)
@@ -61,8 +60,27 @@ class Deduplication(object):
         )
 
 
-if __name__ == "__main__":
+class DeNull(object):
+    def __init__(self, database_name, collection_name):
+        self.database = Database()
+        self.database_name = database_name
+        self.collection_name = collection_name
+        self.delete_num = 0
 
-    Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_CNSTOCK).run()
-    Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_NBD).run()
-    Deduplication(config.DATABASE_NAME, config.COLLECTION_NAME_JRJ).run()
+    def run(self):
+        collection = self.database.get_collection(
+            self.database_name, self.collection_name
+        )
+        for row in self.database.get_collection(
+            self.database_name, self.collection_name
+        ).find():
+            for _key in list(row.keys()):
+                if _key != "RelatedStockCodes" and row[_key] == "":
+                    collection.delete_one({"_id": row["_id"]})
+                    self.delete_num += 1
+                    break
+        logging.info(
+            "there are {} news contained NULL value in {} collection ... ".format(
+                self.delete_num, self.collection_name
+            )
+        )

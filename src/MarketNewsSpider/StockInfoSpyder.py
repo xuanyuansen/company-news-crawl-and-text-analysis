@@ -3,127 +3,122 @@
 """
 https://www.akshare.xyz/zh_CN/latest/
 """
-import redis
-import logging
+# import redis
 import datetime
+import time
+
+from ComTools.JointQuantTool import JointQuantTool
 from MarketNewsSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config
 import akshare as ak
-import tushare as ts
-
-ts.set_token(config.TUSHARE_TOKEN)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-    datefmt="%a, %d %b %Y %H:%M:%S",
-)
+from Utils.database import Database
+import hashlib
 
 
 class StockInfoSpyder(Spyder):
     def __init__(self, database_name, collection_name):
-        super().__init__(database_name, collection_name)
-        # self.db_obj = Database()
-        self.col_basic_info = self.db_obj.get_collection(database_name, collection_name)
+        super().__init__()
+        self.db_obj = Database()
         self.database_name = database_name
         self.collection_name = collection_name
-        self.start_program_date = datetime.datetime.now().strftime("%Y%m%d")
-        self.redis_client = redis.StrictRedis(
-            host="localhost",
-            port=6379,
-            db=config.REDIS_CLIENT_FOR_CACHING_STOCK_INFO_DB_ID,
-        )
-        self.redis_client.set(
-            "today_date", datetime.datetime.now().strftime("%Y-%m-%d")
-        )
+        self.col_basic_info = self.db_obj.get_collection(database_name, collection_name)
+        self.joint_quant_tool = JointQuantTool()
 
-    def get_stock_code_info(self):
-        # TODO:每半年需要更新一次
-        stock_info_df = ak.stock_info_a_code_name()  # 获取所有A股code和name
-        print("stock_info_df")
-        print(stock_info_df[0:100])
-        stock_symbol_code = ak.stock_zh_a_spot()[['代码', '名称']]
-        # 获取A股所有股票的symbol和code
-        print("stock_symbol_code")
-        print(stock_symbol_code[0:100])
-        for _id in range(stock_symbol_code.shape[0]):
-            _symbol = stock_symbol_code.iloc[_id, 0]
-            print(_symbol)
-            _symbol_sub = _symbol[2:]
-            print(_symbol_sub)
-            info = stock_info_df[stock_info_df['code'] == _symbol_sub]
-            _dict = {'symbol': _symbol}
-            print(info.index.values)
-            try:
-                _dict.update(stock_info_df.iloc[int(info.index.values[0]), :].to_dict())
-                self.col_basic_info.insert_one(_dict)
-            except Exception as e:
-                print(e.__traceback__)
-                print(info)
-            finally:
-                print('skip')
+    def get_all_stock_code_info(self):
+        data = self.joint_quant_tool.get_all_stock()
 
-    def get_historical_news(self, start_date=None, end_date=None, freq="day"):
+        for index, row in data.iterrows():
+            str_md5 = hashlib.md5(
+                ("{0} {1}".format(row["name"], index)).encode(encoding="utf-8")
+            ).hexdigest()
+
+            if self.col_basic_info.find_one({"_id": str_md5}) is not None:
+                self.logger.info("id already exist {0} {1}".format(str_md5, index))
+                continue
+
+            stock_code = str(index).split(".")[0]
+            symbol = (
+                "sh{0}".format(stock_code)
+                if int(stock_code) >= 600000
+                else "sz{0}".format(stock_code)
+            )
+            _data = {
+                "_id": str_md5,
+                "symbol": symbol,
+                "name": row["display_name"],
+                "code": stock_code,
+                "start_date": row["start_date"],
+                "end_date": row["end_date"],
+                "name_suo_xie": row["name"],
+                "joint_quant_code": index,
+            }
+
+            self.col_basic_info.insert_one(_data)
+        return True
+
+    def get_historical_price(self, start_date=None, end_date=None, freq="day"):
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y%m%d")
         stock_symbol_list = self.col_basic_info.distinct("symbol")
         if len(stock_symbol_list) == 0:
-            self.get_stock_code_info()
+            self.get_all_stock_code_info()
             stock_symbol_list = self.col_basic_info.distinct("symbol")
         if freq == "day":
-            start_stock_code = (
-                0
-                if self.redis_client.get("start_stock_code") is None
-                else int(self.redis_client.get("start_stock_code").decode())
-            )
             for symbol in stock_symbol_list:
-                if int(symbol[2:]) > start_stock_code:
-                    if start_date is None:
-                        # 如果该symbol有历史数据，如果有则从API获取从数据库中最近的时间开始直到现在的所有价格数据
-                        # 如果该symbol无历史数据，则从API获取从2015年1月1日开始直到现在的所有价格数据
-                        _latest_date = self.redis_client.get(symbol)
-                        if _latest_date is None:
-                            symbol_start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
-                        else:
-                            tmp_date_dt = datetime.datetime.strptime(
-                                _latest_date.decode(), "%Y-%m-%d"
-                            ).date()
-                            offset = datetime.timedelta(days=1)
-                            symbol_start_date = (tmp_date_dt + offset).strftime(
-                                "%Y%m%d"
-                            )
-
-                    if symbol_start_date < end_date:
+                time.sleep(2)
+                if start_date is None:
+                    # 如果该symbol有历史数据，如果有则从API获取从数据库中最近的时间开始直到现在的所有价格数据
+                    # 如果该symbol无历史数据，则从API获取从2015年1月1日开始直到现在的所有价格数据
+                    start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
+                try:
+                    if end_date is None:
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
                             symbol=symbol,
-                            start_date=symbol_start_date,
+                            start_date=start_date,
+                            # end_date=end_date,
+                            adjust="qfq",
+                        )
+                    else:
+                        stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
+                            symbol=symbol,
+                            start_date=start_date,
                             end_date=end_date,
                             adjust="qfq",
                         )
-                        stock_zh_a_daily_hfq_df.insert(
-                            0, "date", stock_zh_a_daily_hfq_df.index.tolist()
-                        )
-                        stock_zh_a_daily_hfq_df.index = range(
-                            len(stock_zh_a_daily_hfq_df)
-                        )
-                        _col = self.db_obj.get_collection(self.database_name, symbol)
-                        for _id in range(stock_zh_a_daily_hfq_df.shape[0]):
-                            _tmp_dict = stock_zh_a_daily_hfq_df.iloc[_id].to_dict()
-                            _tmp_dict.pop("outstanding_share")
-                            _tmp_dict.pop("turnover")
-                            _col.insert_one(_tmp_dict)
-                            self.redis_client.set(
-                                symbol, str(_tmp_dict["date"]).split(" ")[0]
-                            )
+                except Exception as e:
+                    self.logger.error("trace {0}, symbol {1}".format(e, symbol))
+                    continue
 
-                        logging.info(
-                            "{} finished saving from {} to {} ... ".format(
-                                symbol, symbol_start_date, end_date
-                            )
+                # print(symbol)
+                # print(stock_zh_a_daily_hfq_df)
+                stock_zh_a_daily_hfq_df.index = range(len(stock_zh_a_daily_hfq_df))
+                _col = self.db_obj.get_collection(self.database_name, symbol)
+                for _idx in range(stock_zh_a_daily_hfq_df.shape[0]):
+                    _tmp_dict = stock_zh_a_daily_hfq_df.iloc[_idx].to_dict()
+                    id_md5 = hashlib.md5(
+                        ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(
+                            encoding="utf-8"
                         )
-                self.redis_client.set("start_stock_code", int(symbol[2:]))
-            self.redis_client.set("start_stock_code", 0)
+                    ).hexdigest()
+                    if _col.find_one({"_id": id_md5}) is not None:
+                        self.logger.info(
+                            "id already exist {0} {1}".format(id_md5, _tmp_dict)
+                        )
+                        continue
+                    _tmp_dict["_id"] = id_md5
+                    # _tmp_dict.pop("turnover")
+                    _col.insert_one(_tmp_dict)
+
+                self.logger.info(
+                    "{} finished saving from {} to {} ... {}".format(
+                        symbol,
+                        start_date,
+                        end_date,
+                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1 :],
+                    )
+                )
+
         elif freq == "week":
             pass
         elif freq == "month":
@@ -137,61 +132,39 @@ class StockInfoSpyder(Spyder):
         elif freq == "60mins":
             pass
 
-    def get_realtime_news(self, freq="day"):
-        while True:
-            if_updated = input(
-                "Has the stock price dataset been updated today? (Y/N) \n"
-            )
-            if if_updated == "Y":
-                self.redis_client.set("is_today_updated", "1")
-                break
-            elif if_updated == "N":
-                self.redis_client.set("is_today_updated", "")
-                break
-        self.get_historical_news()  # 对所有股票补充数据到最新
-        while True:
-            if freq == "day":
-                time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                if (
-                    time_now.split(" ")[0]
-                    != self.redis_client.get("today_date").decode()
-                ):
-                    self.redis_client.set("today_date", time_now.split(" ")[0])
-                    self.redis_client.set(
-                        "is_today_updated", ""
-                    )  # 过了凌晨，该参数设置回空值，表示今天未进行数据更新
-                if not bool(self.redis_client.get("is_today_updated").decode()):
-                    update_time = "{} {}".format(time_now.split(" ")[0], "15:30:00")
-                    if time_now >= update_time:
-                        stock_zh_a_spot_df = ak.stock_zh_a_spot()  # 当天的日数据行情下载
-                        for _id, sym in enumerate(stock_zh_a_spot_df["symbol"]):
-                            _col = self.db_obj.get_collection(self.database_name, sym)
-                            _tmp_dict = {}
-                            _tmp_dict.update(
-                                {
-                                    "date": Timestamp(
-                                        "{} 00:00:00".format(time_now.split(" ")[0])
-                                    )
-                                }
-                            )
-                            _tmp_dict.update(
-                                {"open": stock_zh_a_spot_df.iloc[_id].open}
-                            )
-                            _tmp_dict.update(
-                                {"high": stock_zh_a_spot_df.iloc[_id].high}
-                            )
-                            _tmp_dict.update({"low": stock_zh_a_spot_df.iloc[_id].low})
-                            _tmp_dict.update(
-                                {"close": stock_zh_a_spot_df.iloc[_id].trade}
-                            )
-                            _tmp_dict.update(
-                                {"volume": stock_zh_a_spot_df.iloc[_id].volume}
-                            )
-                            _col.insert_one(_tmp_dict)
-                            self.redis_client.set(sym, time_now.split(" ")[0])
-                            logging.info(
-                                "finished updating {} price data of {} ... ".format(
-                                    sym, time_now.split(" ")[0]
-                                )
-                            )
-                        self.redis_client.set("is_today_updated", "1")
+    def get_today_price(self, freq="day"):
+        if freq == "day":
+            time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            stock_zh_a_spot_df = ak.stock_zh_a_spot()  # 当天的日数据行情下载
+            for _id, symbol in enumerate(stock_zh_a_spot_df["symbol"]):
+                _col = self.db_obj.get_collection(self.database_name, symbol)
+                _tmp_dict = {}
+                _tmp_dict.update(
+                    {"date": Timestamp("{} 00:00:00".format(time_now.split(" ")[0]))}
+                )
+                id_md5 = hashlib.md5(
+                    ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(
+                        encoding="utf-8"
+                    )
+                ).hexdigest()
+                _tmp_dict["_id"] = id_md5
+                _tmp_dict.update({"open": stock_zh_a_spot_df.iloc[_id].open})
+                _tmp_dict.update({"high": stock_zh_a_spot_df.iloc[_id].high})
+                _tmp_dict.update({"low": stock_zh_a_spot_df.iloc[_id].low})
+                _tmp_dict.update({"close": stock_zh_a_spot_df.iloc[_id].trade})
+                _tmp_dict.update({"volume": stock_zh_a_spot_df.iloc[_id].volume})
+                _tmp_dict.update(
+                    {
+                        "outstanding_share": stock_zh_a_spot_df.iloc[
+                            _id
+                        ].outstanding_share
+                    }
+                )
+                _tmp_dict.update({"turnover": stock_zh_a_spot_df.iloc[_id].turnover})
+                _col.insert_one(_tmp_dict)
+
+                self.logger.info(
+                    "finished updating {} price data of {} ... ".format(
+                        symbol, time_now.split(" ")[0]
+                    )
+                )
