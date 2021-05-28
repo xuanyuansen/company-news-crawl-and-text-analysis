@@ -328,7 +328,7 @@ SHANG_HAI_STOCK_COMPANY_NEWS = dict(
         "key_word": "stock_company_news",
         "key_word_chn": "公司聚集",
         "base_url": "https://company.cnstock.com/",
-        "end_page": 30,
+        "end_page": 100,
     }
 )
 SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS = dict(
@@ -338,7 +338,7 @@ SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS = dict(
         "key_word": "stock_announcement_news",
         "key_word_chn": "公告解读",
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 30,
+        "end_page": 100,
     }
 )
 SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS = dict(
@@ -348,7 +348,7 @@ SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS = dict(
         "key_word": "stock_kuai_xun_news",
         "key_word_chn": "公告快讯",
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 30,
+        "end_page": 100,
     }
 )
 SHANG_HAI_STOCK_COMPANY_GOOD_NEWS = dict(
@@ -358,7 +358,7 @@ SHANG_HAI_STOCK_COMPANY_GOOD_NEWS = dict(
         "key_word": "stock_good_news",
         "key_word_chn": "利好公告",
         "base_url": "https://ggjd.cnstock.com/",
-        "end_page": 30,
+        "end_page": 100,
     }
 )
 SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
@@ -368,7 +368,7 @@ SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
         "key_word": "stock_industry_news",
         "key_word_chn": "产业聚焦",
         "base_url": "https://news.cnstock.com/",
-        "end_page": 30,
+        "end_page": 100,
     }
 )
 ZHONG_JIN_STOCK_NEWS_DB = 'zhong_jin_stock_news_db'

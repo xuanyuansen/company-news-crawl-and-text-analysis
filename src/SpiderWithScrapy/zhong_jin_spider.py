@@ -27,12 +27,12 @@ class ZhongJinStockSpider(BaseSpider):
         btn_more_text = ""
         driver.get(start_url)
         page_cnt = 0
-        while btn_more_text != "没有更多" and page_cnt < self.end_page:
+        while btn_more_text != "无更多文章" and page_cnt < self.end_page:
             page_cnt += 1
 
             time.sleep(random.random() + 1)
             more_btn = driver.find_element_by_xpath("//a[contains(@class, 'loadMore')]")
-            # more_btn = btn_more_list[0]
+            btn_more_text = more_btn.text
             logging.info("1-{} \n{} \n{} \n page cnt {}".format(more_btn, more_btn.text, type(more_btn), page_cnt))
             if more_btn.text == '正在加载':
                 driver.execute_script("arguments[0].focus();", more_btn)
