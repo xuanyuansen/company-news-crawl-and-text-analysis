@@ -23,7 +23,6 @@ COLLECTION_NAME_CNSTOCK = "cnstock"
 COLLECTION_NAME_JRJ = "jrj"
 COLLECTION_NAME_NBD = "nbd"
 
-
 STOCK_PRICE_REQUEST_DEFAULT_DATE = "20150101"
 
 TOPIC_NUMBER = 200
@@ -39,12 +38,10 @@ RDFOREST_TUNED_PARAMTERS = {
 }
 CLASSIFIER_SCORE_LIST = ["f1_weighted"]
 
-
 CACHE_NEWS_REDIS_DB_ID = 0
 CACHE_NEWS_LIST_NAME = "cache_news_waiting_for_classification"
 
 MINIMUM_STOCK_NEWS_NUM_FOR_ML = 1000
-
 
 # 机器学习
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
@@ -323,7 +320,6 @@ EAST_MONEY_BUSINESS_NEWS = dict(
     }
 )
 
-
 SHANG_HAI_STOCK_NEWS_DB = "shanghai_cn_stock_news"
 SHANG_HAI_STOCK_COMPANY_NEWS = dict(
     {
@@ -379,10 +375,70 @@ ZHONG_JIN_STOCK_NEWS_DB = 'zhong_jin_stock_news_db'
 ZHONG_JIN_STOCK_NEWS = dict(
     {
         "name": "zhong_jin_stock_news_spider",
-        "start_url": "http://stock.cnfol.com/",
+        "start_url": "http://sc.stock.cnfol.com/ggzixun/",
         "key_word": "stock_news",
-        "key_word_chn": "A股",
-        "base_url": "http://stock.cnfol.com/",
-        "end_page": 100,
+        "key_word_chn": "个股资讯",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_MARKET_ANALYZE_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_market_analyze_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/shichangceping/",
+        "key_word": "stock_market_analyze_news",
+        "key_word_chn": "市场测评",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_BAN_KUAI_SECTION_ANALYZE_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_ban_kuai_section_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/bkjujiao/",
+        "key_word": "stock_ban_kuai_section_news",
+        "key_word_chn": "板块聚焦",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_CHUANG_YE_BAN_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_chuang_ye_ban_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/cybzixun/",
+        "key_word": "stock_ban_kuai_section_news",
+        "key_word_chn": "创业板资讯",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_MARKET_SEEK_GOLD_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_market_seek_gold_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/shichangjuejin/",
+        "key_word": "stock_market_seek_gold_news",
+        "key_word_chn": "市场掘金",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_MARKET_VERY_IMPORTANT_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_market_very_important_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/gushiyaowen/",
+        "key_word": "stock_market_very_important_news",
+        "key_word_chn": "股市要闻",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
+    }
+)
+ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS = dict(
+    {
+        "name": "zhong_jin_stock_market_main_force_trend_news_spider",
+        "start_url": "http://sc.stock.cnfol.com/zldongxiang/",
+        "key_word": "stock_market_main_force_trend_news",
+        "key_word_chn": "主力动向",
+        "base_url": "http://sc.stock.cnfol.com/",
+        "end_page": 3,
     }
 )

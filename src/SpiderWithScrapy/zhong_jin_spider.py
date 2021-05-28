@@ -29,37 +29,33 @@ class ZhongJinStockSpider(BaseSpider):
         page_cnt = 0
         while btn_more_text != "没有更多" and page_cnt < self.end_page:
             page_cnt += 1
-            btn_more_list = driver.find_elements_by_xpath("//div[contains(@class, 'Mt25 Tc')]")
-            more_btn = btn_more_list[0]
-            logging.info("1-{} {} {}".format(more_btn, more_btn.text, more_btn.tag_name))
-            btn_more_text = more_btn.text
-            if btn_more_text == "加载更多":
-                more_btn.click()
+
+            time.sleep(random.random() + 1)
+            more_btn = driver.find_element_by_xpath("//a[contains(@class, 'loadMore')]")
+            # more_btn = btn_more_list[0]
+            logging.info("1-{} \n{} \n{} \n page cnt {}".format(more_btn, more_btn.text, type(more_btn), page_cnt))
+            if more_btn.text == '正在加载':
+                driver.execute_script("arguments[0].focus();", more_btn)
+                target_elem = driver.find_element_by_xpath("//a[contains(@class, 'backBtn')]")
+                driver.execute_script("arguments[0].focus();", target_elem)
+                # more_btn.click()
                 time.sleep(random.random() + 1)  # sleep random time less 1s
-            else:
-                logging.info("2-{}".format(btn_more_text))
-                time.sleep(random.random() + 2)
-                more_btn_list = driver.find_elements_by_xpath("//div[contains(@class, 'Mt25 Tc')]")
-                btn_more_text = more_btn_list[0].text
-                logging.info("1-{}".format(btn_more_text))
-                if btn_more_text == "加载更多":
-                    more_btn.click()
 
         bs = BeautifulSoup(driver.page_source, "html.parser")
 
-        div_list = bs.find_all("div", attrs={"id": ["artList"]})
+        div_list = bs.find_all("ul", class_="TList")
         logging.info(
             "start parse, bs list len is {0} {1} {2}".format(type(div_list[0]), len(div_list), type(div_list))
         )
-        for li in div_list[0].find_all("div", class_='artBlock'):
-            a = li.find_all("a", class_="h3")[0]
+        for li in div_list[0].find_all("li"):
+            a = li.find_all("a")[0]
             # desc = li.find_all("p", class_="des")[0]
             # logging.info('a {0}, desc {1}'.format(a, desc))
             if a.get("href") is not None:
                 sub_url = a["href"]
                 _title = str(a.text).strip()
-                _time = li.find_all("span", class_="artTime")[0]
-                _time = str(_time.text).replace('\n', '').strip()
+                _time = li.find_all("span")[0]
+                _time = str(_time.text).replace('(', '').replace(')', '').strip()
                 logging.info('sub url {0} sub title {1} \n time {2}'.format(sub_url, _title, _time))
                 yield Request(
                     sub_url,

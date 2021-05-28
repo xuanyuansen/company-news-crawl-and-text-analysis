@@ -94,11 +94,14 @@ def add_shang_hai_stock_spider(process: CrawlerProcess):
 
 
 def add_zhong_jin_stock_spider(process: CrawlerProcess):
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS)
-    # process.crawl(ShanghaiStockSpider, **config.SHANG_HAI_STOCK_COMPANY_GOOD_NEWS)
     process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_MARKET_ANALYZE_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_BAN_KUAI_SECTION_ANALYZE_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_CHUANG_YE_BAN_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_MARKET_SEEK_GOLD_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_MARKET_VERY_IMPORTANT_NEWS)
+    process.crawl(ZhongJinStockSpider, **config.ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS)
+
     pass
 
 
