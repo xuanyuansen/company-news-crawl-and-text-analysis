@@ -33,10 +33,16 @@ class ZhongJinStockSpider(BaseSpider):
             time.sleep(random.random() + 1)
             more_btn = driver.find_element_by_xpath("//a[contains(@class, 'loadMore')]")
             btn_more_text = more_btn.text
-            logging.info("1-{} \n{} \n{} \n page cnt {}".format(more_btn, more_btn.text, type(more_btn), page_cnt))
-            if more_btn.text == '正在加载':
+            logging.info(
+                "1-{} \n{} \n{} \n page cnt {}".format(
+                    more_btn, more_btn.text, type(more_btn), page_cnt
+                )
+            )
+            if more_btn.text == "正在加载":
                 driver.execute_script("arguments[0].focus();", more_btn)
-                target_elem = driver.find_element_by_xpath("//a[contains(@class, 'backBtn')]")
+                target_elem = driver.find_element_by_xpath(
+                    "//a[contains(@class, 'backBtn')]"
+                )
                 driver.execute_script("arguments[0].focus();", target_elem)
                 # more_btn.click()
                 time.sleep(random.random() + 1)  # sleep random time less 1s
@@ -45,7 +51,9 @@ class ZhongJinStockSpider(BaseSpider):
 
         div_list = bs.find_all("ul", class_="TList")
         logging.info(
-            "start parse, bs list len is {0} {1} {2}".format(type(div_list[0]), len(div_list), type(div_list))
+            "start parse, bs list len is {0} {1} {2}".format(
+                type(div_list[0]), len(div_list), type(div_list)
+            )
         )
         for li in div_list[0].find_all("li"):
             a = li.find_all("a")[0]
@@ -55,8 +63,12 @@ class ZhongJinStockSpider(BaseSpider):
                 sub_url = a["href"]
                 _title = str(a.text).strip()
                 _time = li.find_all("span")[0]
-                _time = str(_time.text).replace('(', '').replace(')', '').strip()
-                logging.info('sub url {0} sub title {1} \n time {2}'.format(sub_url, _title, _time))
+                _time = str(_time.text).replace("(", "").replace(")", "").strip()
+                logging.info(
+                    "sub url {0} sub title {1} \n time {2}".format(
+                        sub_url, _title, _time
+                    )
+                )
                 yield Request(
                     sub_url,
                     callback=self.parse,
@@ -70,4 +82,3 @@ class ZhongJinStockSpider(BaseSpider):
 
         yield self.from_paragraphs_to_item(content, response)
         pass
-

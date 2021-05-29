@@ -47,7 +47,9 @@ class NetEaseSpider(BaseSpider):
                     span = li.find_all("span", class_="time")
                     # logging.info('span is {} {} {}'.format(span, len(span), span[0]))
                     _date_time = str(span[0].text).strip()
-                    self.logger.info("sub url is {0} title is {1}".format(sub_url, title))
+                    self.logger.info(
+                        "sub url is {0} title is {1}".format(sub_url, title)
+                    )
                     yield Request(
                         sub_url,
                         callback=self.parse_further_information,

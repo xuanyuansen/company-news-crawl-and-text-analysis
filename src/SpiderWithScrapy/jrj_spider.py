@@ -41,7 +41,9 @@ class JrjSpider(BaseSpider):
                     sub_url = a["href"]
                     title = a["title"]
                     date = li.find_all("span")[0]
-                    self.logger.info("sub url is {0} title is {1}".format(sub_url, title))
+                    self.logger.info(
+                        "sub url is {0} title is {1}".format(sub_url, title)
+                    )
                     yield Request(
                         sub_url,
                         callback=self.parse_further_information,
