@@ -72,7 +72,10 @@ class ZhongJinStockSpider(BaseSpider):
                 yield Request(
                     sub_url,
                     callback=self.parse,
-                    meta={"title": "{0}".format(_title), "date_time": _time},
+                    meta={
+                        "title": "{0}".format(_title),
+                        "date_time": "{0}-{1}".format(self.year_now, _time),
+                    },
                 )
         pass
 

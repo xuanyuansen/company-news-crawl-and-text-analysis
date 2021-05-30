@@ -46,7 +46,9 @@ class EastMoneySpider(BaseSpider):
                         title = str(a.text).strip()
                         # span = li.find_all("span")
                         # logging.info('span is {} {} {}'.format(span, len(span), span[0]))
-                        _date_time = str(_time.text).strip()
+                        _date_time = (
+                            str(_time.text).strip().replace("月", "").replace("日", "")
+                        )
                         self.logger.info(
                             "sub url is {0} title is {1}".format(sub_url, title)
                         )
@@ -54,8 +56,13 @@ class EastMoneySpider(BaseSpider):
                             sub_url,
                             callback=self.parse_further_information,
                             dont_filter=True,
-                            meta={"date_time": _date_time, "title": title},
-                        )
+                            meta={
+                                "date_time": "{0}-{1}".format(
+                                    self.year_now, _date_time
+                                ),
+                                "title": title,
+                            },
+                        ),
         pass
 
     def parse_further_information(self, response):

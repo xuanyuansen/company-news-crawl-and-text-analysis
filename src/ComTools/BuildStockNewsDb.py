@@ -7,18 +7,34 @@ import datetime
 from NlpModel.information_extract import InformationExtract
 from Utils import config, utils
 from NlpModel.tokenization import Tokenization
+import logging
+
+logger = logging.getLogger()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+    datefmt="%a, %d %b %Y %H:%M:%S",
+)
 
 
 class GenStockNewsDB(object):
-    def __init__(self, force_train_model: bool = False):
+    def __init__(
+        self,
+        force_update_model: bool = False,
+        force_update_score_using_model: bool = False,
+        generate_report: bool = False,
+    ):
         self.logger = utils.get_logger()
-        self.information_extractor = InformationExtract()
+        self.information_extractor = InformationExtract(force_update_model)
         self.information_extractor.build_2_class_classify_model()
         self.database = self.information_extractor.db_obj
         self.name_code_df = self.database.get_data(
             config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
         )
+        self.force_update_score_using_model = force_update_score_using_model
         self.col_names = []
+        self.generate_report = generate_report
+        self.latest_news_report = dict()
         self.redis_client = redis.StrictRedis(
             host=config.REDIS_IP,
             port=config.REDIS_PORT,
@@ -31,6 +47,9 @@ class GenStockNewsDB(object):
             "stock_news_num_over_{}".format(config.MINIMUM_STOCK_NEWS_NUM_FOR_ML)
         )
         self.__stock_news_nums_stat()
+
+    def get_report(self, db_name, col_name):
+        return self.latest_news_report.get("{}_{}".format(db_name, col_name))
 
     def get_current_all_stock(self):
         self.col_names = self.database.connect_database(
@@ -60,14 +79,6 @@ class GenStockNewsDB(object):
             ("{0} {1}".format(row["Date"], row["Url"])).encode(encoding="utf-8")
         ).hexdigest()
 
-        _id_list = _collection.find_one({"_id": _id_md5})
-
-        if _id_list is not None:
-            # self.logger.warning("{0} news already in db {1},
-            # res is {2}, skip".format(row["Url"], stock_code, url_list))
-            return False, 1, dict()
-        # no judge
-        # _judge = self.information_extractor.predict_score(row["Title"] + row["Article"])
         if is_redis:
             _data = {
                 "_id": _id_md5,
@@ -98,8 +109,21 @@ class GenStockNewsDB(object):
                 "Label": row["Label"],
                 "Score": row["Score"],
             }
-        _collection.insert_one(_data)
-        return True, 0, _data
+        if self.force_update_score_using_model:
+            _judge = self.information_extractor.predict_score(
+                row["Title"] + row["Article"]
+            )
+            _data = dict(_data, **dict({"NewLabel": _judge[0], "NewScore": _judge[1]}))
+
+        _id_list = _collection.find_one({"_id": _id_md5})
+
+        if _id_list is not None:
+            # self.logger.warning("{0} news already in db {1},
+            # res is {2}, skip".format(row["Url"], stock_code, url_list))
+            return False, 1, _data
+        else:
+            _collection.insert_one(_data)
+            return True, 0, _data
 
     def get_all_news_about_specific_stock(
         self, database_name, collection_name, start_date=None
@@ -131,33 +155,47 @@ class GenStockNewsDB(object):
             data_to_process = self.database.get_collection(
                 database_name, collection_name
             ).find()
-        for row in data_to_process:
-            # logging.info(row)
-            # 先去遍历原始数据
-            if row["RelatedStockCodes"] == "{}":
-                self.logger.warning(
-                    "{0} no related code in {1}".format(
-                        row["RelatedStockCodes"], row["Url"]
+        find_news_cnt = 0
+        try:
+            for row in data_to_process:
+                find_news_cnt += 1
+                # logging.info(row)
+                # 先去遍历原始数据
+                if row["RelatedStockCodes"] == "{}":
+                    self.logger.warning(
+                        "{0} no related code in {1}".format(
+                            row["RelatedStockCodes"], row["Url"]
+                        )
                     )
-                )
-                continue
+                    continue
 
-            for name, stock_code in json.loads(row["RelatedStockCodes"]).items():
-                # 将新闻分别送进相关股票数据库
+                for name, stock_code in json.loads(row["RelatedStockCodes"]).items():
+                    # 将新闻分别送进相关股票数据库
+                    res = self.__insert_data_to_db(
+                        database_name, collection_name, row, stock_code, name
+                    )
+                    if self.generate_report:
+                        _key = "{}_{}".format(database_name, collection_name)
+                        if self.latest_news_report.get(_key) is None:
+                            _value = [res[2]]
+                            self.latest_news_report[_key] = _value
+                        else:
+                            self.latest_news_report[_key] = self.latest_news_report.get(
+                                _key
+                            ).append(res[2])
+                    if res[0]:
+                        _tmp_num_stat += 1
+                    else:
+                        already_in_news_cnt += res[1]
 
-                res = self.__insert_data_to_db(
-                    database_name, collection_name, row, stock_code, name
-                )
-                if res[0]:
-                    _tmp_num_stat += 1
-                else:
-                    already_in_news_cnt += res[1]
-
-                self.logger.info("current stock code {0} {1}".format(stock_code, res))
-
+                    self.logger.info(
+                        "current stock code {0} {1}".format(stock_code, res)
+                    )
+        except Exception as e:
+            logger.error(e)
         self.logger.info(
-            "there are {0} news mentioned in {1} collection insert ... already_in_news_cnt {2}".format(
-                _tmp_num_stat, collection_name, already_in_news_cnt
+            "find news cnt is: {3}, there are {0} news mentioned in {1} collection insert ... already_in_news_cnt {2}".format(
+                _tmp_num_stat, collection_name, already_in_news_cnt, find_news_cnt
             )
         )
 

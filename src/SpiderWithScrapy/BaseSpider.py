@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
+from datetime import datetime
 
 from ComTools.BuildStockNewsDb import GenStockNewsDB
 from scrapy import Spider
@@ -16,10 +17,11 @@ class BaseSpider(Spider):
         self.key_word = key_word
         self.key_word_chn = key_word_chn
         self.base_url = base_url
-        self.GenStockNewsDB = GenStockNewsDB(force_train_model=False)
+        self.GenStockNewsDB = GenStockNewsDB()
         self.name_code_dict = dict(
             (self.GenStockNewsDB.name_code_df[["name", "code"]]).values
         )
+        self.year_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S").split("-")[0]
         self.logger.info("spider name is {}".format(self.name))
         super().__init__()
 

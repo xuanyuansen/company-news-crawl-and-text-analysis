@@ -10,18 +10,12 @@ MONGODB_IP = "localhost"
 MONGODB_PORT = 27017
 REDIS_IP = "localhost"
 REDIS_PORT = 6379
-THREAD_NUMS_FOR_SPYDER = 4
 
 CHROME_DRIVER = (
     "./info/chromedriver_mac" if os_type == "Darwin" else "./info/chromedriver"
 )
 # joint quant
 cipher_key = b"C8_ACDILYdQubRfNB7oUPWvFR1G1U7uhQRBVH_NGne8="
-
-DATABASE_NAME = "finnewshunter"
-COLLECTION_NAME_CNSTOCK = "cnstock"
-COLLECTION_NAME_JRJ = "jrj"
-COLLECTION_NAME_NBD = "nbd"
 
 STOCK_PRICE_REQUEST_DEFAULT_DATE = "20150101"
 
@@ -40,7 +34,6 @@ CLASSIFIER_SCORE_LIST = ["f1_weighted"]
 
 CACHE_NEWS_REDIS_DB_ID = 0
 CACHE_NEWS_LIST_NAME = "cache_news_waiting_for_classification"
-
 MINIMUM_STOCK_NEWS_NUM_FOR_ML = 1000
 
 # 机器学习
@@ -58,7 +51,6 @@ COLLECTION_NAME_STOCK_BASIC_INFO = "basic_info"
 ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE = "stock_specific_news"
 
 
-# JRJ
 STCN_NEWS_DB = "stcn"
 STCN_DJSJ = dict(
     {
@@ -67,6 +59,7 @@ STCN_DJSJ = dict(
         "key_word": "djsj",
         "key_word_chn": "独家数据",
         "base_url": "https://data.stcn.com/",
+        "end_page": 100,
     }
 )
 STCN_DJJD = dict(
@@ -76,6 +69,7 @@ STCN_DJJD = dict(
         "key_word": "djjd",
         "key_word_chn": "独家解读",
         "base_url": "https://stock.stcn.com/",
+        "end_page": 20,
     }
 )
 
@@ -86,6 +80,7 @@ STCN_JIGOU = dict(
         "key_word": "jigou",
         "key_word_chn": "机构",
         "base_url": "https://finance.stcn.com/",
+        "end_page": 20,
     }
 )
 # https://kuaixun.stcn.com/egs/index.html 股市
@@ -96,6 +91,7 @@ STCN_KX_EGS = dict(
         "key_word": "egs",
         "key_word_chn": "快讯",
         "base_url": "https://kuaixun.stcn.com/",
+        "end_page": 20,
     }
 )
 
@@ -106,6 +102,7 @@ STCN_KX_REPORT = dict(
         "key_word": "yb",
         "key_word_chn": "研报",
         "base_url": "https://kuaixun.stcn.com/",
+        "end_page": 20,
     }
 )
 
@@ -116,6 +113,7 @@ STCN_COMPANY_TRENDS = dict(
         "key_word": "gsdt",
         "key_word_chn": "公司动态",
         "base_url": "https://company.stcn.com/",
+        "end_page": 20,
     }
 )
 
@@ -126,6 +124,7 @@ STCN_COMPANY_NEWS = dict(
         "key_word": "gsxw",
         "key_word_chn": "公司新闻",
         "base_url": "https://company.stcn.com/",
+        "end_page": 20,
     }
 )
 
@@ -136,6 +135,7 @@ STCN_DEEP_NEWS = dict(
         "key_word": "sd",
         "key_word_chn": "深度",
         "base_url": "https://news.stcn.com/",
+        "end_page": 20,
     }
 )
 STCN_SPIDER_LIST = [
@@ -496,3 +496,17 @@ ZHONG_JIN_SPIDER_LIST = [
     ZHONG_JIN_STOCK_MARKET_VERY_IMPORTANT_NEWS,
     ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS,
 ]
+
+ALL_SPIDER_LIST_OF_DICT = dict(
+    {
+        EAST_MONEY_NEWS_DB: EAST_MONEY_SPIDER_LIST,
+        JRJ_NEWS_DB: JRJ_SPIDER_LIST,
+        NET_EASE_STOCK_NEWS_DB: NET_EASE_SPIDER_LIST,
+        STCN_NEWS_DB: STCN_SPIDER_LIST,
+        SHANG_HAI_STOCK_NEWS_DB: SHANG_HAI_SPIDER_LIST,
+        ZHONG_JIN_STOCK_NEWS_DB: ZHONG_JIN_SPIDER_LIST,
+        NBD_STOCK_NEWS_DB: NBD_SPIDER_LIST,
+    }
+)
+
+LATEST_DAY_OR_PAGE_SETTING = 3

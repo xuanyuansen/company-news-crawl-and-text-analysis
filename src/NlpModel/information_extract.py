@@ -26,30 +26,13 @@ logging.basicConfig(
 class InformationExtract(object):
     def __init__(self, force_train_model: bool = False):
         self.logger = utils.get_logger()
-        self.db_name = config.DATABASE_NAME
         self.db_obj = Database()
-        self.collections = [
-            config.COLLECTION_NAME_CNSTOCK,
-            config.COLLECTION_NAME_JRJ,
-            config.COLLECTION_NAME_NBD,
-        ]
         # 获得所有collection的列表
-        self.raw_spider_name_list_dict = dict(
-            {
-                config.EAST_MONEY_NEWS_DB: config.EAST_MONEY_SPIDER_LIST,
-                config.JRJ_NEWS_DB: config.JRJ_SPIDER_LIST,
-                config.NET_EASE_STOCK_NEWS_DB: config.NET_EASE_SPIDER_LIST,
-                config.STCN_NEWS_DB: config.STCN_SPIDER_LIST,
-                config.SHANG_HAI_STOCK_NEWS_DB: config.SHANG_HAI_SPIDER_LIST,
-                config.ZHONG_JIN_STOCK_NEWS_DB: config.ZHONG_JIN_SPIDER_LIST,
-                config.NBD_STOCK_NEWS_DB: config.NBD_SPIDER_LIST,
-            }
-        )
-
+        self.raw_spider_name_list_dict = config.ALL_SPIDER_LIST_OF_DICT
         self.all_collection_name_list_dict = dict()
         self.__from_raw_spider_name_list_dict_to_col_name()
-        self.vocabulary = None
-        self.df_of_train_data_set = None
+        self.__vocabulary = None
+        self.__df_of_train_data_set = None
         self.excel_name = "./info/word_seg_all.xlsx"
         self.label_excel = "./info/word_seg_all_with_label.xlsx"
         self.label = None
@@ -57,9 +40,9 @@ class InformationExtract(object):
         self.label_neg = dict()
         self.label_middle = dict()
         self.all_raw_data_dict_of_list = dict()
-        self.cn_stock_df = None
-        self.jrj_df = None
-        self.nbd_df = None
+        # self.cn_stock_df = None
+        # self.jrj_df = None
+        # self.nbd_df = None
         self.__load_seg_word_label()
         self.token = Tokenization(
             import_module=config.SEG_METHOD,
@@ -68,12 +51,25 @@ class InformationExtract(object):
         )
         self.bayes_model = None
         self.svm_model = None
-        self.vocabulary = None
+        self.__vocabulary = None
         self.count_vector_rise = None
         self.tfidf_transformer = TfidfTransformer()
         self.force_train = force_train_model
         if not self.force_train:
             self.__inner_load_model()
+
+    def get_vocabulary(self):
+        return self.__vocabulary
+
+    def get_train_data_set(self):
+        if self.__df_of_train_data_set is None:
+            self.__get_raw_data_from_db()
+            if self.get_train_data(["Title", "Article", "ClassifyLabel"]):
+                return self.__df_of_train_data_set
+            else:
+                raise Exception("get data wrong!!!")
+        else:
+            raise Exception("get data wrong!!!")
 
     def __from_raw_spider_name_list_dict_to_col_name(self):
         for k_db, v_col_list in self.raw_spider_name_list_dict.items():
@@ -238,23 +234,27 @@ class InformationExtract(object):
         else:
             return "利好", 0.5 * good_score
 
-    def get_raw_data_from_db(self):
+    def __get_raw_data_from_db(self):
         # self.cn_stock_df = self.__inner_get_data(self.collections[0])
         # self.jrj_df = self.__inner_get_data(self.collections[1])
         # self.nbd_df = self.__inner_get_data(self.collections[2])
         for db_name, col_list in self.all_collection_name_list_dict.items():
-            db_data_list = [self.__inner_get_data(db_name, col_name) for col_name in col_list]
+            db_data_list = [
+                self.__inner_get_data(db_name, col_name) for col_name in col_list
+            ]
             self.all_raw_data_dict_of_list[db_name] = db_data_list
         return
 
     def get_train_data(self, columns: list):
         data_frame_by_db_list = []
         for db_name, data_frame_list in self.all_raw_data_dict_of_list.items():
-            data_frame_by_db_list.append(pd.concat(
-                [data_frame[columns] for data_frame in data_frame_list],
-                axis=0,
-            ))
-        self.df_of_train_data_set = pd.concat(data_frame_by_db_list, axis=0)
+            data_frame_by_db_list.append(
+                pd.concat(
+                    [data_frame[columns] for data_frame in data_frame_list],
+                    axis=0,
+                )
+            )
+        self.__df_of_train_data_set = pd.concat(data_frame_by_db_list, axis=0)
         return True
 
     def build_2_class_classify_model(self, force_train_model: bool = False):
@@ -265,11 +265,11 @@ class InformationExtract(object):
         ):
             self.logger.info("model and vocabulary already load!!! no train need!")
             return True
-        self.get_raw_data_from_db()
+        self.__get_raw_data_from_db()
         res = self.get_train_data(["Title", "Article", "ClassifyLabel"])
         self.logger.info("get train data done!")
         if res:
-            data = self.df_of_train_data_set
+            data = self.__df_of_train_data_set
         else:
             raise Exception
         # 先做数据筛选
@@ -296,7 +296,7 @@ class InformationExtract(object):
         train_features = sms_train["text_cut"].values
         count_v1 = CountVectorizer(max_df=0.8, decode_error="ignore")
         counts_train = count_v1.fit_transform(train_features)
-        self.vocabulary = count_v1.vocabulary_
+        self.__vocabulary = count_v1.vocabulary_
         # print(count_v1.get_feature_names())
         # repr(counts_train.shape)
         tfidf_train = self.tfidf_transformer.fit(counts_train).transform(counts_train)
@@ -304,7 +304,7 @@ class InformationExtract(object):
         test_labels = sms_test["ClassifyLabel"].values
         test_features = sms_test["text_cut"].values
         self.count_vector_rise = CountVectorizer(
-            vocabulary=self.vocabulary, max_df=0.8, decode_error="ignore"
+            vocabulary=self.__vocabulary, max_df=0.8, decode_error="ignore"
         )
         joblib.dump(self.count_vector_rise, config.COUNT_VECTOR_FILE)
         counts_test = self.count_vector_rise.fit_transform(test_features)
@@ -337,8 +337,8 @@ class InformationExtract(object):
         self.__calculate_result(test_labels, pred)
         return True
 
-    def get_count(self, collection_name):
-        return self.db_obj.get_collection(self.db_name, collection_name).find().count()
+    def __get_count(self, db_name, collection_name):
+        return self.db_obj.get_collection(db_name, collection_name).find().count()
 
     def write_excel(self, word_dict_sort, threshold: int = 10):
         ordered_list = [
@@ -413,14 +413,11 @@ class InformationExtract(object):
     #         result_dict = self.get_collection_word_seg(col)
     #         utils.merge_dict(tem_dict, result_dict)
     #     self.vocabulary = tem_dict
-    def get_vocabulary(self):
-        return self.vocabulary
-
     pass
 
 
 if __name__ == "__main__":
     info_extract = InformationExtract()
     dict_of_words = info_extract.get_all_word_dictionary_of_new_data()
-    info_extract.write_excel(threshold=100)
+    info_extract.write_excel(dict_of_words, threshold=100)
     pass

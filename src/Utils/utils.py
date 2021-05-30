@@ -62,6 +62,13 @@ def set_display():
     pd.set_option("max_colwidth", 500)
 
 
+def get_or_else(_dict: dict, _key: str):
+    if _dict.get(_key) is None:
+        return 0
+    else:
+        return _dict.get(_key)
+
+
 def merge_dict(a, b):
     for k, v in b.items():
         # print(k, v)
@@ -71,20 +78,6 @@ def merge_dict(a, b):
         else:
             a[k] += v
     return True
-
-
-def generate_pages_list(total_pages, range, init_page_id):
-    page_list = list()
-    k = init_page_id
-
-    while k + range - 1 <= total_pages:
-        page_list.append((k, k + range - 1))
-        k += range
-
-    if k + range - 1 < total_pages:
-        page_list.append((k, total_pages))
-
-    return page_list
 
 
 def count_chn(string):
