@@ -12,7 +12,7 @@ from SpiderWithScrapy.stcn_spider import StcnSpider
 from SpiderWithScrapy.jrj_spider import JrjSpider
 from SpiderWithScrapy.nbd_spider import NBDSpider
 from SpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
-from Utils import config
+from Utils import config, utils
 from datetime import datetime, timedelta
 
 logging.basicConfig(
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     _process.start()
 
     #
-    start_date_time = (datetime.now() - timedelta(days=0)).strftime("%Y-%m-%d")
+    start_date_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     logging.info("start time is {}".format(start_date_time))
     gdb = GenStockNewsDB(force_update_score_using_model=True, generate_report=True)
     report_list_of_dict = []
@@ -147,7 +147,7 @@ if __name__ == "__main__":
         # break
     logging.info("report list cnt is {}".format(len(report_list_of_dict)))
     whole_report_dict = dict()
-    logging.info(report_list_of_dict)
+    # logging.info(report_list_of_dict)
     for element in report_list_of_dict:
         logging.info(element)
         for k, v in element.items():
@@ -174,8 +174,30 @@ if __name__ == "__main__":
             reverse=True,
         )
     )
+
+    title_list = []
+
+    temp_list = {}
     for k, v in whole_report_dict_sorted.items():
-        logging.info(k)
-        # logging.info(v)
+        title_list.append("{},利好:{},利空:{}".format(k, v.get("利好"), v.get("利空")))
+
+        content_list = [
+            "Title:{}\nArticle:{}".format(ele.get("Title"), ele.get("Article"))
+            for ele in v.get("news")
+        ]
+        for content in content_list:
+            if temp_list.get(content) is None:
+                temp_list[content] = [k]
+            else:
+                temp_list[content] = temp_list[content] + [k]
     logging.info(len(whole_report_dict_sorted))
+    utils.send_mail(
+        ", ".join([ele for ele in title_list]),
+        "\n\n\n".join(
+            [
+                "{}:\n {}".format(",".join(code), content)
+                for content, code in temp_list.items()
+            ]
+        ),
+    )
     pass

@@ -13,14 +13,15 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+    datefmt="%a, %d %b %Y %H:%M:%S",
+)
+
 
 def get_logger():
     logger = logging.getLogger()
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-        datefmt="%a, %d %b %Y %H:%M:%S",
-    )
     return logger
 
 
@@ -48,10 +49,10 @@ def send_mail(topic, content, _file_name=None):
         server = smtplib.SMTP("smtp.qq.com")
         server.login(from_address, password)
         server.sendmail(from_address, toaddrs, m.as_string())
-        # print('success')
+        logging.info("send mail success {} {}".format(topic, content))
         server.quit()
     except smtplib.SMTPException as e:
-        print("error:", e)  # 打印错误
+        logging.error("error:", e)  # 打印错误
 
 
 def set_display():
