@@ -26,56 +26,56 @@ logging.basicConfig(
 if __name__ == "__main__":
     os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
     settings = get_project_settings()
-    # _process = CrawlerProcess(settings)
-    #
-    # EAST_MONEY = [
-    #     element.update({"end_page": 5}) for element in config.EAST_MONEY_SPIDER_LIST
-    # ]
-    #
-    # JRJ_NEWS = [element.update({"end_page": 5}) for element in config.JRJ_SPIDER_LIST]
-    #
-    # NET_EASE = [
-    #     element.update({"end_page": 5}) for element in config.NET_EASE_SPIDER_LIST
-    # ]
-    #
-    # STCN_EASE = [element.update({"end_page": 5}) for element in config.STCN_SPIDER_LIST]
-    #
-    # SHANG_HAI = [
-    #     element.update({"end_page": 5}) for element in config.SHANG_HAI_SPIDER_LIST
-    # ]
-    #
-    # NBD_NEWS = [element.update({"end_page": 5}) for element in config.NBD_SPIDER_LIST]
-    #
-    # ZHONG_JIN = [
-    #     element.update({"end_page": 15}) for element in config.ZHONG_JIN_SPIDER_LIST
-    # ]
-    #
-    # for spider_config in config.EAST_MONEY_SPIDER_LIST:
-    #     logging.info(spider_config)
-    #     _process.crawl(EastMoneySpider, **spider_config)
-    #
-    # for spider_config in config.JRJ_SPIDER_LIST:
-    #     _process.crawl(JrjSpider, **spider_config)
-    #
-    # for spider_config in config.NET_EASE_SPIDER_LIST:
-    #     _process.crawl(NetEaseSpider, **spider_config)
-    #
-    # for spider_config in config.STCN_SPIDER_LIST:
-    #     _process.crawl(StcnSpider, **spider_config)
-    #
-    # for spider_config in config.SHANG_HAI_SPIDER_LIST:
-    #     _process.crawl(ShanghaiStockSpider, **spider_config)
-    #
-    # for spider_config in config.NBD_SPIDER_LIST:
-    #     _process.crawl(NBDSpider, **spider_config)
-    #
-    # for spider_config in config.ZHONG_JIN_SPIDER_LIST:
-    #     _process.crawl(ZhongJinStockSpider, **spider_config)
-    #
-    # _process.start()
+    _process = CrawlerProcess(settings)
+
+    EAST_MONEY = [
+        element.update({"end_page": 5}) for element in config.EAST_MONEY_SPIDER_LIST
+    ]
+
+    JRJ_NEWS = [element.update({"end_page": 5}) for element in config.JRJ_SPIDER_LIST]
+
+    NET_EASE = [
+        element.update({"end_page": 5}) for element in config.NET_EASE_SPIDER_LIST
+    ]
+
+    STCN_EASE = [element.update({"end_page": 5}) for element in config.STCN_SPIDER_LIST]
+
+    SHANG_HAI = [
+        element.update({"end_page": 5}) for element in config.SHANG_HAI_SPIDER_LIST
+    ]
+
+    NBD_NEWS = [element.update({"end_page": 5}) for element in config.NBD_SPIDER_LIST]
+
+    ZHONG_JIN = [
+        element.update({"end_page": 15}) for element in config.ZHONG_JIN_SPIDER_LIST
+    ]
+
+    for spider_config in config.EAST_MONEY_SPIDER_LIST:
+        logging.info(spider_config)
+        _process.crawl(EastMoneySpider, **spider_config)
+
+    for spider_config in config.JRJ_SPIDER_LIST:
+        _process.crawl(JrjSpider, **spider_config)
+
+    for spider_config in config.NET_EASE_SPIDER_LIST:
+        _process.crawl(NetEaseSpider, **spider_config)
+
+    for spider_config in config.STCN_SPIDER_LIST:
+        _process.crawl(StcnSpider, **spider_config)
+
+    for spider_config in config.SHANG_HAI_SPIDER_LIST:
+        _process.crawl(ShanghaiStockSpider, **spider_config)
+
+    for spider_config in config.NBD_SPIDER_LIST:
+        _process.crawl(NBDSpider, **spider_config)
+
+    for spider_config in config.ZHONG_JIN_SPIDER_LIST:
+        _process.crawl(ZhongJinStockSpider, **spider_config)
+
+    _process.start()
 
     #
-    start_date_time = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
+    start_date_time = (datetime.now() - timedelta(days=0)).strftime("%Y-%m-%d")
     logging.info("start time is {}".format(start_date_time))
     gdb = GenStockNewsDB(force_update_score_using_model=True, generate_report=True)
     report_list_of_dict = []
@@ -90,62 +90,62 @@ if __name__ == "__main__":
             # {
             #   'XXXX_name': { 'news': list(news_list), '利好': 111, '利空':222}
             # }
-            report_dict = gdb.get_report(
+            report_dict_list = gdb.get_report(
                 db_name, col.get("name").replace("spider", "data")
             )
-            if report_dict is None:
+            if report_dict_list is None:
                 logging.warning("no data found, continue")
                 continue
 
-            for element in report_dict:
+            for element in report_dict_list:
+                # logging.info('element is {} {}'.format(type(element), element))
                 if one_col_report_dict.get(element.get("Name")) is None:
                     _value = [element]
                     one_col_report_dict[element.get("Name")] = dict(
                         {"news": _value, element.get("Label"): 1}
                     )
                 else:
-                    try:
-                        one_col_report_dict[element.get("Name")] = (
-                            dict(
-                                {
-                                    "news": one_col_report_dict.get(element.get("Name"))
-                                    .get("news")
-                                    .append(element),
-                                    "利好": get_or_else(
-                                        one_col_report_dict.get(element.get("Name")),
-                                        "利好",
-                                    )
-                                    + 1,
-                                    "利空": get_or_else(
-                                        one_col_report_dict.get(element.get("Name")),
-                                        "利空",
-                                    ),
-                                }
-                            )
-                            if element.get("Label") == "利好"
-                            else dict(
-                                {
-                                    "news": one_col_report_dict[element.get("Name")]
-                                    .get("news")
-                                    .append(element),
-                                    "利好": get_or_else(
-                                        one_col_report_dict[element.get("Name")], "利好"
-                                    ),
-                                    "利空": get_or_else(
-                                        one_col_report_dict[element.get("Name")], "利空"
-                                    )
-                                    + 1,
-                                }
-                            )
+                    logging.warning(one_col_report_dict)
+                    raw_news = one_col_report_dict.get(element.get("Name")).get("news")
+                    raw_news.append(element)
+                    one_col_report_dict[element.get("Name")] = (
+                        dict(
+                            {
+                                "news": raw_news,
+                                "利好": get_or_else(
+                                    one_col_report_dict.get(element.get("Name")),
+                                    "利好",
+                                )
+                                + 1,
+                                "利空": get_or_else(
+                                    one_col_report_dict.get(element.get("Name")),
+                                    "利空",
+                                ),
+                            }
                         )
-                    except Exception as e:
-                        print(one_col_report_dict, element.get("Name"))
-                        break
+                        if element.get("Label") == "利好"
+                        else dict(
+                            {
+                                "news": raw_news,
+                                "利好": get_or_else(
+                                    one_col_report_dict[element.get("Name")], "利好"
+                                ),
+                                "利空": get_or_else(
+                                    one_col_report_dict[element.get("Name")], "利空"
+                                )
+                                + 1,
+                            }
+                        )
+                    )
 
             report_list_of_dict.append(one_col_report_dict)
-            logging.info("{0} : {1} insert data done".format(db_name, col))
+            logging.info(
+                "{0} : {1}\n insert data done, data cnt is {2}".format(
+                    db_name, col, len(one_col_report_dict)
+                )
+            )
         # break
-
+    logging.info("report list cnt is {}".format(len(report_list_of_dict)))
     whole_report_dict = dict()
     logging.info(report_list_of_dict)
     for element in report_list_of_dict:
@@ -176,6 +176,6 @@ if __name__ == "__main__":
     )
     for k, v in whole_report_dict_sorted.items():
         logging.info(k)
-        logging.info(v)
+        # logging.info(v)
     logging.info(len(whole_report_dict_sorted))
     pass

@@ -180,17 +180,17 @@ class GenStockNewsDB(object):
                             _value = [res[2]]
                             self.latest_news_report[_key] = _value
                         else:
-                            self.latest_news_report[_key] = self.latest_news_report.get(
-                                _key
-                            ).append(res[2])
+                            _value = self.latest_news_report.get(_key)
+                            _value.append(res[2])
+                            self.latest_news_report[_key] = _value
                     if res[0]:
                         _tmp_num_stat += 1
                     else:
                         already_in_news_cnt += res[1]
 
-                    self.logger.info(
-                        "current stock code {0} {1}".format(stock_code, res)
-                    )
+                    # self.logger.info(
+                    #     "current stock code {0} {1}".format(stock_code, res)
+                    # )
         except Exception as e:
             logger.error(e)
         self.logger.info(
