@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
 # http://finance.eastmoney.com/a/cssgs.html
+from datetime import datetime, timedelta
+
 from bs4 import BeautifulSoup
 from scrapy.http import Request
 from SpiderWithScrapy.BaseSpider import BaseSpider
@@ -29,7 +31,6 @@ class EastMoneySpider(BaseSpider):
     def parse(self, response):
         bs = BeautifulSoup(response.text, "lxml")
         li_list = bs.find_all("div", class_="repeatList")
-
         for li in li_list:
             div_list = li.find_all("div", class_=["text text-no-img", "text"])
             self.logger.info("all sub li div count is {0}".format(len(div_list)))
@@ -46,9 +47,7 @@ class EastMoneySpider(BaseSpider):
                         title = str(a.text).strip()
                         # span = li.find_all("span")
                         # logging.info('span is {} {} {}'.format(span, len(span), span[0]))
-                        _date_time = (
-                            str(_time.text).strip().replace("月", "").replace("日", "")
-                        )
+                        _date_time = str(_time.text).strip().replace("月", "-").replace("日", "")
                         self.logger.info(
                             "sub url is {0} title is {1}".format(sub_url, title)
                         )
@@ -56,14 +55,7 @@ class EastMoneySpider(BaseSpider):
                             sub_url,
                             callback=self.parse_further_information,
                             dont_filter=True,
-                            meta={
-                                "date_time": "{0}-{1}".format(
-                                    self.year_now, _date_time
-                                ),
-                                "title": title,
-                            },
-                        ),
-        pass
+                            meta={"date_time": "{0}-{1}".format(self.year_now, _date_time), "title": title})
 
     def parse_further_information(self, response):
         bs = BeautifulSoup(response.text, "lxml")

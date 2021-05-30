@@ -58,10 +58,10 @@ class StcnSpider(BaseSpider):
             for li in ul_meta[0].find_all("li"):
                 _date_news = li.find_all("p", class_="sj")[0]
                 _time_news = li.find_all("span")[0]
-                _a = _time_news = li.find_all("a")[0]
+                _a = li.find_all("a")[0]
                 title = _a["title"]
                 sub_url = _a["href"]
-                _sub_title = (li.find_all("p", class_="exp")[0]).text
+                _sub_title = (li.find_all("p", class_="exp")[0]).text.strip()
                 self.logger.info(
                     "sub url is {0} title is {1}, sub title {2}".format(
                         sub_url, title, _sub_title
@@ -73,7 +73,7 @@ class StcnSpider(BaseSpider):
                     callback=self.parse_further_information,
                     dont_filter=True,
                     meta={
-                        "date_time": "{0} {1}".format(_date_news.text, _time_news.text),
+                        "date_time": "{0} {1}".format(_date_news.text.strip()[:10], _time_news.text.strip()),
                         "title": title + _sub_title,
                     },
                 )
