@@ -35,6 +35,7 @@ class GenStockNewsDB(object):
         self.col_names = []
         self.generate_report = generate_report
         self.latest_news_report = dict()
+        self.news_report_raw_version = list()
         self.redis_client = redis.StrictRedis(
             host=config.REDIS_IP,
             port=config.REDIS_PORT,
@@ -47,6 +48,9 @@ class GenStockNewsDB(object):
             "stock_news_num_over_{}".format(config.MINIMUM_STOCK_NEWS_NUM_FOR_ML)
         )
         self.__stock_news_nums_stat()
+
+    def get_report_raw_version(self):
+        return self.news_report_raw_version
 
     def get_report(self, db_name, col_name):
         return self.latest_news_report.get("{}_{}".format(db_name, col_name))
@@ -168,7 +172,7 @@ class GenStockNewsDB(object):
                         )
                     )
                     continue
-
+                self.news_report_raw_version.append(row)
                 for name, stock_code in json.loads(row["RelatedStockCodes"]).items():
                     # 将新闻分别送进相关股票数据库
                     res = self.__insert_data_to_db(

@@ -21,7 +21,7 @@ class BaseSpider(Spider):
         self.name_code_dict = dict(
             (self.GenStockNewsDB.name_code_df[["name", "code"]]).values
         )
-        self.year_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S").split("-")[0]
+        self.day_now = datetime.now().strftime("%m-%d")
         self.logger.info("spider name is {}".format(self.name))
         super().__init__()
 

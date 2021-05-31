@@ -27,7 +27,7 @@ class StcnSpider(BaseSpider):
             or (self.key_word == "gsxw" and self.key_word_chn == "公司新闻")
             or (self.key_word == "sd" and self.key_word_chn == "深度")
         ):
-            iter_url = self.base_url + self.key_word + sub_url[1 : len(sub_url)]
+            iter_url = self.base_url + self.key_word + sub_url[1: len(sub_url)]
         elif self.key_word == "jigou" or self.key_word_chn == "机构":
             iter_url = sub_url
         else:

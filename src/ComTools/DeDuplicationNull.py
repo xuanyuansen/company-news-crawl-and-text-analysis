@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
 from Utils.database import Database
-from Utils import utils
+from Utils import utils, config
 import logging
+from datetime import datetime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -84,3 +85,36 @@ class DeNull(object):
                 self.delete_num, self.collection_name
             )
         )
+
+
+class DeleteTimeWrong(object):
+    def __init__(self, database_name, collection_name):
+        self.database = Database()
+        self.database_name = database_name
+        self.collection_name = collection_name
+        self.delete_num = 0
+        self.today_date = datetime.now().strftime('%Y-%m-%d')
+
+    def run(self):
+        collection = self.database.get_collection(
+            self.database_name, self.collection_name
+        )
+        for row in self.database.get_collection(
+            self.database_name, self.collection_name
+        ).find():
+            if row["Date"] > self.today_date:
+                collection.delete_one({"_id": row["_id"]})
+                self.delete_num += 1
+        logging.info(
+            "there are {} news contained wrong value in {} collection, {}, and delete done ... ".format(
+                self.delete_num, self.collection_name,  self.database_name
+            )
+        )
+
+
+if __name__ == "__main__":
+    for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():
+        for col in collection_list:
+            dt = DeleteTimeWrong(db_name, col.get("name").replace("spider", "data"))
+            dt.run()
+    pass
