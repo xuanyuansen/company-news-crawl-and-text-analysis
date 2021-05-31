@@ -3,6 +3,8 @@ import os
 
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+from xlsxwriter import Workbook
+
 from Utils.utils import get_or_else
 from ComTools.BuildStockNewsDb import GenStockNewsDB
 from SpiderWithScrapy.east_money_spider import EastMoneySpider
@@ -47,7 +49,7 @@ if __name__ == "__main__":
     NBD_NEWS = [element.update({"end_page": 5}) for element in config.NBD_SPIDER_LIST]
 
     ZHONG_JIN = [
-        element.update({"end_page": 15}) for element in config.ZHONG_JIN_SPIDER_LIST
+        element.update({"end_page": 10}) for element in config.ZHONG_JIN_SPIDER_LIST
     ]
 
     for spider_config in config.EAST_MONEY_SPIDER_LIST:
@@ -115,8 +117,7 @@ if __name__ == "__main__":
                                 "利好": get_or_else(
                                     one_col_report_dict.get(element.get("Name")),
                                     "利好",
-                                )
-                                + 1,
+                                ) + 1,
                                 "利空": get_or_else(
                                     one_col_report_dict.get(element.get("Name")),
                                     "利空",
@@ -132,8 +133,7 @@ if __name__ == "__main__":
                                 ),
                                 "利空": get_or_else(
                                     one_col_report_dict[element.get("Name")], "利空"
-                                )
-                                + 1,
+                                ) + 1,
                             }
                         )
                     )
@@ -159,9 +159,9 @@ if __name__ == "__main__":
                     {
                         "news": whole_report_dict.get(k).get("news") + v.get("news"),
                         "利好": get_or_else(whole_report_dict.get(k), "利好")
-                        + get_or_else(v, "利好"),
+                              + get_or_else(v, "利好"),
                         "利空": get_or_else(whole_report_dict.get(k), "利空")
-                        + get_or_else(v, "利空"),
+                              + get_or_else(v, "利空"),
                     }
                 )
 
@@ -191,13 +191,29 @@ if __name__ == "__main__":
             else:
                 temp_list[content] = temp_list[content] + [k]
     logging.info(len(whole_report_dict_sorted))
+
+    file_name = './info/news_{}.xlsx'.format(datetime.now().strftime("%Y-%m-%d"))
+
+    ordered_list = ["code", "news"]  # list object calls by index but dict object calls items randomly
+    wb = Workbook(file_name)
+    ws = wb.add_worksheet("News")  # or leave it blank, default name is "Sheet 1"
+    # 表头
+    first_row = 0
+    for header in ordered_list:
+        col = ordered_list.index(header)  # we are keeping order.
+        ws.write(first_row, col, header)  # we have written first row which is the header of worksheet also.
+
+    row = 1
+    for content, code in temp_list.items():
+        ws.write(row, 0, ",".join(code))
+        ws.write(row, 1, content)
+        row += 1  # enter the next row
+    wb.close()
+
     utils.send_mail(
-        ", ".join([ele for ele in title_list]),
-        "\n\n\n".join(
-            [
-                "{}:\n {}".format(",".join(code), content)
-                for content, code in temp_list.items()
-            ]
-        ),
+        topic=file_name,
+        content=", ".join([ele for ele in title_list]),
+        _file_name=file_name
     )
+
     pass
