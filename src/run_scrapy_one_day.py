@@ -31,31 +31,31 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--report', help='run report')
     args = parser.parse_args()
     if args.spider:
-        logging.info('page number is {}'.format(int(args.spier)))
+        logging.info('page number is {}'.format(int(args.spider)))
         os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
         settings = get_project_settings()
         _process = CrawlerProcess(settings)
 
         EAST_MONEY = [
-            element.update({"end_page": int(args.spier)}) for element in config.EAST_MONEY_SPIDER_LIST
+            element.update({"end_page": int(args.spider)}) for element in config.EAST_MONEY_SPIDER_LIST
         ]
 
-        JRJ_NEWS = [element.update({"end_page": int(args.spier)}) for element in config.JRJ_SPIDER_LIST]
+        JRJ_NEWS = [element.update({"end_page": int(args.spider)}) for element in config.JRJ_SPIDER_LIST]
 
         NET_EASE = [
-            element.update({"end_page": int(args.spier)}) for element in config.NET_EASE_SPIDER_LIST
+            element.update({"end_page": int(args.spider)}) for element in config.NET_EASE_SPIDER_LIST
         ]
 
-        STCN_EASE = [element.update({"end_page": int(args.spier)}) for element in config.STCN_SPIDER_LIST]
+        STCN_EASE = [element.update({"end_page": int(args.spider)}) for element in config.STCN_SPIDER_LIST]
 
         SHANG_HAI = [
-            element.update({"end_page": int(args.spier)}) for element in config.SHANG_HAI_SPIDER_LIST
+            element.update({"end_page": int(args.spider)}) for element in config.SHANG_HAI_SPIDER_LIST
         ]
 
-        NBD_NEWS = [element.update({"end_page": int(args.spier)}) for element in config.NBD_SPIDER_LIST]
+        NBD_NEWS = [element.update({"end_page": int(args.spider)}) for element in config.NBD_SPIDER_LIST]
 
         ZHONG_JIN = [
-            element.update({"end_page": 2*int(args.spier)}) for element in config.ZHONG_JIN_SPIDER_LIST
+            element.update({"end_page": 2*int(args.spider)}) for element in config.ZHONG_JIN_SPIDER_LIST
         ]
 
         for spider_config in config.EAST_MONEY_SPIDER_LIST:
