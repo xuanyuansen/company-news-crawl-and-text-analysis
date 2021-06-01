@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -5,7 +6,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from xlsxwriter import Workbook
 import argparse
-#from Utils.utils import get_or_else
+from Utils.utils import get_or_else
 from ComTools.BuildStockNewsDb import GenStockNewsDB
 from SpiderWithScrapy.east_money_spider import EastMoneySpider
 from SpiderWithScrapy.net_ease_spider import NetEaseSpider
@@ -209,13 +210,15 @@ if __name__ == "__main__":
         wb.close()
         title_dict = dict()
         for ele_dict in report_list_of_dict:
-            for k, _ in ele_dict.items():
+            related_codes = json.loads(ele_dict.get('RelatedStockCodes'))
+            _label = ele_dict.get('Label')
+            for k, _ in related_codes.items():
                 if title_dict.get(k) is None:
-                    title_dict[k] = 1
+                    title_dict[k] = {_label: 1}
                 else:
-                    title_dict[k] += 1
+                    title_dict[k].update({_label: get_or_else(title_dict[k], _label)+1})
 
-        title_dict_sort = sorted(title_dict.items(), key=lambda item: item[1], reverse=True)
+        title_dict_sort = sorted(title_dict.items(), key=lambda item: get_or_else(item[1], '利好'), reverse=True)
 
         utils.send_mail(
             topic='news_{}'.format(datetime.now().strftime("%Y-%m-%d")),
