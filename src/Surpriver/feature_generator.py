@@ -115,7 +115,7 @@ class TAEngine:
                 constant=0.015,
                 fillna=True,
             ).values.tolist()
-            slope_cci, r_value_cci, p_value_cci = self.calculate_slope( cci[-self.HISTORY_TO_USE:])
+            slope_cci, r_value_cci, p_value_cci = self.calculate_slope(cci[-self.HISTORY_TO_USE:])
             technical_indicators_dictionary["cci-" + str(history)] = cci[
                 -self.HISTORY_TO_USE:
             ] + [slope_cci, r_value_cci, p_value_cci]

@@ -575,7 +575,7 @@ class Surpriver:
 # Check arguments
 argumentChecker = ArgChecker()
 
-# Create surpriver instance
+# Create Surpriver instance
 supriver = Surpriver()
 
 # Generate predictions

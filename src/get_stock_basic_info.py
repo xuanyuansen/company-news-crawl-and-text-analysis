@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
-from MarketNewsSpider.StockInfoSpyder import StockInfoSpyder
+from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 from Utils import config
 
 stock_info_spyder = StockInfoSpyder(

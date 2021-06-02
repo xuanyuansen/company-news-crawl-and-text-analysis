@@ -8,7 +8,7 @@ import datetime
 import time
 from ComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price
-from MarketNewsSpider.BasicSpyder import Spyder
+from MarketPriceSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
 from Utils.database import Database
@@ -30,8 +30,18 @@ class StockInfoSpyder(Spyder):
 
     def get_cn_stock_week_data_from_joint_quant(self):
         jq_stock_symbol_list = self.col_basic_info.distinct("joint_quant_code")
+        week_col_names = self.db_obj.connect_database(
+            self.database_name
+        ).list_collection_names(session=None)
         for symbol in jq_stock_symbol_list:
+            if '{}_week'.format(symbol) in week_col_names:
+                self.logger.info('already down data {}'.format(symbol))
+                continue
             data = self.__get_week_data_from_joint_quant_of_one_cn_stock(symbol)
+            if data is None:
+                self.logger.warning('{} no data, continue'.format(symbol))
+                continue
+
             _col = self.db_obj.get_collection(self.database_name, '{}_week'.format(symbol))
             self.insert_data_to_col_from_dataframe(_col, symbol, data)
             self.logger.info(

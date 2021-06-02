@@ -11,3 +11,10 @@
 
 #### 港股数据爬取
 *   https://www.akshare.xyz/zh_CN/latest/tutorial.html
+
+#### matplot lib font problem solve
+*   matplot 字体问题解决:~/.local/lib/python3.8/site-packages/matplotlib/mpl-data/fonts/ttf
+*   https://blog.csdn.net/weixin_34184158/article/details/93173871
+*   http://www.xiazaiziti.com/210356.html
+*   matplotrc 删除注释行,https://matplotlib.org/3.2.1/gallery/text_labels_and_annotations/font_family_rc_sgskip.html
+*   buy sell point
