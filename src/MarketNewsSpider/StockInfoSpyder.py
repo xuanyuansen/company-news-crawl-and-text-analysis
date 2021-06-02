@@ -13,12 +13,6 @@ from Utils import config
 from Utils.database import Database
 import hashlib
 import akshare as ak
-import logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-    datefmt="%a, %d %b %Y %H:%M:%S",
-)
 
 
 class StockInfoSpyder(Spyder):
@@ -38,14 +32,30 @@ class StockInfoSpyder(Spyder):
         data = ak.stock_hk_daily(symbol=symbol, adjust=adjust)
         return data
 
-    def get_historical_hk_stock_daily_price(self, start_date=None, end_date=None):
-        stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
+    def get_historical_hk_stock_daily_price(self, start_date=None,
+                                            end_date=None,
+                                            start_symbol: str = None,
+                                            symbols: list = None):
+        if symbols is None:
+            stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
+            if start_symbol is not None:
+                new_list = []
+                for element in stock_symbol_list:
+                    if element >= start_symbol:
+                        new_list.append(element)
+                stock_symbol_list = new_list
+        else:
+            stock_symbol_list = symbols
         for symbol in stock_symbol_list:
             stock_hk_a_daily_hfq_df = self.__get_single_hk_stock_data(symbol)
             _col = self.db_obj.get_collection(self.database_name_hk, symbol)
 
             for _idx in range(stock_hk_a_daily_hfq_df.shape[0]):
                 _tmp_dict = stock_hk_a_daily_hfq_df.iloc[_idx].to_dict()
+
+                if isinstance(_tmp_dict['date'], datetime.date):
+                    _tmp_dict['date'] = str(_tmp_dict['date'])
+
                 id_md5 = hashlib.md5(
                     ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(
                         encoding="utf-8"
@@ -58,10 +68,15 @@ class StockInfoSpyder(Spyder):
                     continue
                 _tmp_dict["_id"] = id_md5
                 # _tmp_dict.pop("turnover")
+                # ERROR trace cannot encode object: datetime.date(2021, 5, 7),
+                # of type: <class 'datetime.date'>, symbol 00042
+                # 这里要把(2021, 5, 7)改成(2021, 05, 07)才可以。next to do
                 try:
                     _col.insert_one(_tmp_dict)
+                    # self.logger.info("good data, {0}, type date{1}".format(_tmp_dict, type(_tmp_dict['date'])))
                 except Exception as e:
-                    self.logger.error("trace {0}, symbol {1}".format(e, symbol))
+                    self.logger.error("trace {0}, symbol {1}, data{2}, type date {3}"
+                                      .format(e, symbol, _tmp_dict, type(_tmp_dict['date'])))
                     continue
 
             time.sleep(1.5)
