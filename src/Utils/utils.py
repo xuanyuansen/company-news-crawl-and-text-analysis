@@ -13,6 +13,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import logging
 
+today_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",

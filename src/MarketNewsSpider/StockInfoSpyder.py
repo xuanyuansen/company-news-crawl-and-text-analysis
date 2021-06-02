@@ -7,9 +7,10 @@ https://www.akshare.xyz/zh_CN/latest/
 import datetime
 import time
 from ComTools.JointQuantTool import JointQuantTool
+from jqdatasdk import get_price
 from MarketNewsSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
-from Utils import config
+from Utils import config, utils
 from Utils.database import Database
 import hashlib
 import akshare as ak
@@ -26,6 +27,53 @@ class StockInfoSpyder(Spyder):
         self.collection_name_hk = config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
         self.col_basic_info_hk = self.db_obj.get_collection(self.database_name_hk, self.collection_name_hk)
         self.joint_quant_tool = JointQuantTool()
+
+    def get_cn_stock_week_data_from_joint_quant(self):
+        jq_stock_symbol_list = self.col_basic_info.distinct("joint_quant_code")
+        for symbol in jq_stock_symbol_list:
+            data = self.__get_week_data_from_joint_quant_of_one_cn_stock(symbol)
+            _col = self.db_obj.get_collection(self.database_name, '{}_week'.format(symbol))
+            self.insert_data_to_col_from_dataframe(_col, symbol, data)
+            self.logger.info(
+                "{} finished saving from {} to {} ... last day data is {}".format(
+                    symbol,
+                    data.iloc[0, 6],  # start date
+                    data.iloc[data.shape[0] - 1, 6],  # end date
+                    data[data.shape[0] - 1:],
+                )
+            )
+        return True
+
+    # https://www.joinquant.com/view/community/detail/738214d7db9b1c03de504177f4e94690
+    def __get_week_data_from_joint_quant_of_one_cn_stock(self, t_stock):
+        try:
+            stock_data = get_price(t_stock, start_date='2015-01-01', end_date=utils.today_date,
+                                   frequency='1d', skip_paused=True, fq='pre')
+            stock_data['date'] = stock_data.index
+            # print(stock_data[:100])
+            # 直接使用resample方法搞定, pandas niu!!!
+            df2 = stock_data.resample('W').agg({'open': 'first',
+                                                'close': 'last',
+                                                'high': 'max',
+                                                'low': 'min',
+                                                'money': 'sum',
+                                                'volume': 'sum',
+                                                'date': 'first'})
+            # 主要是让索引使用我们定义的每周第一个交易日，而不是星期日
+            # 把索引的别名删了，保持数据视图一致性
+            df2 = df2[df2['open'].notnull()]
+            df2.reset_index(inplace=True)
+
+            df2.set_index('date', inplace=True)
+            del df2['index']
+            df2['date'] = df2.index
+            return df2
+        # del df2.index.name
+        # 打印信息
+        # print(df2)
+        except Exception as e:
+            self.logger.error('error info is {}'.format(e))
+            return None
 
     @staticmethod
     def __get_single_hk_stock_data(symbol, adjust='qfq'):
