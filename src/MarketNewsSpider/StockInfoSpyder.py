@@ -6,7 +6,6 @@ https://www.akshare.xyz/zh_CN/latest/
 # import redis
 import datetime
 import time
-
 from ComTools.JointQuantTool import JointQuantTool
 from MarketNewsSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
@@ -14,6 +13,12 @@ from Utils import config
 from Utils.database import Database
 import hashlib
 import akshare as ak
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+    datefmt="%a, %d %b %Y %H:%M:%S",
+)
 
 
 class StockInfoSpyder(Spyder):
@@ -53,9 +58,13 @@ class StockInfoSpyder(Spyder):
                     continue
                 _tmp_dict["_id"] = id_md5
                 # _tmp_dict.pop("turnover")
-                _col.insert_one(_tmp_dict)
+                try:
+                    _col.insert_one(_tmp_dict)
+                except Exception as e:
+                    self.logger.error("trace {0}, symbol {1}".format(e, symbol))
+                    continue
 
-            time.sleep(2)
+            time.sleep(1.5)
             self.logger.info(
                 "{} finished saving from {} to {} ... last day data is {}".format(
                     symbol,

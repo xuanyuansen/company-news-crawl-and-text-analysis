@@ -8,3 +8,6 @@
 #### Prob Solve
 *   https://stackoverflow.com/questions/20931909/too-many-open-files-while-ensure-index-mongo
 *   sudo launchctl limit maxfiles 1024 2048
+
+#### 港股数据爬取
+*   https://www.akshare.xyz/zh_CN/latest/tutorial.html
