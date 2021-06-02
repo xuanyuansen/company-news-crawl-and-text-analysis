@@ -7,6 +7,8 @@ stock_info_spyder = StockInfoSpyder(
     config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
 )
 # get all name and code
+stock_info_spyder.get_historical_hk_stock_daily_price()
+exit(0)
 stock_info_spyder.get_all_stock_code_info()
 
 # 指定时间段，获取历史数据，如：stock_info_spyder.get_historical_news(start_date="20150101", end_date="20201204")

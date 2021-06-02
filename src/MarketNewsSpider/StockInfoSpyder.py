@@ -11,9 +11,9 @@ from ComTools.JointQuantTool import JointQuantTool
 from MarketNewsSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config
-import akshare as ak
 from Utils.database import Database
 import hashlib
+import akshare as ak
 
 
 class StockInfoSpyder(Spyder):
@@ -23,7 +23,72 @@ class StockInfoSpyder(Spyder):
         self.database_name = database_name
         self.collection_name = collection_name
         self.col_basic_info = self.db_obj.get_collection(database_name, collection_name)
+        self.database_name_hk = config.HK_STOCK_DATABASE_NAME
+        self.collection_name_hk = config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
+        self.col_basic_info_hk = self.db_obj.get_collection(self.database_name_hk, self.collection_name_hk)
         self.joint_quant_tool = JointQuantTool()
+
+    @staticmethod
+    def __get_single_hk_stock_data(symbol, adjust='qfq'):
+        data = ak.stock_hk_daily(symbol=symbol, adjust=adjust)
+        return data
+
+    def get_historical_hk_stock_daily_price(self, start_date=None, end_date=None):
+        stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
+        for symbol in stock_symbol_list:
+            stock_hk_a_daily_hfq_df = self.__get_single_hk_stock_data(symbol)
+            _col = self.db_obj.get_collection(self.database_name_hk, symbol)
+
+            for _idx in range(stock_hk_a_daily_hfq_df.shape[0]):
+                _tmp_dict = stock_hk_a_daily_hfq_df.iloc[_idx].to_dict()
+                id_md5 = hashlib.md5(
+                    ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(
+                        encoding="utf-8"
+                    )
+                ).hexdigest()
+                if _col.find_one({"_id": id_md5}) is not None:
+                    self.logger.info(
+                        "id already exist {0} {1}".format(id_md5, _tmp_dict)
+                    )
+                    continue
+                _tmp_dict["_id"] = id_md5
+                # _tmp_dict.pop("turnover")
+                _col.insert_one(_tmp_dict)
+
+            time.sleep(2)
+            self.logger.info(
+                "{} finished saving from {} to {} ... last day data is {}".format(
+                    symbol,
+                    stock_hk_a_daily_hfq_df.iloc[0, 0],  # start date
+                    stock_hk_a_daily_hfq_df.iloc[stock_hk_a_daily_hfq_df.shape[0] - 1, 0],  # end date
+                    stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1:],
+                )
+            )
+
+        return True
+
+    def get_all_stock_code_info_of_hk(self):
+        current_data_df = ak.stock_hk_spot()
+        print(current_data_df[:10])
+        for index, row in current_data_df.iterrows():
+            str_md5 = hashlib.md5(
+                ("{0} {1}".format(row["name"], row["symbol"])).encode(encoding="utf-8")
+            ).hexdigest()
+
+            if self.col_basic_info_hk.find_one({"_id": str_md5}) is not None:
+                self.logger.info("id already exist {0} {1} {2}".format(str_md5, row["name"], row["symbol"]))
+                continue
+
+            _data = {
+                "_id": str_md5,
+                "symbol": row['symbol'],
+                "name": row["name"],
+                "tradetype": row["tradetype"],
+                "engname": row["engname"],
+            }
+
+            self.col_basic_info_hk.insert_one(_data)
+        return
 
     def get_all_stock_code_info(self):
         data = self.joint_quant_tool.get_all_stock()
