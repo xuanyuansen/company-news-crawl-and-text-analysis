@@ -3,7 +3,7 @@ import os
 import json
 import collections
 import numpy as np
-from os import walk, path
+from os import path
 import datetime as dt
 import matplotlib.pyplot as plt
 from sklearn.ensemble import IsolationForest
@@ -66,7 +66,7 @@ argParser.add_argument(
 argParser.add_argument(
     "--is_test",
     type=int,
-    default=0,
+    default=1,
     help="Whether to test the tool or just predict for future. "
          "When testing, you should set the future_bars to larger than 1.",
 )
@@ -80,7 +80,7 @@ argParser.add_argument(
     "--volatility_filter",
     type=float,
     default=0.05,
-    help="Stocks with volatility less than this value will be ignored.",
+    help="Stocks with volatility(波动性) less than this value will be ignored.",
 )
 argParser.add_argument(
     "--output_format",
@@ -93,12 +93,6 @@ argParser.add_argument(
     type=str,
     default="stocks.txt",
     help="What is the name of the file in the stocks directory which contains the stocks you wish to predict.",
-)
-argParser.add_argument(
-    "--data_source",
-    type=str,
-    default="yahoo_finance",
-    help="The name of the data engine to use.",
 )
 
 args = argParser.parse_args()
@@ -114,11 +108,12 @@ future_bars = args.future_bars
 volatility_filter = args.volatility_filter
 output_format = args.output_format.upper()
 stock_list = args.stock_list
-data_source = args.data_source
 
 """
 Sample run:
-python detection_engine.py --is_test 1 --future_bars 25 --top_n 25 --min_volume 5000 --data_granularity_minutes 60 --history_to_use 14 --is_load_from_dictionary 0 --data_dictionary_path 'dictionaries/feature_dict.npy' --is_save_dictionary 1 --output_format 'CLI'
+python detection_engine.py --is_test 1 --future_bars 25 --top_n 25 --min_volume 5000 --data_granularity_minutes 60 
+--history_to_use 14 --is_load_from_dictionary 0 --data_dictionary_path 'dictionaries/feature_dict.npy' 
+--is_save_dictionary 1 --output_format 'CLI'
 """
 
 
@@ -157,9 +152,6 @@ class ArgChecker:
         if not path.exists(directory_path + f"/stocks/{stock_list}"):
             print("The stocks list file must exist in the stocks directory")
             exit()
-        if data_source not in ["binance", "yahoo_finance"]:
-            print("Data source must be a valid and supported service.")
-            exit()
 
 
 class Surpriver:
@@ -177,7 +169,7 @@ class Surpriver:
         self.VOLATILITY_FILTER = volatility_filter
         self.OUTPUT_FORMAT = output_format
         self.STOCK_LIST = stock_list
-        self.DATA_SOURCE = data_source
+        self.CLOSE_PRICE_INDEX = 4
 
         # Create data engine
         self.dataEngine = DataEngine(
@@ -191,14 +183,13 @@ class Surpriver:
             self.FUTURE_BARS_FOR_TESTING,
             self.VOLATILITY_FILTER,
             self.STOCK_LIST,
-            self.DATA_SOURCE,
         )
 
-    def is_nan(self, object):
+    def is_nan(self, objects):
         """
         Checks if a value is null.
         """
-        return object != object
+        return objects != objects
 
     def calculate_percentage_change(self, old, new):
         return ((new - old) * 100) / old
@@ -230,9 +221,8 @@ class Surpriver:
             volume_by_date_dictionary[date].append(volume[j])
 
         for key in volume_by_date_dictionary:
-            volume_by_date_dictionary[key] = np.sum(
-                volume_by_date_dictionary[key]
-            )  # taking average as we have multiple bars per day.
+            volume_by_date_dictionary[key] = [np.sum(volume_by_date_dictionary[key])]
+            # taking average as we have multiple bars per day.
 
         # Get all dates
         all_dates = list(reversed(sorted(volume_by_date_dictionary.keys())))
@@ -240,13 +230,9 @@ class Surpriver:
         latest_data_point = list(reversed(sorted(dates)))[0]
 
         # Get volume information
-        today_volume = volume_by_date_dictionary[latest_date]
-        average_vol_last_five_days = np.mean(
-            [volume_by_date_dictionary[date] for date in all_dates[1:6]]
-        )
-        average_vol_last_twenty_days = np.mean(
-            [volume_by_date_dictionary[date] for date in all_dates[1:20]]
-        )
+        today_volume = volume_by_date_dictionary[latest_date][0]
+        average_vol_last_five_days = np.mean([volume_by_date_dictionary[date][0] for date in all_dates[1:6]])
+        average_vol_last_twenty_days = np.mean([volume_by_date_dictionary[date][0] for date in all_dates[1:20]])
 
         return (
             latest_data_point,
@@ -255,6 +241,7 @@ class Surpriver:
             self.parse_large_values(average_vol_last_twenty_days),
         )
 
+    # 计算close price 的标准差
     def calculate_recent_volatility(self, historical_price):
         close_price = list(historical_price["Close"])
         volatility_five_bars = np.std(close_price[-5:])
@@ -263,9 +250,8 @@ class Surpriver:
         return volatility_five_bars, volatility_twenty_bars, volatility_all
 
     def calculate_future_performance(self, future_data):
-        CLOSE_PRICE_INDEX = 4
-        price_at_alert = future_data[0][CLOSE_PRICE_INDEX]
-        prices_in_future = [item[CLOSE_PRICE_INDEX] for item in future_data[1:]]
+        price_at_alert = future_data[0][self.CLOSE_PRICE_INDEX]
+        prices_in_future = [item[self.CLOSE_PRICE_INDEX] for item in future_data[1:]]
         prices_in_future = [item for item in prices_in_future if item != 0]
         total_sum_percentage_change = abs(
             sum(
@@ -303,10 +289,10 @@ class Surpriver:
         # Find anomalous stocks using the Isolation Forest model.
         # Read more about the model at ->
         # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
-        detector = IsolationForest(n_estimators=100, random_state=0)
+        detector = IsolationForest(n_estimators=200, random_state=0)
         detector.fit(features)
         predictions = detector.decision_function(features)
-
+        print('type {}, sample {}'.format(type(predictions), predictions[: self.TOP_PREDICTIONS_TO_PRINT]))
         # Print top predictions with some statistics
         predictions_with_output_data = [
             [
@@ -371,8 +357,8 @@ class Surpriver:
                             today_volume,
                             average_vol_last_five_days,
                             average_vol_last_twenty_days,
-                            volatility_vol_last_five_days,
-                            volatility_vol_last_twenty_days,
+                            float(volatility_vol_last_five_days),
+                            float(volatility_vol_last_twenty_days),
                         )
                     )
                 results.append(
@@ -408,8 +394,8 @@ class Surpriver:
                             today_volume,
                             average_vol_last_five_days,
                             average_vol_last_twenty_days,
-                            volatility_vol_last_five_days,
-                            volatility_vol_last_twenty_days,
+                            float(volatility_vol_last_five_days),
+                            float(volatility_vol_last_twenty_days),
                             future_abs_sum_percentage_change,
                         )
                     )
@@ -430,6 +416,7 @@ class Surpriver:
         if self.OUTPUT_FORMAT == "JSON":
             self.store_results(results)
 
+        # draw pic
         if self.IS_TEST == 1:
             self.calculate_future_stats(predictions_with_output_data)
 
@@ -454,35 +441,38 @@ class Surpriver:
 
     def calculate_future_stats(self, predictions_with_output_data):
         """
-        Calculate different stats for future data to show whether the anomalous stocks found were actually better than non-anomalous ones
+        Calculate different stats for future data to show
+        whether the anomalous stocks found were actually better than non-anomalous ones
         """
         future_change = []
         anomalous_score = []
         historical_volatilities = []
         future_volatilities = []
+        symbols = []
 
         for item in predictions_with_output_data:
             prediction, symbol, historical_price, future_price = item
-            (
-                future_sum_percentage_change,
-                future_volatility,
-            ) = self.calculate_future_performance(future_price)
-            _, _, historical_volatility = self.calculate_recent_volatility(
-                historical_price
-            )
 
-            # Skip for when there is a reverse split, the yfinance package does not handle that well so percentages get weirdly large
-            if (
-                    abs(future_sum_percentage_change) > 250
-                    or self.is_nan(future_sum_percentage_change) == True
-                    or self.is_nan(prediction) == True
-            ):
+            future_sum_percentage_change, future_volatility = self.calculate_future_performance(future_price)
+            _, _, historical_volatility = self.calculate_recent_volatility(historical_price)
+
+            # Skip for when there is a reverse split,
+            # the yfinance package does not handle that well so percentages get weirdly large
+            if (abs(future_sum_percentage_change) > 250
+                    or self.is_nan(future_sum_percentage_change)
+                    or self.is_nan(prediction)):
                 continue
 
             future_change.append(future_sum_percentage_change)
             anomalous_score.append(prediction)
             future_volatilities.append(future_volatility)
             historical_volatilities.append(historical_volatility)
+            symbols.append(symbol)
+
+        print('abnormal stocks:')
+        for idx in range(0, len(anomalous_score)):
+            if anomalous_score[idx] < 0:
+                print(symbols[idx])
 
         # Calculate correlation and stats
         correlation = np.corrcoef(anomalous_score, future_change)[0, 1]
@@ -540,12 +530,12 @@ class Surpriver:
             "\nHistorical volatility for Normal Stocks: **%.3f**\n"
             % (
                 correlation,
-                anomalous_future_changes,
-                normal_future_changes,
-                anomalous_future_volatilities,
-                normal_future_volatilities,
-                anomalous_historical_volatilities,
-                normal_historical_volatilities,
+                float(anomalous_future_changes),
+                float(normal_future_changes),
+                float(anomalous_future_volatilities),
+                float(normal_future_volatilities),
+                float(anomalous_historical_volatilities),
+                float(normal_historical_volatilities),
             )
         )
 

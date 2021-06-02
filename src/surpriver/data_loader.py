@@ -3,8 +3,6 @@ import os
 import collections
 import numpy as np
 
-import pandas as pd
-import yfinance as yf
 from Utils.database import Database
 from tqdm import tqdm
 
@@ -28,7 +26,6 @@ class DataEngine:
             future_bars_for_testing,
             volatility_filter,
             stocks_list,
-            data_source,
     ):
         print("Data engine has been initialized...")
         self.db_name = config.STOCK_DATABASE_NAME
@@ -43,7 +40,7 @@ class DataEngine:
         self.FUTURE_FOR_TESTING = future_bars_for_testing
         self.IS_TEST = is_test
         self.VOLATILITY_THRESHOLD = volatility_filter
-        self.DATA_SOURCE = data_source
+        self.CLOSE_PRICE_INDEX = 4
 
         # Stocks list
         self.directory_path = str(os.path.dirname(os.path.abspath(__file__)))
@@ -133,123 +130,11 @@ class DataEngine:
             # print(history_data)
             return history_data, [], False
 
-    # symbol 股票代码
-    # 返回成交和价格数据。
-    # 这里可以做个修改，换成从自己的mongodb里面取数据。
-    def get_data(self, symbol):
-        """
-        Get stock data.
-        """
-
-        # Find period
-        if self.DATA_GRANULARITY_MINUTES == 1:
-            period = "7d"
-        else:
-            period = "30d"
-
-        try:
-            # get crytpo price from Binance
-            if self.DATA_SOURCE == "binance":
-                # Binance clients doesn't like 60m as an interval
-                if self.DATA_GRANULARITY_MINUTES == 60:
-                    interval = "1h"
-                else:
-                    interval = str(self.DATA_GRANULARITY_MINUTES) + "m"
-                stock_prices = self.binance_client.get_klines(
-                    symbol=symbol, interval=interval
-                )
-                # ensure that stock prices contains some data, otherwise the pandas operations below could fail
-                if len(stock_prices) == 0:
-                    return [], [], True
-                # convert list to pandas dataframe
-                stock_prices = pd.DataFrame(
-                    stock_prices,
-                    columns=[
-                        "Datetime",
-                        "Open",
-                        "High",
-                        "Low",
-                        "Close",
-                        "Volume",
-                        "close_time",
-                        "quote_av",
-                        "trades",
-                        "tb_base_av",
-                        "tb_quote_av",
-                        "ignore",
-                    ],
-                )
-                stock_prices["Datetime"] = stock_prices["Datetime"].astype(float)
-                stock_prices["Open"] = stock_prices["Open"].astype(float)
-                stock_prices["High"] = stock_prices["High"].astype(float)
-                stock_prices["Low"] = stock_prices["Low"].astype(float)
-                stock_prices["Close"] = stock_prices["Close"].astype(float)
-                stock_prices["Volume"] = stock_prices["Volume"].astype(float)
-            # get stock prices from yahoo finance
-            else:
-                stock_prices = yf.download(
-                    tickers=symbol,
-                    period=period,
-                    interval=str(self.DATA_GRANULARITY_MINUTES) + "m",
-                    auto_adjust=False,
-                    progress=False,
-                )
-            stock_prices = stock_prices.reset_index()
-            stock_prices = stock_prices[
-                ["Datetime", "Open", "High", "Low", "Close", "Volume"]
-            ]
-            data_length = len(stock_prices.values.tolist())
-            self.stock_data_length.append(data_length)
-
-            # After getting some data, ignore partial data based on number of data samples
-            if len(self.stock_data_length) > 5:
-                most_frequent_key = self.get_most_frequent_key(self.stock_data_length)
-                if data_length != most_frequent_key:
-                    return [], [], True
-
-            if self.IS_TEST == 1:
-                stock_prices_list = stock_prices.values.tolist()
-                stock_prices_list = stock_prices_list[1:]
-                # For some reason, yfinance gives some 0 values in the first index
-                future_prices_list = stock_prices_list[-(self.FUTURE_FOR_TESTING + 1):]
-                historical_prices = stock_prices_list[: -self.FUTURE_FOR_TESTING]
-                historical_prices = pd.DataFrame(historical_prices)
-                historical_prices.columns = [
-                    "Datetime",
-                    "Open",
-                    "High",
-                    "Low",
-                    "Close",
-                    "Volume",
-                ]
-            else:
-                # No testing
-                stock_prices_list = stock_prices.values.tolist()
-                stock_prices_list = stock_prices_list[1:]
-                historical_prices = pd.DataFrame(stock_prices_list)
-                historical_prices.columns = [
-                    "Datetime",
-                    "Open",
-                    "High",
-                    "Low",
-                    "Close",
-                    "Volume",
-                ]
-                future_prices_list = []
-
-            if len(stock_prices.values.tolist()) == 0:
-                return [], [], True
-        except Exception as e:
-            print(e)
-            return [], [], True
-
-        return historical_prices, future_prices_list, False
-
     def calculate_volatility(self, stock_price_data):
-        CLOSE_PRICE_INDEX = 4
+
         stock_price_data_list = stock_price_data.values.tolist()
         close_prices = [
-            float(item[CLOSE_PRICE_INDEX]) for item in stock_price_data_list
+            float(item[self.CLOSE_PRICE_INDEX]) for item in stock_price_data_list
         ]
         close_prices = [item for item in close_prices if item != 0]
         volatility = np.std(close_prices)
@@ -257,10 +142,9 @@ class DataEngine:
 
     def collect_data_for_all_tickers(self):
         """
-        Iterates over all symbols and collects their data
+        从mongodb里面获得所以股票以及其价格数据
         """
-
-        print("Loading data for all stocks...")
+        print("Loading data for all stocks from mongodb...")
         features = []
         symbol_names = []
         historical_price_info = []
@@ -284,7 +168,7 @@ class DataEngine:
                 features_dictionary = self.taEngine.get_technical_indicators(
                     stock_price_data
                 )
-                # print('features_dictionary, {}'.format(features_dictionary))
+                print('features_dictionary keys, {}'.format(features_dictionary.keys()))
                 feature_list = self.taEngine.get_features(features_dictionary)
 
                 # Add to dictionary
@@ -321,7 +205,7 @@ class DataEngine:
 
         print('features len {}'.format(len(features)))
         # print('historical_price_info {}'.format(historical_price_info))
-        print('future_price_info {}'.format(future_price_info))
+        print('future_price_info len {}'.format(len(future_price_info)))
         print('symbol_names len {}'.format(len(symbol_names)))
 
         # Sometimes, there are some errors in feature generation or price extraction, let us remove that stuff

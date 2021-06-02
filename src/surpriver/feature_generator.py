@@ -121,9 +121,9 @@ class TAEngine:
             ] + [slope_cci, r_value_cci, p_value_cci]
 
         # Daily log return
-        daily_return = ta.others.daily_return(
-            price_data["Close"], fillna=True
-        ).values.tolist()
+        # daily_return = ta.others.daily_return(
+        #     price_data["Close"], fillna=True
+        # ).values.tolist()
         daily_log_return = ta.others.daily_log_return(
             price_data["Close"], fillna=True
         ).values.tolist()
@@ -153,7 +153,7 @@ class TAEngine:
         But here, we will only use the price returns, volume returns, and eom values.
         """
 
-        keys_to_use = ["volume_returns", "daily_log_return", "eom"]
+        keys_to_use = ["volume_returns", "daily_log_return", "eom", 'cci', 'rsi']
         all_keys = list(sorted(features_dictionary.keys()))
         feature_list = []
         for key in all_keys:
@@ -164,6 +164,7 @@ class TAEngine:
                 # Add values for the key
                 feature_list.extend(features_dictionary[key])
             else:
+                # why???
                 # TAs such as CCI, RSI, STOCHS are being ignored. You can add another condition above to use them
                 _ = None
 
