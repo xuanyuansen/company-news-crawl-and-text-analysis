@@ -197,10 +197,10 @@ class ChanSourceDataObject(object):
 
         for i in range(self.exp12.shape[0] - 1):
             if (self.exp12.iloc[i] <= self.exp26[i]) & (self.exp12[i + 1] >= self.exp26[i + 1]):
-                self.cross_list.append((self.exp12.index[i + 1], 1))
+                self.cross_list.append((self.exp12.index[i+1], 1))
                 # print("MACD金叉的日期：{}".format(self.exp12.index[i + 1]))
             if (self.exp12.iloc[i] >= self.exp26[i]) & (self.exp12[i + 1] <= self.exp26[i + 1]):
-                self.cross_list.append((self.exp12.index[i + 1], -1))
+                self.cross_list.append((self.exp12.index[i+1], -1))
                 # print("MACD死叉的日期：{}".format(self.exp12.index[i + 1]))
 
         # BOLL线
@@ -256,6 +256,8 @@ class ChanSourceDataObject(object):
         last_cross = self.cross_list[-1]
         valid_ding = self.data_to_plot_frame.loc[self.data_to_plot_frame.Ding_to_draw.notnull(), :]
         valid_di = self.data_to_plot_frame.loc[self.data_to_plot_frame.Di_to_draw.notnull(), :]
+        # print(valid_ding, type(valid_ding))
+        # print(valid_di, type(valid_di))
         valid_ding_date = valid_ding.iloc[-1].name
         valid_di_date = valid_di.iloc[-1].name
         # print('valid_ding_date {}'.format(valid_ding_date))
@@ -384,7 +386,10 @@ class ChanSourceDataObject(object):
         if debug_flag:
             print([ele.ding_di_to_bi for ele in k_line_merged])
         return None
+
     pass
+
+
 # 类定义结束
 
 
@@ -419,7 +424,7 @@ def from_point_to_bi(data: list, value_data: list):
     while idx_start < len(data) - 1:
         # up bi
         if data[idx_start] == -1:
-            idx_end_j = idx_start+1
+            idx_end_j = idx_start + 1
             while idx_end_j < len(data) - 1:
                 if 1 == data[idx_end_j]:
                     break
@@ -486,9 +491,9 @@ def gap_between_first_second_element_then_shape_or_not(standard_feature_line: li
         # 这个时候新序列的方向变了
         if 'up' == direction:
             if standard_feature_line[idx_feature_line].low == min(
-                                                                standard_feature_line[idx_feature_line - 1].low,
-                                                                standard_feature_line[idx_feature_line].low,
-                                                                standard_feature_line[idx_feature_line + 1].low):
+                    standard_feature_line[idx_feature_line - 1].low,
+                    standard_feature_line[idx_feature_line].low,
+                    standard_feature_line[idx_feature_line + 1].low):
                 has_shape = True
                 break
         # 向xia时候看后续是否有ding分型
@@ -541,7 +546,7 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
         start_idx += 2
 
     # for element in sub_origin_down_bi_list:
-        # print(element[0])
+    # print(element[0])
 
     # 向下特征序列起始方向是向上的，处理成标准特征序列
     # 向下线段的特征序列由向上笔构成，这些笔的方向连起来看是向下的
@@ -566,16 +571,16 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
     idx_feature_line = 1
     # 这里是在特征序列中的index，实际上的其实index要+idx
     new_stop_idx = 0
-    while idx_feature_line < len(standard_feature_line)-1:
+    while idx_feature_line < len(standard_feature_line) - 1:
         # 向上的情况看顶分型
         if 'up' == feature_line_direction:
-            if standard_feature_line[idx_feature_line].high == max(standard_feature_line[idx_feature_line-1].high,
+            if standard_feature_line[idx_feature_line].high == max(standard_feature_line[idx_feature_line - 1].high,
                                                                    standard_feature_line[idx_feature_line].high,
-                                                                   standard_feature_line[idx_feature_line+1].high
+                                                                   standard_feature_line[idx_feature_line + 1].high
                                                                    ):
                 # 顶或者底分型前两个元素出现缺口时划分
                 if check_ding_di_shape_gap:
-                    if standard_feature_line[idx_feature_line-1].high < standard_feature_line[idx_feature_line].low:
+                    if standard_feature_line[idx_feature_line - 1].high < standard_feature_line[idx_feature_line].low:
                         new_start_idx = standard_feature_line[idx_feature_line].start_index
 
                         new_other_direction_feature_line = \
@@ -596,9 +601,9 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
         elif 'down' == feature_line_direction:
             # 向下方向的情况看底分型
             if standard_feature_line[idx_feature_line].low == min(
-                                                    standard_feature_line[idx_feature_line - 1].low,
-                                                    standard_feature_line[idx_feature_line].low,
-                                                    standard_feature_line[idx_feature_line + 1].low):
+                    standard_feature_line[idx_feature_line - 1].low,
+                    standard_feature_line[idx_feature_line].low,
+                    standard_feature_line[idx_feature_line + 1].low):
                 # 顶或者底分型前两个元素出现缺口时划分
                 if check_ding_di_shape_gap:
                     if standard_feature_line[idx_feature_line - 1].low > standard_feature_line[idx_feature_line].high:
@@ -631,7 +636,7 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
 
     # start_idx = idx + 1，这里要加回来才是最开始序列的位置，这里是合并后的所以不准确，从特征序列找, sub_origin_down_bi_list
     new_stop_idx_in_origin_list = 0
-    while new_stop_idx_in_origin_list < len(sub_origin_down_bi_list)-1:
+    while new_stop_idx_in_origin_list < len(sub_origin_down_bi_list) - 1:
         if sub_origin_down_bi_list[new_stop_idx_in_origin_list][0].start_index \
                 == standard_feature_line[new_stop_idx].start_index:
             new_stop_idx_in_origin_list = sub_origin_down_bi_list[new_stop_idx_in_origin_list][1]
@@ -649,7 +654,7 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
 
     # 从原始序列找。
     new_stop_idx_in_origin_list_double_check = 0
-    while idx_double_check < len(bi_list)-1:
+    while idx_double_check < len(bi_list) - 1:
         if bi_list[idx_double_check].start_index == standard_feature_line[new_stop_idx].start_index:
             new_stop_idx_in_origin_list_double_check = idx_double_check + sub_start_idx
             break
@@ -762,7 +767,7 @@ def bi_to_line_inner_check(start_idx: int,
                                                    bi_list[idx].high, bi_list[stop_idx].low,
                                                    bi_list[idx: stop_idx + 1]))
                 else:
-                    o_message = 'current line not right, direction is {0}, idx is {1}'\
+                    o_message = 'current line not right, direction is {0}, idx is {1}' \
                         .format(direction, start_idx)
                     warnings.warn(o_message)
                     # print(o_message)
@@ -776,7 +781,7 @@ def bi_to_line_inner_check(start_idx: int,
         # 禅的理论
         # 继续向上的线段直到出现线段被线段破坏
         if stop_idx != 0:
-            idx = stop_idx+2
+            idx = stop_idx + 2
         else:
             idx += 2
 
@@ -789,7 +794,7 @@ def bi_to_line_inner_check(start_idx: int,
 # 输入包含所有笔的序列
 def from_bi_list_to_line(bi_list: list, is_debug: bool = False):
     bi_idx = 0
-    while bi_idx < len(bi_list)-1:
+    while bi_idx < len(bi_list) - 1:
         if is_debug:
             print('index is {0}, bi element is {1}'.format(bi_idx, bi_list[bi_idx]))
         bi_idx += 1
@@ -798,7 +803,8 @@ def from_bi_list_to_line(bi_list: list, is_debug: bool = False):
     idx = 0
     while idx < len(bi_list) - 1:
         if is_debug:
-            print('===============outer start check, index is {0}, bi is {1}.==================='.format(idx, bi_list[idx]))
+            print('===============outer start check, index is {0}, bi is {1}.==================='.format(idx,
+                                                                                                         bi_list[idx]))
             print('===============outer check end.========================================\n\n\n')
         out_idx = bi_to_line_inner_check(idx, bi_list, chan_line_list, direction=bi_list[idx].direction)
         idx = out_idx
@@ -886,7 +892,7 @@ def from_macd_seq_with_zhong_shu_2_buy_sell_point_list_afterwords(chan_data: Cha
 
     else:
         zhong_shu_cnt = len(zhong_shu_list)
-        last_zhong_shu = zhong_shu_list[zhong_shu_cnt-1]
+        last_zhong_shu = zhong_shu_list[zhong_shu_cnt - 1]
         l_z_s_price = last_zhong_shu.zhong_shu_middle_price
         second_last_zhong_shu = zhong_shu_list[zhong_shu_cnt - 2]
         s_l_z_s_price = second_last_zhong_shu.zhong_shu_middle_price
@@ -902,7 +908,7 @@ def from_macd_seq_with_zhong_shu_2_buy_sell_point_list_afterwords(chan_data: Cha
             ret_current_type = '下跌'
             print('下跌趋势，不建议操作，等待机会，需要等待第一类买点')
             print('先判断这两个中枢是否出现背驰，即趋势的力度')
-            if 1.0/duo_kong_rate_last < 1.0/duo_kong_rate_second:
+            if 1.0 / duo_kong_rate_last < 1.0 / duo_kong_rate_second:
                 current_action = '背驰，空的力量变小，等第一类买点，重要的是耐心，至少日级别MACD回零轴'
                 sub_action = last_zhong_shu_and_price(zhong_shu_list[-1], last_close_price, bi_all)
                 print(current_action)
@@ -943,7 +949,7 @@ def last_zhong_shu_and_price(last_zhong_shu: ZhongShu, last_close_price, bi_all)
         xian_duan_min_value = min(sub_xian_duan_min_vs)
 
         if xian_duan_min_value > last_zhong_shu_middle_bottom_price:
-            current_action = '不破中枢，距离中枢{0},多空分出胜负，脱离中枢价格{1}，可以选择涨幅小的买入'\
+            current_action = '不破中枢，距离中枢{0},多空分出胜负，脱离中枢价格{1}，可以选择涨幅小的买入' \
                 .format(current_distance, break_ratio)
             # print(current_action)
         else:
@@ -971,7 +977,7 @@ def get_macd_info(chan_data: ChanSourceDataObject, t_zhong_shu: ZhongShu):
     red_line_sum = red_line.sum()
     print('red_line_cnt', red_line_cnt)
     print('red_line_sum', red_line_sum)
-    print('average_red_strength', red_line_sum/red_line_cnt)
+    print('average_red_strength', red_line_sum / red_line_cnt)
 
     green_line = chan_data.histogram_negative.iloc[zhong_shu_start_index: zhong_shu_end_index]
     green_line = green_line[green_line < 0]
@@ -979,10 +985,10 @@ def get_macd_info(chan_data: ChanSourceDataObject, t_zhong_shu: ZhongShu):
     green_line_sum = green_line.sum()
     print('green_line_cnt', green_line_cnt)
     print('green_line_sum', green_line_sum)
-    print('average_green_strength', green_line_sum/green_line_cnt)
+    print('average_green_strength', green_line_sum / green_line_cnt)
 
-    print('中枢内多空力量比，{0}'.format(red_line_sum/(-1.0*green_line_sum)))
-    return red_line_sum/(-1.0*green_line_sum)
+    print('中枢内多空力量比，{0}'.format(red_line_sum / (-1.0 * green_line_sum)))
+    return red_line_sum / (-1.0 * green_line_sum)
 
 
 # 注意该方法要在事中进行分析，不能使用未来的数据。
@@ -1002,7 +1008,7 @@ def from_macd_seq_with_zhong_shu_2_buy_sell_point_in_time(chan_data: ChanSourceD
     h_len = histogram.shape[0]
     buy_flag = False
     for idx in range(1, h_len):
-        current_macd = histogram.iloc[idx-1]
+        current_macd = histogram.iloc[idx - 1]
         next_macd = histogram.iloc[idx]
         if next_macd < 0:
             print("hold money")
@@ -1037,8 +1043,9 @@ def from_macd_seq_with_zhong_shu_2_buy_sell_point_in_time(chan_data: ChanSourceD
 
 def plot_with_mlf_v2(chan_data_object: ChanSourceDataObject, stock_name: str, pic_date: str):
     data = chan_data_object.get_plot_data_frame()
+    # print(data[:data.shape[0]])
     max_boll = data['upper'].max()
-    print("max of boll is {0}".format(max_boll))
+    # print("max of boll is {0}".format(max_boll))
 
     add_plot = [
         # 原图上面的MACD线
@@ -1050,42 +1057,49 @@ def plot_with_mlf_v2(chan_data_object: ChanSourceDataObject, stock_name: str, pi
         mpf.make_addplot(chan_data_object.macd, panel=2, color='fuchsia', secondary_y=True),
         mpf.make_addplot(chan_data_object.signal, panel=2, color='b', secondary_y=True),
 
-        # 成交量放大的点可以加到成交量的图上面去。
-        mpf.make_addplot(data['break_point_of_buy']*max_boll,
-                         scatter=True, markersize=10, marker='^',
-                         color='r', panel=1, secondary_y='auto'),
-        mpf.make_addplot(data['break_point_of_sell']*max_boll,
-                         scatter=True, markersize=10, marker='v',
-                         color='blue', panel=1, secondary_y='auto'),
-
         # BOLL线
         mpf.make_addplot(data['upper'], type='line', color='r', panel=1),
         mpf.make_addplot(data['lower'], type='line', color='g', panel=1),
         mpf.make_addplot(data['middle'], type='line', color='b', panel=1),
 
+        # valid 顶底分型
+        # ding red and di  green
+        mpf.make_addplot(data['Valid_ding_to_draw'], scatter=True, markersize=25, marker='^', color='r'),
+        mpf.make_addplot(data['Valid_di_to_draw'], scatter=True, markersize=25, marker='v', color='g'),
+
         # 顶底分型
         # ding red and di  green
-        mpf.make_addplot(data['Valid_ding_to_draw'], scatter=True, markersize=15, marker='^', color='r'),
-        mpf.make_addplot(data['Valid_di_to_draw'], scatter=True, markersize=15, marker='v', color='g'),
+        mpf.make_addplot(data['Ding_to_draw'], scatter=True, markersize=8, marker='^', color='r'),
+        mpf.make_addplot(data['Di_to_draw'], scatter=True, markersize=8, marker='v', color='g'),
 
         # 笔
         # chan bi
         mpf.make_addplot(data['Bi_to_draw'], scatter=False, type='line',
                          color='black', linestyle='--', width=0.8),
-
-        # 线段
-        # chan line
-        mpf.make_addplot(data['Line_to_draw'], scatter=False, type='line',
-                         color='blue', linestyle='--', width=1.2),
-
-
     ]
+
+    # 成交量放大的点可以加到成交量的图上面去。
+    if data.loc[data.break_point_of_buy.notnull(), :].shape[0] > 0:
+        add_plot.append(mpf.make_addplot(data['break_point_of_buy'] * max_boll,
+                                         scatter=True, markersize=10, marker='^',
+                                         color='r', panel=1, secondary_y='auto'), )
+    if data.loc[data.break_point_of_sell.notnull(), :].shape[0] > 0:
+        add_plot.append(mpf.make_addplot(data['break_point_of_sell'] * max_boll,
+                                         scatter=True, markersize=10, marker='v',
+                                         color='blue', panel=1, secondary_y='auto'), )
+
+    # 线段
+    # chan line
+    if len(chan_data_object.merged_chan_line_list) > 0:
+        add_plot.append(mpf.make_addplot(data['Line_to_draw'], scatter=False, type='line',
+                                         color='blue', linestyle='--', width=1.2))
+
     # zhong shu
     if len(chan_data_object.zhong_shu_list) > 0:
         add_plot.append(mpf.make_addplot(data['Zhong_shu_up_to_draw'], scatter=False, type='line',
-                                         color='red', linestyle='-', width=0.5),)
+                                         color='red', linestyle='-', width=0.5), )
         add_plot.append(mpf.make_addplot(data['Zhong_shu_down_to_draw'], scatter=False, type='line',
-                                         color='black', linestyle='-', width=0.5),)
+                                         color='black', linestyle='-', width=0.5), )
 
     my_color = mpf.make_marketcolors(up='red', down='cyan', edge='inherit', wick='black',
                                      volume={'up': 'red', 'down': 'green'})

@@ -22,16 +22,16 @@ if __name__ == '__main__':
     t_stock = 'sh600000'
     k_level = 'week'
     name = '浦发银行'
-    df = stock_info_spyder.get_week_data_cn_stock(symbol='sh600000', market_type='cn')
+    df = stock_info_spyder.get_week_data_cn_stock(symbol='sz001201', market_type='cn', start_date='2019-05-24')
 
     # db = Database()
     # df = db.get_data(database_name='stock', collection_name='000001.XSHE_week')
-    print(df[:100])
+    # print(df[:100])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     df['Date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
     df.set_index("Date", inplace=True)
-    print(df[:100])
+    # print(df[:100])
     # run_type = str(sys.argv[4])
 
     stock_data = df
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     ding_di_data = chan_data.get_ding_di()
     print(ding_di_data)
 
-    res = chan_data.is_valid_buy_sell_point_on_week_line()
-    print('is buy point {}'.format(res))
+    res, cross, ding, di = chan_data.is_valid_buy_sell_point_on_week_line()
+    print('is buy point {} {} {} {}'.format(res, cross, ding, di))
 
     plot_with_mlf_v2(chan_data, '{0},{1},{2}'.format(t_stock, name, k_level), today_date)
 

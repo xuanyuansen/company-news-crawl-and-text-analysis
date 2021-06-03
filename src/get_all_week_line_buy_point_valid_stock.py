@@ -35,13 +35,19 @@ if __name__ == '__main__':
             if row['end_date'] < datetime.datetime.now():
                 continue
             stock_data = stock_info_spyder.get_week_data_cn_stock(row['symbol'], market_type='cn')
+            if stock_data.shape[0] < 12:
+                continue
             stock_data['Date'] = pd.to_datetime(stock_data['date'], format='%Y-%m-%d')
             stock_data.set_index("Date", inplace=True)
             merged_k_line_data = KiLineObject.k_line_merge(row['symbol'], stock_data)
             chan_data = ChanSourceDataObject('week', merged_k_line_data)
             chan_data.gen_data_frame()
-
-            valid, last_cross, valid_ding_date, valid_di_date = chan_data.is_valid_buy_sell_point_on_week_line()
+            try:
+                valid, last_cross, valid_ding_date, valid_di_date = chan_data.is_valid_buy_sell_point_on_week_line()
+            except Exception as e:
+                print(row)
+                print(e)
+                break
             if valid:
                 print(row)
                 print('is buy point {},{},{},{}'.format(valid, last_cross, valid_ding_date, valid_di_date))
@@ -49,6 +55,7 @@ if __name__ == '__main__':
                                                           'name': row['name'],
                                                           'last_cross': last_cross[0].strftime('%Y-%m-%d'),
                                                           'last_valid_ding_date': valid_ding_date.strftime('%Y-%m-%d'),
-                                                          'last_valid_di_date': valid_di_date.strftime('%Y-%m-%d')})))
+                                                          'last_valid_di_date': valid_di_date.strftime('%Y-%m-%d')},
+                                                         ensure_ascii=False)))
 
     pass

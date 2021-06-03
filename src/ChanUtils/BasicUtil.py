@@ -66,7 +66,7 @@ class KiLineObject(object):
 
     # 处理，先找到不包含的K线，然后开始处理。
     @staticmethod
-    def k_line_merge(stock_code, stock_data):
+    def k_line_merge(stock_code, stock_data, merge_or_not: bool =True):
         k_line_list = []
         for idx in range(0, stock_data.shape[0]):
             k_line_ele = KiLineObject(stock_code, [stock_data.iloc[idx].name],
@@ -77,7 +77,10 @@ class KiLineObject(object):
                                       stock_data.iloc[idx]['volume'],
                                       stock_data.iloc[idx]['money'])
             k_line_list.append(k_line_ele)
-        return inner_merge(k_line_list)
+        if merge_or_not:
+            return inner_merge(k_line_list)
+        else:
+            return k_line_list
     pass
 
 
