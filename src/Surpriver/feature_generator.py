@@ -37,13 +37,17 @@ class TAEngine:
         rsi_history = [5, 10, 15]
         for history in rsi_history:
             rsi = (
-                ta.momentum.RSIIndicator(price_data["Close"], window=history, fillna=True)
+                ta.momentum.RSIIndicator(
+                    price_data["Close"], window=history, fillna=True
+                )
                 .rsi()
                 .values.tolist()
             )
-            slope_rsi, r_value_rsi, p_value_rsi = self.calculate_slope(rsi[-self.HISTORY_TO_USE:])
+            slope_rsi, r_value_rsi, p_value_rsi = self.calculate_slope(
+                rsi[-self.HISTORY_TO_USE :]
+            )
             technical_indicators_dictionary["rsi-" + str(history)] = rsi[
-                -self.HISTORY_TO_USE:
+                -self.HISTORY_TO_USE :
             ] + [slope_rsi, r_value_rsi, p_value_rsi]
 
         # Stochastic
@@ -61,9 +65,11 @@ class TAEngine:
                 .stoch()
                 .values.tolist()
             )
-            slope_stoch, r_value_stoch, p_value_stoch = self.calculate_slope(stochastics[-self.HISTORY_TO_USE:])
+            slope_stoch, r_value_stoch, p_value_stoch = self.calculate_slope(
+                stochastics[-self.HISTORY_TO_USE :]
+            )
             technical_indicators_dictionary["stochs-" + str(history)] = stochastics[
-                -self.HISTORY_TO_USE:
+                -self.HISTORY_TO_USE :
             ] + [slope_stoch, r_value_stoch, p_value_stoch]
 
         # Accumulation Distribution
@@ -74,7 +80,7 @@ class TAEngine:
             price_data["Volume"],
             fillna=True,
         ).values.tolist()
-        acc_dist = acc_dist[-self.HISTORY_TO_USE:]
+        acc_dist = acc_dist[-self.HISTORY_TO_USE :]
         slope_acc_dist, r_value_acc_dist, p_value_acc_dist = self.calculate_slope(
             acc_dist
         )
@@ -96,7 +102,9 @@ class TAEngine:
                 window=history,
                 fillna=True,
             ).values.tolist()
-            slope_eom, r_value_eom, p_value_eom = self.calculate_slope(eom[-self.HISTORY_TO_USE:])
+            slope_eom, r_value_eom, p_value_eom = self.calculate_slope(
+                eom[-self.HISTORY_TO_USE :]
+            )
             technical_indicators_dictionary["eom-" + str(history)] = [
                 slope_eom,
                 r_value_eom,
@@ -115,9 +123,11 @@ class TAEngine:
                 constant=0.015,
                 fillna=True,
             ).values.tolist()
-            slope_cci, r_value_cci, p_value_cci = self.calculate_slope(cci[-self.HISTORY_TO_USE:])
+            slope_cci, r_value_cci, p_value_cci = self.calculate_slope(
+                cci[-self.HISTORY_TO_USE :]
+            )
             technical_indicators_dictionary["cci-" + str(history)] = cci[
-                -self.HISTORY_TO_USE:
+                -self.HISTORY_TO_USE :
             ] + [slope_cci, r_value_cci, p_value_cci]
 
         # Daily log return
@@ -128,7 +138,7 @@ class TAEngine:
             price_data["Close"], fillna=True
         ).values.tolist()
         technical_indicators_dictionary["daily_log_return"] = daily_log_return[
-            -self.HISTORY_TO_USE:
+            -self.HISTORY_TO_USE :
         ]
 
         # Volume difference
@@ -138,10 +148,10 @@ class TAEngine:
             volume_list[x] / volume_list[x - 1] for x in range(1, len(volume_list))
         ]
         slope_vol, r_value_vol, p_value_vol = self.calculate_slope(
-            volume_returns[-self.HISTORY_TO_USE:]
+            volume_returns[-self.HISTORY_TO_USE :]
         )
         technical_indicators_dictionary["volume_returns"] = volume_returns[
-            -self.HISTORY_TO_USE:
+            -self.HISTORY_TO_USE :
         ] + [slope_vol, r_value_vol, p_value_vol]
 
         return technical_indicators_dictionary
@@ -153,7 +163,7 @@ class TAEngine:
         But here, we will only use the price returns, volume returns, and eom values.
         """
 
-        keys_to_use = ["volume_returns", "daily_log_return", "eom", 'cci', 'rsi']
+        keys_to_use = ["volume_returns", "daily_log_return", "eom", "cci", "rsi"]
         all_keys = list(sorted(features_dictionary.keys()))
         feature_list = []
         for key in all_keys:

@@ -15,8 +15,8 @@ from Utils.database import Database
 class PlotUtil(object):
     def __init__(self, data_to_plot: pd.DataFrame):
         self.data_to_plot_frame = data_to_plot
-        self.exp12 = self.data_to_plot_frame['close'].ewm(span=12, adjust=False).mean()
-        self.exp26 = self.data_to_plot_frame['close'].ewm(span=26, adjust=False).mean()
+        self.exp12 = self.data_to_plot_frame["close"].ewm(span=12, adjust=False).mean()
+        self.exp26 = self.data_to_plot_frame["close"].ewm(span=26, adjust=False).mean()
         self.macd = self.exp12 - self.exp26
         self.signal = self.macd.ewm(span=9, adjust=False).mean()
 
@@ -43,50 +43,79 @@ class PlotUtil(object):
         # classta.volatility.BollingerBands(close: pandas.core.series.Series, window: int = 20,
         # window_dev: int = 2, fillna: bool = False)
         self.boll = ta.volatility.BollingerBands(
-            self.data_to_plot_frame['close'],
+            self.data_to_plot_frame["close"],
             window=20,
             # number of non-biased standard deviations from the mean
             window_dev=2,
             # Moving average type: simple moving average here
-            fillna=False)
+            fillna=False,
+        )
         print(self.boll)
-        self.data_to_plot_frame['upper'] = self.boll.bollinger_hband()
-        self.data_to_plot_frame['lower'] = self.boll.bollinger_lband()
-        self.data_to_plot_frame['middle'] = self.boll.bollinger_mavg()
+        self.data_to_plot_frame["upper"] = self.boll.bollinger_hband()
+        self.data_to_plot_frame["lower"] = self.boll.bollinger_lband()
+        self.data_to_plot_frame["middle"] = self.boll.bollinger_mavg()
         self.add_plot = [
             # 原图上面的MACD线
             # mpf.make_addplot(exp12, type='line', color='y'),
             # mpf.make_addplot(exp26, type='line', color='r'),
             # MACD图上面的面积柱子，红柱子，绿柱子
-            mpf.make_addplot(self.histogram_positive, type='bar', width=0.7, panel=2, color='red'),
-            mpf.make_addplot(self.histogram_negative, type='bar', width=0.7, panel=2, color='green'),
-            mpf.make_addplot(self.macd, panel=2, color='fuchsia', secondary_y=True),
-            mpf.make_addplot(self.signal, panel=2, color='b', secondary_y=True),
-
+            mpf.make_addplot(
+                self.histogram_positive, type="bar", width=0.7, panel=2, color="red"
+            ),
+            mpf.make_addplot(
+                self.histogram_negative, type="bar", width=0.7, panel=2, color="green"
+            ),
+            mpf.make_addplot(self.macd, panel=2, color="fuchsia", secondary_y=True),
+            mpf.make_addplot(self.signal, panel=2, color="b", secondary_y=True),
             # BOLL线
-            mpf.make_addplot(self.data_to_plot_frame['upper'], type='line', color='r', panel=1),
-            mpf.make_addplot(self.data_to_plot_frame['lower'], type='line', color='g', panel=1),
-            mpf.make_addplot(self.data_to_plot_frame['middle'], type='line', color='b', panel=1),
+            mpf.make_addplot(
+                self.data_to_plot_frame["upper"], type="line", color="r", panel=1
+            ),
+            mpf.make_addplot(
+                self.data_to_plot_frame["lower"], type="line", color="g", panel=1
+            ),
+            mpf.make_addplot(
+                self.data_to_plot_frame["middle"], type="line", color="b", panel=1
+            ),
         ]
-        self.my_color = mpf.make_marketcolors(up='red', down='cyan', edge='inherit', wick='black',
-                                              volume={'up': 'red', 'down': 'green'})
-        self.my_style = mpf.make_mpf_style(marketcolors=self.my_color, gridaxis='both', gridstyle='-.',
-                                           y_on_right=False)
+        self.my_color = mpf.make_marketcolors(
+            up="red",
+            down="cyan",
+            edge="inherit",
+            wick="black",
+            volume={"up": "red", "down": "green"},
+        )
+        self.my_style = mpf.make_mpf_style(
+            marketcolors=self.my_color,
+            gridaxis="both",
+            gridstyle="-.",
+            y_on_right=False,
+        )
 
     def plot(self, stock_name, pic_date):
-        mpf.plot(self.data_to_plot_frame, type='candle', addplot=self.add_plot, mav=(5, 10, 30), volume=True,
-                 figscale=1.4,
-                 style=self.my_style, title='{0}: {1}'.format(stock_name, pic_date),
-                 ylabel='Price', ylabel_lower='Volume', xrotation=15, datetime_format='%Y-%m-%d')
+        mpf.plot(
+            self.data_to_plot_frame,
+            type="candle",
+            addplot=self.add_plot,
+            mav=(5, 10, 30),
+            volume=True,
+            figscale=1.4,
+            style=self.my_style,
+            title="{0}: {1}".format(stock_name, pic_date),
+            ylabel="Price",
+            ylabel_lower="Volume",
+            xrotation=15,
+            datetime_format="%Y-%m-%d",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     db = Database()
-    df = db.get_data(database_name='stock', collection_name='000001.XSHE_week')
+    df = db.get_data(database_name="stock", collection_name="000001.XSHE_week")
     print(df[:100])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df.set_index("date", inplace=True)
     print(df[:100])
 

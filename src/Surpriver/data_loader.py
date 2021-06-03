@@ -15,17 +15,17 @@ warnings.filterwarnings("ignore")
 
 class DataEngine:
     def __init__(
-            self,
-            history_to_use,
-            data_granularity_minutes,  # default=15
-            is_save_dict,
-            is_load_dict,
-            dict_path,
-            min_volume_filter,
-            is_test,
-            future_bars_for_testing,
-            volatility_filter,
-            stocks_list,
+        self,
+        history_to_use,
+        data_granularity_minutes,  # default=15
+        is_save_dict,
+        is_load_dict,
+        dict_path,
+        min_volume_filter,
+        is_test,
+        future_bars_for_testing,
+        volatility_filter,
+        stocks_list,
     ):
         print("Data engine has been initialized...")
         self.db_name = config.STOCK_DATABASE_NAME
@@ -84,14 +84,14 @@ class DataEngine:
         return frequent_key
 
     def new_get_data(self, symbol):
-        if 'sh' in symbol or 'sz' in symbol:
+        if "sh" in symbol or "sz" in symbol:
             col_name = symbol
-        elif 'basic_info' == symbol:
+        elif "basic_info" == symbol:
             return [], [], True
         elif int(symbol) >= 600000:
-            col_name = 'sh{}'.format(symbol)
+            col_name = "sh{}".format(symbol)
         else:
-            col_name = 'sz{}'.format(symbol)
+            col_name = "sz{}".format(symbol)
 
         df = self.db_obj.get_data(self.db_name, col_name)
         if df.shape[0] < 30:
@@ -105,28 +105,34 @@ class DataEngine:
         df["Volume"] = df["volume"].astype(float)
 
         if self.IS_TEST == 1:
-            future_prices_list = df.iloc[-(self.FUTURE_FOR_TESTING + 1):, :].values.tolist()
+            future_prices_list = df.iloc[
+                -(self.FUTURE_FOR_TESTING + 1) :, :
+            ].values.tolist()
             historical_prices = df.iloc[: -self.FUTURE_FOR_TESTING, :]
-            history_data = historical_prices[[
-                "Datetime",
-                "Open",
-                "High",
-                "Low",
-                "Close",
-                "Volume",
-            ]]
+            history_data = historical_prices[
+                [
+                    "Datetime",
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                ]
+            ]
             # print(history_data)
             return history_data, future_prices_list, False
         else:
             # No testing
-            history_data = df[[
-                "Datetime",
-                "Open",
-                "High",
-                "Low",
-                "Close",
-                "Volume",
-            ]]
+            history_data = df[
+                [
+                    "Datetime",
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                ]
+            ]
             # print(history_data)
             return history_data, [], False
 
@@ -160,7 +166,7 @@ class DataEngine:
 
             if not not_found:
                 volatility = self.calculate_volatility(stock_price_data)
-                print('volatility, {} {}'.format(volatility, symbol))
+                print("volatility, {} {}".format(volatility, symbol))
                 # Filter low volatility stocks
                 if volatility < self.VOLATILITY_THRESHOLD:  # default=0.05,
                     continue
@@ -168,7 +174,7 @@ class DataEngine:
                 features_dictionary = self.taEngine.get_technical_indicators(
                     stock_price_data
                 )
-                print('features_dictionary keys, {}'.format(features_dictionary.keys()))
+                print("features_dictionary keys, {}".format(features_dictionary.keys()))
                 feature_list = self.taEngine.get_features(features_dictionary)
 
                 # Add to dictionary
@@ -180,12 +186,10 @@ class DataEngine:
 
                 # Save dictionary after every 100 symbols
                 if (
-                        len(self.features_dictionary_for_all_symbols) % 100 == 0
-                        and self.IS_SAVE_DICT == 1
+                    len(self.features_dictionary_for_all_symbols) % 100 == 0
+                    and self.IS_SAVE_DICT == 1
                 ):
-                    np.save(
-                        self.DICT_PATH, self.features_dictionary_for_all_symbols
-                    )
+                    np.save(self.DICT_PATH, self.features_dictionary_for_all_symbols)
 
                 if np.isnan(feature_list).any():
                     continue
@@ -203,10 +207,10 @@ class DataEngine:
                 historical_price_info.append(stock_price_data)
                 future_price_info.append(future_prices)
 
-        print('features len {}'.format(len(features)))
+        print("features len {}".format(len(features)))
         # print('historical_price_info {}'.format(historical_price_info))
-        print('future_price_info len {}'.format(len(future_price_info)))
-        print('symbol_names len {}'.format(len(symbol_names)))
+        print("future_price_info len {}".format(len(future_price_info)))
+        print("symbol_names len {}".format(len(symbol_names)))
 
         # Sometimes, there are some errors in feature generation or price extraction, let us remove that stuff
         (
@@ -258,14 +262,14 @@ class DataEngine:
         return features, historical_price_info, future_price_info, symbol_names
 
     def remove_bad_data(
-            self, features, historical_price_info, future_price_info, symbol_names
+        self, features, historical_price_info, future_price_info, symbol_names
     ):
         """
         Remove bad data i.e data that had some errors while scraping or feature generation
         """
         length_dictionary = collections.Counter([len(feature) for feature in features])
         length_dictionary = list(length_dictionary.keys())
-        print('length_dictionary is {}'.format(len(length_dictionary)))
+        print("length_dictionary is {}".format(len(length_dictionary)))
         most_common_length = length_dictionary[0]
 
         (

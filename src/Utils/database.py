@@ -71,7 +71,7 @@ class Database(object):
                             _dict[_key].append("null")
                 else:
                     break
-            logging.info("fine done")
+            logging.info("fine done, data cnt is {}".format(len(_dict.get(keys[0]))))
         else:
             # data = collection.find()
             data = collection.find(query) if len(query) != 0 else collection.find()
@@ -103,7 +103,7 @@ class Database(object):
                         _dict[_key].append(row[_key])
                 else:
                     break
-        logging.info("find done {0}".format(len(_dict)))
+            logging.info("find done {0}".format(len(_dict.get(data_keys[0]))))
         return pd.DataFrame(_dict)
 
     def drop_db(self, database):

@@ -1,17 +1,17 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
 # import sys
-import pandas as pd
+import sys
 
+import pandas as pd
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 from Utils import config
-from Utils.database import Database
 from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     set_display()
     print(today_date)
 
@@ -19,17 +19,21 @@ if __name__ == '__main__':
         config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
     )
 
-    t_stock = 'sh600000'
-    k_level = 'week'
-    name = '浦发银行'
-    df = stock_info_spyder.get_week_data_cn_stock(symbol='sz001201', market_type='cn', start_date='2019-05-24')
-
+    t_stock = sys.argv[1]
+    k_level = "week"
+    name = sys.argv[1]
+    data_res, df = stock_info_spyder.get_week_data_cn_stock(
+        symbol=t_stock, market_type="cn"
+    )
+    if not data_res:
+        sys.exit(-1)
+    print(df.shape)
     # db = Database()
     # df = db.get_data(database_name='stock', collection_name='000001.XSHE_week')
     # print(df[:100])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-    df['Date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+    df["Date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df.set_index("Date", inplace=True)
     # print(df[:100])
     # run_type = str(sys.argv[4])
@@ -45,9 +49,11 @@ if __name__ == '__main__':
     ding_di_data = chan_data.get_ding_di()
     print(ding_di_data)
 
-    res, cross, ding, di = chan_data.is_valid_buy_sell_point_on_week_line()
-    print('is buy point {} {} {} {}'.format(res, cross, ding, di))
+    res, cross, ding, di, distance = chan_data.is_valid_buy_sell_point_on_week_line()
+    print("is buy point {} {} {} {} {}".format(res, cross, ding, di, distance))
 
-    plot_with_mlf_v2(chan_data, '{0},{1},{2}'.format(t_stock, name, k_level), today_date)
+    plot_with_mlf_v2(
+        chan_data, "{0},{1},{2}".format(t_stock, name, k_level), today_date
+    )
 
     pass

@@ -28,35 +28,48 @@ logging.basicConfig(
 # 再把这些消息插入到各自新闻的db.同时生成报告
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--spider', help='run spider')
-    parser.add_argument('-r', '--report', help='run report')
+    parser.add_argument("-s", "--spider", help="run spider")
+    parser.add_argument("-r", "--report", help="run report")
     args = parser.parse_args()
     if args.spider:
-        logging.info('page number is {}'.format(int(args.spider)))
+        logging.info("page number is {}".format(int(args.spider)))
         os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
         settings = get_project_settings()
         _process = CrawlerProcess(settings)
 
         EAST_MONEY = [
-            element.update({"end_page": int(args.spider)}) for element in config.EAST_MONEY_SPIDER_LIST
+            element.update({"end_page": int(args.spider)})
+            for element in config.EAST_MONEY_SPIDER_LIST
         ]
 
-        JRJ_NEWS = [element.update({"end_page": int(args.spider)}) for element in config.JRJ_SPIDER_LIST]
+        JRJ_NEWS = [
+            element.update({"end_page": int(args.spider)})
+            for element in config.JRJ_SPIDER_LIST
+        ]
 
         NET_EASE = [
-            element.update({"end_page": int(args.spider)}) for element in config.NET_EASE_SPIDER_LIST
+            element.update({"end_page": int(args.spider)})
+            for element in config.NET_EASE_SPIDER_LIST
         ]
 
-        STCN_EASE = [element.update({"end_page": int(args.spider)}) for element in config.STCN_SPIDER_LIST]
+        STCN_EASE = [
+            element.update({"end_page": int(args.spider)})
+            for element in config.STCN_SPIDER_LIST
+        ]
 
         SHANG_HAI = [
-            element.update({"end_page": int(args.spider)}) for element in config.SHANG_HAI_SPIDER_LIST
+            element.update({"end_page": int(args.spider)})
+            for element in config.SHANG_HAI_SPIDER_LIST
         ]
 
-        NBD_NEWS = [element.update({"end_page": int(args.spider)}) for element in config.NBD_SPIDER_LIST]
+        NBD_NEWS = [
+            element.update({"end_page": int(args.spider)})
+            for element in config.NBD_SPIDER_LIST
+        ]
 
         ZHONG_JIN = [
-            element.update({"end_page": 2*int(args.spider)}) for element in config.ZHONG_JIN_SPIDER_LIST
+            element.update({"end_page": 2 * int(args.spider)})
+            for element in config.ZHONG_JIN_SPIDER_LIST
         ]
 
         for spider_config in config.EAST_MONEY_SPIDER_LIST:
@@ -84,8 +97,10 @@ if __name__ == "__main__":
         _process.start()
 
     if args.report:
-        logging.info('report of {} days'.format(int(args.report)))
-        start_date_time = (datetime.now() - timedelta(days=int(args.report))).strftime("%Y-%m-%d")
+        logging.info("report of {} days".format(int(args.report)))
+        start_date_time = (datetime.now() - timedelta(days=int(args.report))).strftime(
+            "%Y-%m-%d"
+        )
         logging.info("start time is {}".format(start_date_time))
         gdb = GenStockNewsDB(force_update_score_using_model=True, generate_report=True)
         report_list_of_dict = []
@@ -187,9 +202,18 @@ if __name__ == "__main__":
         # logging.info('all unique news count is '.format(len(whole_report_dict_sorted)))
         report_list_of_dict = gdb.get_report_raw_version()
 
-        file_name = './info/news_{}.xlsx'.format(datetime.now().strftime("%Y-%m-%d"))
+        file_name = "./info/news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
 
-        ordered_list = ["Code", "Title", "Article", "Date", 'Category', "Label", "Score", "Url"]
+        ordered_list = [
+            "Code",
+            "Title",
+            "Article",
+            "Date",
+            "Category",
+            "Label",
+            "Score",
+            "Url",
+        ]
         # list object calls by index but dict object calls items randomly
         wb = Workbook(file_name)
         ws = wb.add_worksheet("News")  # or leave it blank, default name is "Sheet 1"
@@ -197,11 +221,13 @@ if __name__ == "__main__":
         first_row = 0
         for header in ordered_list:
             col = ordered_list.index(header)  # we are keeping order.
-            ws.write(first_row, col, header)  # we have written first row which is the header of worksheet also.
+            ws.write(
+                first_row, col, header
+            )  # we have written first row which is the header of worksheet also.
 
         row = 1
         for news in report_list_of_dict:
-            ws.write(row, 0, news.get('RelatedStockCodes'))
+            ws.write(row, 0, news.get("RelatedStockCodes"))
             idx = 1
             for ele in ordered_list[1:]:
                 ws.write(row, idx, news.get(ele))
@@ -210,20 +236,26 @@ if __name__ == "__main__":
         wb.close()
         title_dict = dict()
         for ele_dict in report_list_of_dict:
-            related_codes = json.loads(ele_dict.get('RelatedStockCodes'))
-            _label = ele_dict.get('Label')
+            related_codes = json.loads(ele_dict.get("RelatedStockCodes"))
+            _label = ele_dict.get("Label")
             for k, _ in related_codes.items():
                 if title_dict.get(k) is None:
                     title_dict[k] = {_label: 1}
                 else:
-                    title_dict[k].update({_label: get_or_else(title_dict[k], _label)+1})
+                    title_dict[k].update(
+                        {_label: get_or_else(title_dict[k], _label) + 1}
+                    )
 
-        title_dict_sort = sorted(title_dict.items(), key=lambda item: get_or_else(item[1], '利好'), reverse=True)
+        title_dict_sort = sorted(
+            title_dict.items(),
+            key=lambda item: get_or_else(item[1], "利好"),
+            reverse=True,
+        )
 
         utils.send_mail(
-            topic='news_{}'.format(datetime.now().strftime("%Y-%m-%d")),
+            topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),
             content=str(title_dict_sort),
-            _file_name=file_name
+            _file_name=file_name,
         )
 
     pass

@@ -5,7 +5,7 @@ date 2021/06/03
 """
 import datetime
 import json
-
+import sys
 import pandas as pd
 
 from ChanUtils.BasicUtil import KiLineObject
@@ -18,44 +18,79 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     set_display()
     print(today_date)
     db = Database()
-
+    stock_type = sys.argv[1]
     stock_info_spyder = StockInfoSpyder(
         config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
     )
 
-    data = db.get_data(config.STOCK_DATABASE_NAME,
-                       config.COLLECTION_NAME_STOCK_BASIC_INFO,
-                       keys=["symbol", "name", "end_date"])
-    with open('./info/week_buy_point_res.json', 'w') as file:
+    data = db.get_data(
+        config.STOCK_DATABASE_NAME,
+        config.COLLECTION_NAME_STOCK_BASIC_INFO,
+        keys=["symbol", "name", "end_date"],
+    )
+    with open("./info/week_buy_point_res.json", "w") as file:
         for _, row in data.iterrows():
-            if row['end_date'] < datetime.datetime.now():
+            if stock_type not in row["symbol"]:
+                print("市场不对 跳过{}".format(row["symbol"]))
                 continue
-            stock_data = stock_info_spyder.get_week_data_cn_stock(row['symbol'], market_type='cn')
-            if stock_data.shape[0] < 12:
+            if row["end_date"] < datetime.datetime.now():
+                print("退市了，不考虑{}".format(row["symbol"]))
                 continue
-            stock_data['Date'] = pd.to_datetime(stock_data['date'], format='%Y-%m-%d')
+            res, stock_data = stock_info_spyder.get_week_data_cn_stock(
+                row["symbol"], market_type="cn"
+            )
+            if not res or stock_data.shape[0] < 33:
+                print("not enough data")
+                continue
+            print("current stock is {}".format(row["symbol"]))
+            stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
             stock_data.set_index("Date", inplace=True)
-            merged_k_line_data = KiLineObject.k_line_merge(row['symbol'], stock_data)
-            chan_data = ChanSourceDataObject('week', merged_k_line_data)
+            merged_k_line_data = KiLineObject.k_line_merge(row["symbol"], stock_data)
+            chan_data = ChanSourceDataObject("week", merged_k_line_data)
             chan_data.gen_data_frame()
             try:
-                valid, last_cross, valid_ding_date, valid_di_date = chan_data.is_valid_buy_sell_point_on_week_line()
+                (
+                    valid,
+                    last_cross,
+                    valid_ding_date,
+                    valid_di_date,
+                    distance,
+                ) = chan_data.is_valid_buy_sell_point_on_week_line()
             except Exception as e:
                 print(row)
                 print(e)
                 break
             if valid:
                 print(row)
-                print('is buy point {},{},{},{}'.format(valid, last_cross, valid_ding_date, valid_di_date))
-                file.writelines('{}\n'.format(json.dumps({'symbol': row['symbol'],
-                                                          'name': row['name'],
-                                                          'last_cross': last_cross[0].strftime('%Y-%m-%d'),
-                                                          'last_valid_ding_date': valid_ding_date.strftime('%Y-%m-%d'),
-                                                          'last_valid_di_date': valid_di_date.strftime('%Y-%m-%d')},
-                                                         ensure_ascii=False)))
+                print(
+                    "{} is   buy point {},{},{},{}".format(
+                        row["symbol"], valid, last_cross, valid_ding_date, valid_di_date
+                    )
+                )
+                file.writelines(
+                    "{}\n".format(
+                        json.dumps(
+                            {
+                                "symbol": row["symbol"],
+                                "name": row["name"],
+                                "last_cross": last_cross[0].strftime("%Y-%m-%d"),
+                                "last_valid_ding_date": valid_ding_date.strftime(
+                                    "%Y-%m-%d"
+                                )
+                                if valid_ding_date is not None
+                                else "",
+                                "last_valid_di_date": valid_di_date.strftime("%Y-%m-%d")
+                                if valid_di_date is not None
+                                else "",
+                                "distance": distance,
+                            },
+                            ensure_ascii=False,
+                        )
+                    )
+                )
 
     pass

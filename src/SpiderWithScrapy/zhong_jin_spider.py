@@ -66,10 +66,14 @@ class ZhongJinStockSpider(BaseSpider):
                 _title = str(a.text).strip()
                 _time = li.find_all("span")[0]
                 _time = str(_time.text).replace("(", "").replace(")", "").strip()
-                if _time.split(' ')[0] > self.day_now:
-                    _year = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d').split('-')[0]
+                if _time.split(" ")[0] > self.day_now:
+                    _year = (
+                        (datetime.now() - timedelta(days=365))
+                        .strftime("%Y-%m-%d")
+                        .split("-")[0]
+                    )
                 else:
-                    _year = datetime.now().strftime('%Y-%m-%d').split('-')[0]
+                    _year = datetime.now().strftime("%Y-%m-%d").split("-")[0]
                 logging.info(
                     "sub url {0} sub title {1} \n time {2}".format(
                         sub_url, _title, _time

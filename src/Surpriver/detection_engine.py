@@ -10,6 +10,7 @@ from sklearn.ensemble import IsolationForest
 from data_loader import DataEngine
 import warnings
 import argparse
+
 warnings.filterwarnings("ignore")
 
 # Styling for plots
@@ -68,7 +69,7 @@ argParser.add_argument(
     type=int,
     default=1,
     help="Whether to test the tool or just predict for future. "
-         "When testing, you should set the future_bars to larger than 1.",
+    "When testing, you should set the future_bars to larger than 1.",
 )
 argParser.add_argument(
     "--future_bars",
@@ -231,8 +232,12 @@ class Surpriver:
 
         # Get volume information
         today_volume = volume_by_date_dictionary[latest_date][0]
-        average_vol_last_five_days = np.mean([volume_by_date_dictionary[date][0] for date in all_dates[1:6]])
-        average_vol_last_twenty_days = np.mean([volume_by_date_dictionary[date][0] for date in all_dates[1:20]])
+        average_vol_last_five_days = np.mean(
+            [volume_by_date_dictionary[date][0] for date in all_dates[1:6]]
+        )
+        average_vol_last_twenty_days = np.mean(
+            [volume_by_date_dictionary[date][0] for date in all_dates[1:20]]
+        )
 
         return (
             latest_data_point,
@@ -292,7 +297,11 @@ class Surpriver:
         detector = IsolationForest(n_estimators=200, random_state=0)
         detector.fit(features)
         predictions = detector.decision_function(features)
-        print('type {}, sample {}'.format(type(predictions), predictions[: self.TOP_PREDICTIONS_TO_PRINT]))
+        print(
+            "type {}, sample {}".format(
+                type(predictions), predictions[: self.TOP_PREDICTIONS_TO_PRINT]
+            )
+        )
         # Print top predictions with some statistics
         predictions_with_output_data = [
             [
@@ -332,8 +341,8 @@ class Surpriver:
                 _,
             ) = self.calculate_recent_volatility(historical_price)
             if (
-                    average_vol_last_five_days is None
-                    or volatility_vol_last_five_days is None
+                average_vol_last_five_days is None
+                or volatility_vol_last_five_days is None
             ):
                 continue
 
@@ -453,14 +462,21 @@ class Surpriver:
         for item in predictions_with_output_data:
             prediction, symbol, historical_price, future_price = item
 
-            future_sum_percentage_change, future_volatility = self.calculate_future_performance(future_price)
-            _, _, historical_volatility = self.calculate_recent_volatility(historical_price)
+            (
+                future_sum_percentage_change,
+                future_volatility,
+            ) = self.calculate_future_performance(future_price)
+            _, _, historical_volatility = self.calculate_recent_volatility(
+                historical_price
+            )
 
             # Skip for when there is a reverse split,
             # the yfinance package does not handle that well so percentages get weirdly large
-            if (abs(future_sum_percentage_change) > 250
-                    or self.is_nan(future_sum_percentage_change)
-                    or self.is_nan(prediction)):
+            if (
+                abs(future_sum_percentage_change) > 250
+                or self.is_nan(future_sum_percentage_change)
+                or self.is_nan(prediction)
+            ):
                 continue
 
             future_change.append(future_sum_percentage_change)
@@ -469,7 +485,7 @@ class Surpriver:
             historical_volatilities.append(historical_volatility)
             symbols.append(symbol)
 
-        print('abnormal stocks:')
+        print("abnormal stocks:")
         for idx in range(0, len(anomalous_score)):
             if anomalous_score[idx] < 0:
                 print(symbols[idx])

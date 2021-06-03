@@ -47,11 +47,17 @@ class EastMoneySpider(BaseSpider):
                         title = str(a.text).strip()
                         # span = li.find_all("span")
                         # logging.info('span is {} {} {}'.format(span, len(span), span[0]))
-                        _date_time = str(_time.text).strip().replace("月", "-").replace("日", "")
+                        _date_time = (
+                            str(_time.text).strip().replace("月", "-").replace("日", "")
+                        )
                         if _date_time > self.day_now:
-                            _year = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d').split('-')[0]
+                            _year = (
+                                (datetime.now() - timedelta(days=365))
+                                .strftime("%Y-%m-%d")
+                                .split("-")[0]
+                            )
                         else:
-                            _year = datetime.now().strftime('%Y-%m-%d').split('-')[0]
+                            _year = datetime.now().strftime("%Y-%m-%d").split("-")[0]
                         self.logger.info(
                             "sub url is {0} title is {1}".format(sub_url, title)
                         )
@@ -59,7 +65,11 @@ class EastMoneySpider(BaseSpider):
                             sub_url,
                             callback=self.parse_further_information,
                             dont_filter=True,
-                            meta={"date_time": "{0}-{1}".format(_year, _date_time), "title": title})
+                            meta={
+                                "date_time": "{0}-{1}".format(_year, _date_time),
+                                "title": title,
+                            },
+                        )
 
     def parse_further_information(self, response):
         bs = BeautifulSoup(response.text, "lxml")

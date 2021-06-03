@@ -93,7 +93,7 @@ class DeleteTimeWrong(object):
         self.database_name = database_name
         self.collection_name = collection_name
         self.delete_num = 0
-        self.today_date = datetime.now().strftime('%Y-%m-%d')
+        self.today_date = datetime.now().strftime("%Y-%m-%d")
 
     def run(self):
         collection = self.database.get_collection(
@@ -107,7 +107,7 @@ class DeleteTimeWrong(object):
                 self.delete_num += 1
         logging.info(
             "there are {} news contained wrong value in {} collection, {}, and delete done ... ".format(
-                self.delete_num, self.collection_name,  self.database_name
+                self.delete_num, self.collection_name, self.database_name
             )
         )
 
