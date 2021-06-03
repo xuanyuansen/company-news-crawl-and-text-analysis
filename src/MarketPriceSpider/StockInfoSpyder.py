@@ -6,6 +6,7 @@ https://www.akshare.xyz/zh_CN/latest/
 # import redis
 import datetime
 import time
+import pymongo
 from ComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price
 from MarketPriceSpider.BasicSpyder import Spyder
@@ -17,7 +18,7 @@ import akshare as ak
 
 
 class StockInfoSpyder(Spyder):
-    def __init__(self, database_name, collection_name):
+    def __init__(self, database_name, collection_name, joint_quant_on: bool = False):
         super().__init__()
         self.db_obj = Database()
         self.database_name = database_name
@@ -26,7 +27,10 @@ class StockInfoSpyder(Spyder):
         self.database_name_hk = config.HK_STOCK_DATABASE_NAME
         self.collection_name_hk = config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
         self.col_basic_info_hk = self.db_obj.get_collection(self.database_name_hk, self.collection_name_hk)
-        self.joint_quant_tool = JointQuantTool()
+        if joint_quant_on:
+            self.joint_quant_tool = JointQuantTool()
+        else:
+            self.joint_quant_tool = None
 
     def get_cn_stock_week_data_from_joint_quant(self):
         jq_stock_symbol_list = self.col_basic_info.distinct("joint_quant_code")
@@ -53,6 +57,34 @@ class StockInfoSpyder(Spyder):
                 )
             )
         return True
+
+    def get_week_data_cn_stock(self, symbol, market_type: str, start_date: str = None):
+        db_name = self.database_name if market_type == 'cn' else self.database_name_hk
+        if start_date is None:
+            stock_data = self.db_obj.get_data(db_name, symbol)
+        else:
+            sd = start_date.split('-')
+            stock_data = self.db_obj.get_data(
+                db_name,
+                symbol,
+                query={'date': {"$gt": datetime.datetime(int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000)}})
+
+        stock_data['money'] = stock_data.apply(
+            lambda row: 0.25*(row['open']+row['close']+row['high']+row['close'])*row['volume'], axis=1)
+
+        stock_data.index = stock_data['date']
+        df2 = stock_data.resample('W').agg({'open': 'first',
+                                            'close': 'last',
+                                            'high': 'max',
+                                            'low': 'min',
+                                            'money': 'sum',
+                                            'volume': 'sum',
+                                            'date': 'first'})
+
+        df2 = df2[df2['open'].notnull()]
+        df2.index = df2['date']
+        # print(df2)
+        return df2
 
     # https://www.joinquant.com/view/community/detail/738214d7db9b1c03de504177f4e94690
     def __get_week_data_from_joint_quant_of_one_cn_stock(self, t_stock):
@@ -204,7 +236,7 @@ class StockInfoSpyder(Spyder):
             self.col_basic_info.insert_one(_data)
         return True
 
-    def get_historical_price(self, start_date=None, end_date=None, freq="day"):
+    def get_historical_price_cn_stock(self, start_date=None, end_date=None, freq="day"):
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y%m%d")
         stock_symbol_list = self.col_basic_info.distinct("symbol")
@@ -213,23 +245,32 @@ class StockInfoSpyder(Spyder):
             stock_symbol_list = self.col_basic_info.distinct("symbol")
         if freq == "day":
             for symbol in stock_symbol_list:
-                time.sleep(2)
+                time.sleep(1)
+                _col = self.db_obj.get_collection(self.database_name, symbol)
                 if start_date is None:
+                    # 首先查询DB里面最大的时间
+                    max_date = _col.find_one(sort=[("date", pymongo.DESCENDING)]).get('date')
+                    if max_date:
+                        _start_date = max_date
+                        self.logger.info("stock {} max date is {}".format(symbol, max_date))
                     # 如果该symbol有历史数据，如果有则从API获取从数据库中最近的时间开始直到现在的所有价格数据
                     # 如果该symbol无历史数据，则从API获取从2015年1月1日开始直到现在的所有价格数据
-                    start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
+                    else:
+                        _start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
+                else:
+                    _start_date = start_date
                 try:
                     if end_date is None:
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
                             symbol=symbol,
-                            start_date=start_date,
+                            start_date=_start_date,
                             # end_date=end_date,
                             adjust="qfq",
                         )
                     else:
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
                             symbol=symbol,
-                            start_date=start_date,
+                            start_date=_start_date,
                             end_date=end_date,
                             adjust="qfq",
                         )
@@ -237,46 +278,21 @@ class StockInfoSpyder(Spyder):
                     self.logger.error("trace {0}, symbol {1}".format(e, symbol))
                     continue
 
-                # print(symbol)
-                # print(stock_zh_a_daily_hfq_df)
                 stock_zh_a_daily_hfq_df.index = range(len(stock_zh_a_daily_hfq_df))
-                _col = self.db_obj.get_collection(self.database_name, symbol)
-                for _idx in range(stock_zh_a_daily_hfq_df.shape[0]):
-                    _tmp_dict = stock_zh_a_daily_hfq_df.iloc[_idx].to_dict()
-                    id_md5 = hashlib.md5(
-                        ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(
-                            encoding="utf-8"
-                        )
-                    ).hexdigest()
-                    if _col.find_one({"_id": id_md5}) is not None:
-                        self.logger.info(
-                            "id already exist {0} {1}".format(id_md5, _tmp_dict)
-                        )
-                        continue
-                    _tmp_dict["_id"] = id_md5
-                    # _tmp_dict.pop("turnover")
-                    _col.insert_one(_tmp_dict)
+                res, cnt = self.insert_data_to_col_from_dataframe(_col, symbol, stock_zh_a_daily_hfq_df)
 
                 self.logger.info(
-                    "{} finished saving from {} to {} ... {}".format(
+                    "{} finished saving from {} to {} ... {}, insert cnt is {}".format(
                         symbol,
                         start_date,
                         end_date,
-                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1 :],
+                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1:],
+                        cnt
                     )
                 )
 
-        elif freq == "week":
-            pass
-        elif freq == "month":
-            pass
-        elif freq == "5mins":
-            pass
-        elif freq == "15mins":
-            pass
-        elif freq == "30mins":
-            pass
-        elif freq == "60mins":
+        else:
+            self.logger.warning("undefined frequent {}".format(freq))
             pass
 
     def get_today_price(self, freq="day"):

@@ -19,7 +19,7 @@ class ChanSourceDataObject(object):
         self.k_line_level = level
         self.k_line_list = data
         # 生成所有的顶或者底，merge。
-        ChanSourceDataObject.is_ding_di_shape(self.k_line_list, 3, True)
+        ChanSourceDataObject.is_ding_di_shape(self.k_line_list, 3, False)
         # merge后的顶底分型，去除中间的顶底分型list
         self.ding_di_to_bi = []
         # 笔
@@ -41,6 +41,7 @@ class ChanSourceDataObject(object):
         self.exp26 = None
         self.signal = None
         self.boll = None
+        self.cross_list = list()
 
         if len(data) > 0:
             if not isinstance(data[0], KiLineObject):
@@ -116,9 +117,9 @@ class ChanSourceDataObject(object):
 
                 # chan_line_merged, 修正后的线段列表
                 self.zhong_shu_list = from_xian_duan_to_zhong_shu(self.merged_chan_line_list)
-                print('zhong shu list')
+                # print('zhong shu list')
                 for zs_element in self.zhong_shu_list:
-                    print(zs_element)
+                    # print(zs_element)
                     # draw zhong shu
                     # -1 避免连接
                     for idx in range(zs_element.start_index, zs_element.end_index - 1):
@@ -176,9 +177,11 @@ class ChanSourceDataObject(object):
         # 如果在金融数据分析和量化交易上深耕的朋友相信对这些指标的计算原理已经了如指掌，
         # 直接通过原始数据计算即可，以macd的计算为例如下：
         # 通过快速线与慢速线来挖掘买卖点
+        # dif, dea, hist
         self.exp12 = self.data_to_plot_frame['Close'].ewm(span=12, adjust=False).mean()
         self.exp26 = self.data_to_plot_frame['Close'].ewm(span=26, adjust=False).mean()
         self.macd = self.exp12 - self.exp26
+        # 这里计算的hist就是dif-dea,而很多证券商计算的MACD=hist*2=(dif-dea)*2
         self.signal = self.macd.ewm(span=9, adjust=False).mean()
 
         # 添加MACD子图，拆分成红绿柱子
@@ -189,6 +192,16 @@ class ChanSourceDataObject(object):
         temp_hist_n = self.macd - self.signal
         temp_hist_n[temp_hist_n >= 0] = None
         self.histogram_negative = temp_hist_n
+
+        # 寻找MACD金叉和死叉
+
+        for i in range(self.exp12.shape[0] - 1):
+            if (self.exp12.iloc[i] <= self.exp26[i]) & (self.exp12[i + 1] >= self.exp26[i + 1]):
+                self.cross_list.append((self.exp12.index[i + 1], 1))
+                # print("MACD金叉的日期：{}".format(self.exp12.index[i + 1]))
+            if (self.exp12.iloc[i] >= self.exp26[i]) & (self.exp12[i + 1] <= self.exp26[i + 1]):
+                self.cross_list.append((self.exp12.index[i + 1], -1))
+                # print("MACD死叉的日期：{}".format(self.exp12.index[i + 1]))
 
         # BOLL线
         # 一般在软件上都用BOLL表示。该指标一般都三条线，上、中、下三个轨道。
@@ -223,6 +236,12 @@ class ChanSourceDataObject(object):
         self.data_to_plot_frame['middle'] = self.boll.bollinger_mavg()
         pass
 
+    def get_ding_di(self):
+        return self.data_to_plot_frame[['Ding_to_draw', 'Di_to_draw']]
+
+    def get_cross_list(self):
+        return self.cross_list
+
     def get_macd_bar(self):
         return self.histogram
 
@@ -232,8 +251,16 @@ class ChanSourceDataObject(object):
     def get_zhong_shu_list(self):
         return self.zhong_shu_list
 
-    def get_buy_sell_point(self):
-        pass
+    # 周线级别上最近有金叉，而且最近一个顶底分型是底分型
+    def is_valid_buy_sell_point_on_week_line(self):
+        last_cross = self.cross_list[-1]
+        valid_ding = self.data_to_plot_frame.loc[self.data_to_plot_frame.Ding_to_draw.notnull(), :]
+        valid_di = self.data_to_plot_frame.loc[self.data_to_plot_frame.Di_to_draw.notnull(), :]
+        valid_ding_date = valid_ding.iloc[-1].name
+        valid_di_date = valid_di.iloc[-1].name
+        # print('valid_ding_date {}'.format(valid_ding_date))
+        # print('valid_di_date {}'.format(valid_di_date))
+        return last_cross[1] == 1 and valid_di_date > valid_ding_date, last_cross, valid_ding_date, valid_di_date
 
     # 像图1这种，第二K线高点是相邻三K线高点中最高的，而低点也是相邻三K线低点中最高的，本ID给一个定义叫顶分型；
     # 图2这种叫底分型，第二K线低点是相邻三K线低点中最低的，而高点也是相邻三K线高点中最低的。
@@ -363,7 +390,7 @@ class ChanSourceDataObject(object):
 
 # 处理特征序列的包含关系
 def feature_bao_han(k_line_list: list, direction: str):
-    print("len of k_line_list {0}".format(len(k_line_list)))
+    # print("len of k_line_list {0}".format(len(k_line_list)))
     k_line_list_out = []
     for idx in range(0, len(k_line_list) - 1):
         m_res = is_contain(k_line_list[idx], k_line_list[idx + 1], direction)
@@ -376,7 +403,7 @@ def feature_bao_han(k_line_list: list, direction: str):
         else:
             k_line_list_out.append(k_line_list[idx])
 
-    print("len of k_line_list_out {0}".format(len(k_line_list_out)))
+    # print("len of k_line_list_out {0}".format(len(k_line_list_out)))
     return k_line_list_out
 
 
@@ -503,8 +530,8 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
                                                          feature_line_direction: str,
                                                          check_ding_di_shape_gap: bool = True,
                                                          debug_f: bool = False):
-    print('===============start check_current_direction_line_with_other_direction_bi=======================')
     if debug_f:
+        print('===============start check_current_direction_line_with_other_direction_bi=======================')
         print('start')
     # 第一个向下笔, 这里多加了1。
     start_idx = 1
@@ -520,7 +547,8 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
     # 向下线段的特征序列由向上笔构成，这些笔的方向连起来看是向下的
     if len(sub_origin_down_bi_list) <= 1:
         return 0
-    print('origin length of feature line is {0}'.format(len(sub_origin_down_bi_list)))
+    if debug_f:
+        print('origin length of feature line is {0}'.format(len(sub_origin_down_bi_list)))
 
     if 'up' == feature_line_direction:
         standard_feature_line = bi_inner_merge([ele[0] for ele in sub_origin_down_bi_list], feature_line_direction)
@@ -528,7 +556,9 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
         standard_feature_line = bi_inner_merge([ele[0] for ele in sub_origin_down_bi_list], feature_line_direction)
     else:
         raise Exception('wrong direction {0}'.format(feature_line_direction))
-    print('standard length of feature line is {0}'.format(len(standard_feature_line)))
+
+    if debug_f:
+        print('standard length of feature line is {0}'.format(len(standard_feature_line)))
 
     if debug_f:
         debug(sub_origin_down_bi_list, standard_feature_line)
@@ -594,8 +624,9 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
         idx_feature_line += 1
 
     if 0 == new_stop_idx:
-        debug(sub_origin_down_bi_list, standard_feature_line)
-        print("do not have ding shape in standard feature bi list")
+        if debug_f:
+            debug(sub_origin_down_bi_list, standard_feature_line)
+            print("do not have ding shape in standard feature bi list")
         return 0
 
     # start_idx = idx + 1，这里要加回来才是最开始序列的位置，这里是合并后的所以不准确，从特征序列找, sub_origin_down_bi_list
@@ -610,11 +641,12 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
     # 缺的加回来
     new_stop_idx_in_origin_list += sub_start_idx
 
-    print("direct check new stop point is {0}".format(new_stop_idx_in_origin_list))
-
+    if debug_f:
+        print("direct check new stop point is {0}".format(new_stop_idx_in_origin_list))
+        print('VIP target bi is {0}'.format(standard_feature_line[new_stop_idx]))
     # 通过start index去校验原始位置
     idx_double_check = 0
-    print('VIP target bi is {0}'.format(standard_feature_line[new_stop_idx]))
+
     # 从原始序列找。
     new_stop_idx_in_origin_list_double_check = 0
     while idx_double_check < len(bi_list)-1:
@@ -623,7 +655,8 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
             break
         idx_double_check += 1
 
-    print("double check new stop point is {0}".format(new_stop_idx_in_origin_list_double_check))
+    if debug_f:
+        print("double check new stop point is {0}".format(new_stop_idx_in_origin_list_double_check))
     if new_stop_idx_in_origin_list != new_stop_idx_in_origin_list_double_check:
         print('==============debug start===================')
         debug(sub_origin_down_bi_list, standard_feature_line)
@@ -636,9 +669,9 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
 
         print('==============debug done===================')
         raise Exception("not equal")
-
-    print('origin stop idx is {0}, new stop idx is {1}'.format(stop_idx, new_stop_idx_in_origin_list))
-    print('find done!-------------------------------------------------------------------------------\n\n\n')
+    if debug_f:
+        print('origin stop idx is {0}, new stop idx is {1}'.format(stop_idx, new_stop_idx_in_origin_list))
+        print('find done!-------------------------------------------------------------------------------\n\n\n')
     return new_stop_idx_in_origin_list
 
 
@@ -648,7 +681,7 @@ def check_current_direction_line_with_other_direction_bi(sub_start_idx, bi_list,
 def bi_to_line_inner_check(start_idx: int,
                            bi_list: list,
                            chan_line_list: list,
-                           direction: str):
+                           direction: str, is_debug: bool = False):
     if 'up' == bi_list[start_idx].direction:
         # 如果第二个向上笔出问题，那么换方向
         if bi_list[start_idx].low >= bi_list[start_idx + 1].low:
@@ -665,8 +698,8 @@ def bi_to_line_inner_check(start_idx: int,
 
     stop_idx = 0
     low_idx_j = idx + 4
-
-    print("direction {0} start, idx {0}".format(direction, idx))
+    if is_debug:
+        print("direction {0} start, idx {0}".format(direction, idx))
 
     actual_stop_index = 0
 
@@ -687,7 +720,8 @@ def bi_to_line_inner_check(start_idx: int,
             high_idx_i += 2
 
         if stop_idx != 0:
-            print("direction {0} stop, idx {0}, stop idx is {1}".format(direction, idx, stop_idx))
+            if is_debug:
+                print("direction {0} stop, idx {0}, stop idx is {1}".format(direction, idx, stop_idx))
             # 转换成原始坐标，意味着出现了向下的笔破坏，这个时候考察特征序列
             actual_stop_index = check_current_direction_line_with_other_direction_bi(idx,
                                                                                      bi_list[idx:],
@@ -707,13 +741,14 @@ def bi_to_line_inner_check(start_idx: int,
                                                    bi_list[idx].high, bi_list[stop_idx].low,
                                                    bi_list[idx: stop_idx]))
                 else:
-                    print('direction {0} line not right'.format(direction))
+                    if is_debug:
+                        print('direction {0} line not right'.format(direction))
             # 还是按照笔破坏处理
             else:
                 o_message = 'direction {0}!!!笔破坏, start idx {0}, bi stop index{1}'.format(
                     direction, start_idx, stop_idx)
                 warnings.warn(o_message)
-                print(o_message)
+                # print(o_message)
 
                 if 'up' == direction and bi_list[idx].low <= bi_list[stop_idx].high:
                     chan_line_list.append(
@@ -730,7 +765,7 @@ def bi_to_line_inner_check(start_idx: int,
                     o_message = 'current line not right, direction is {0}, idx is {1}'\
                         .format(direction, start_idx)
                     warnings.warn(o_message)
-                    print(o_message)
+                    # print(o_message)
 
             idx = stop_idx
             break
@@ -752,19 +787,22 @@ def bi_to_line_inner_check(start_idx: int,
 # 核心函数！！！！！！！
 # 用笔来形成线段！！！！
 # 输入包含所有笔的序列
-def from_bi_list_to_line(bi_list: list):
+def from_bi_list_to_line(bi_list: list, is_debug: bool = False):
     bi_idx = 0
     while bi_idx < len(bi_list)-1:
-        print('index is {0}, bi element is {1}'.format(bi_idx, bi_list[bi_idx]))
+        if is_debug:
+            print('index is {0}, bi element is {1}'.format(bi_idx, bi_list[bi_idx]))
         bi_idx += 1
 
     chan_line_list = []
     idx = 0
     while idx < len(bi_list) - 1:
-        print('===============outer start check, index is {0}, bi is {1}.==================='.format(idx, bi_list[idx]))
+        if is_debug:
+            print('===============outer start check, index is {0}, bi is {1}.==================='.format(idx, bi_list[idx]))
+            print('===============outer check end.========================================\n\n\n')
         out_idx = bi_to_line_inner_check(idx, bi_list, chan_line_list, direction=bi_list[idx].direction)
         idx = out_idx
-        print('===============outer check end.========================================\n\n\n')
+
         # if 'up' == bi_list[idx].direction:
         #     # 如果第二个向上笔出问题，那么换方向
         #     if bi_list[idx].low >= bi_list[idx+1].low:
@@ -783,8 +821,9 @@ def from_bi_list_to_line(bi_list: list):
         #     raise Exception('no direction')
 
     print('len of chan line {0}'.format(len(chan_line_list)))
-    for element in chan_line_list:
-        print(element)
+    if is_debug:
+        for element in chan_line_list:
+            print(element)
     return chan_line_list
 
 

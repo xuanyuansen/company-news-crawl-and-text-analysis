@@ -8,7 +8,7 @@ stock_info_spyder = StockInfoSpyder(
 )
 # get all name and code
 # stock_info_spyder.get_historical_hk_stock_daily_price(start_symbol='00156')
-stock_info_spyder.get_cn_stock_week_data_from_joint_quant()
+stock_info_spyder.get_historical_price_cn_stock(start_date='2021-05-28')
 exit(0)
 stock_info_spyder.get_all_stock_code_info()
 

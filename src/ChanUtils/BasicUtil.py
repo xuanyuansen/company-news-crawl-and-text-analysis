@@ -503,11 +503,12 @@ def inner_merge(k_line_list, merge_direction: str = 'unknown'):
 
 
 # 用于笔的合并，与K线不完全一样
-def bi_inner_merge(input_line_list, merge_direction: str = 'unknown'):
-    print("merge_direction is {0}".format(merge_direction))
+def bi_inner_merge(input_line_list, merge_direction: str = 'unknown', is_debug: bool = False):
     bi_line_list = copy.deepcopy(input_line_list)
-    print("len line list")
-    print(len(bi_line_list))
+    if is_debug:
+        print("merge_direction is {0}".format(merge_direction))
+        print("len line list")
+        print(len(bi_line_list))
 
     k_line_list_out = list()
     k_line_list_out.append(input_line_list[0])
@@ -528,9 +529,9 @@ def bi_inner_merge(input_line_list, merge_direction: str = 'unknown'):
             k_line_list_out.append(bi_line_list[idx + 1])
             break
         idx += 1
-
-    print("k_line_list_out")
-    print(len(k_line_list_out))
+    if is_debug:
+        print("k_line_list_out")
+        print(len(k_line_list_out))
     return k_line_list_out
 
 

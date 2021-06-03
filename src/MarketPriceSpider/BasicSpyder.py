@@ -18,6 +18,7 @@ class Spyder(object):
         pass
 
     def insert_data_to_col_from_dataframe(self, col: pymongo.collection.Collection, symbol: str, data: DataFrame):
+        insert_cnt = 0
         for _idx in range(data.shape[0]):
             _tmp_dict = data.iloc[_idx].to_dict()
             id_md5 = hashlib.md5(
@@ -33,5 +34,6 @@ class Spyder(object):
             _tmp_dict["_id"] = id_md5
             # _tmp_dict.pop("turnover")
             col.insert_one(_tmp_dict)
-        return True
+            insert_cnt += 1
+        return True, insert_cnt
     pass
