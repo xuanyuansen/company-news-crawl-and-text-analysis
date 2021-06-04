@@ -19,7 +19,8 @@ class PlotUtil(object):
         self.exp26 = self.data_to_plot_frame["close"].ewm(span=26, adjust=False).mean()
         self.macd = self.exp12 - self.exp26
         self.signal = self.macd.ewm(span=9, adjust=False).mean()
-
+        y_max = max(self.macd.max(), self.signal.max())
+        y_min = min(self.macd.min(), self.signal.min())
         # 添加MACD子图，拆分成红绿柱子
         self.histogram = self.macd - self.signal
         temp_hist_p = self.macd - self.signal
@@ -60,13 +61,13 @@ class PlotUtil(object):
             # mpf.make_addplot(exp26, type='line', color='r'),
             # MACD图上面的面积柱子，红柱子，绿柱子
             mpf.make_addplot(
-                self.histogram_positive, type="bar", width=0.7, panel=2, color="red"
+                self.histogram_positive, type="bar", width=0.7, panel=2, color="red", ylim=(y_min-0.1, y_max+0.1)
             ),
             mpf.make_addplot(
-                self.histogram_negative, type="bar", width=0.7, panel=2, color="green"
+                self.histogram_negative, type="bar", width=0.7, panel=2, color="green",  ylim=(y_min-0.1, y_max+0.1)
             ),
-            mpf.make_addplot(self.macd, panel=2, color="fuchsia", secondary_y=True),
-            mpf.make_addplot(self.signal, panel=2, color="b", secondary_y=True),
+            mpf.make_addplot(self.macd, panel=2, color="fuchsia", ylim=(y_min-0.1, y_max+0.1)),
+            mpf.make_addplot(self.signal, panel=2, color="b", ylim=(y_min-0.1, y_max+0.1)),
             # BOLL线
             mpf.make_addplot(
                 self.data_to_plot_frame["upper"], type="line", color="r", panel=1
@@ -111,14 +112,14 @@ class PlotUtil(object):
 
 if __name__ == "__main__":
     db = Database()
-    df = db.get_data(database_name="stock", collection_name="000001.XSHE_week")
-    print(df[:100])
+    df = db.get_data(database_name="stock", collection_name="sz000995")
+    # print(df[:100])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df.set_index("date", inplace=True)
-    print(df[:100])
+    # print(df[:100])
 
     _plot = PlotUtil(df)
-    _plot.plot("000001.XSHE", "平安银行")
+    _plot.plot("sz002019", "亿帆医药")
     pass

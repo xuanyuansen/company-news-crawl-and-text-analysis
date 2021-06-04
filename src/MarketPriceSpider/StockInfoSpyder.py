@@ -5,18 +5,21 @@ https://www.akshare.xyz/zh_CN/latest/
 """
 # import redis
 import datetime
+import logging
 import time
 import pymongo
 from pandas import DataFrame
 
 from ComTools.JointQuantTool import JointQuantTool
-from jqdatasdk import get_price
+from jqdatasdk import get_price, get_query_count
 from MarketPriceSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
 from Utils.database import Database
 import hashlib
 import akshare as ak
+
+from Utils.utils import today_date
 
 
 class StockInfoSpyder(Spyder):
@@ -35,6 +38,45 @@ class StockInfoSpyder(Spyder):
             self.joint_quant_tool = JointQuantTool()
         else:
             self.joint_quant_tool = None
+
+    def update_cn_stock_money_column_using_joint_quant(self):
+        sd = today_date.split("-")
+        # 获得所以要更新的股票列表
+        code_joint_quant_symbol = self.db_obj.get_data(config.STOCK_DATABASE_NAME,
+                                                       config.COLLECTION_NAME_STOCK_BASIC_INFO,
+                                                       keys=['symbol', 'joint_quant_code'],
+                                                       query={
+                                                           "end_date": {
+                                                               "$gt": datetime.datetime(
+                                                                   int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                                                               )
+                                                           }
+                                                       })
+        for index, row in code_joint_quant_symbol.iterrows():
+            _col = self.db_obj.get_collection(config.STOCK_DATABASE_NAME, row['symbol'])
+            start_date = _col.find_one(sort=[("date", pymongo.ASCENDING)]).get(
+                "date"
+            )
+            self.logger.info('current row is {}'.format(row))
+            start_date_ymd = start_date.strftime("%Y-%m-%d")
+            joint_data: DataFrame = get_price(row['joint_quant_code'],
+                                              start_date=start_date_ymd,
+                                              end_date=today_date,
+                                              frequency='daily',
+                                              fields=['money'])
+            modify_cnt = 0
+            for _index, _row in joint_data.iterrows():
+                id_md5 = hashlib.md5(
+                    ("{0} {1}".format(row['symbol'], _index)).encode(
+                        encoding="utf-8"
+                    )
+                ).hexdigest()
+                result = _col.update_one({"_id": id_md5}, {"$set": {'money': _row['money']}})
+                modify_cnt += result.modified_count
+
+            self.logger.info('modify count in {} is {}'.format(row['symbol'], modify_cnt))
+            self.logger.info('joint quant usage {}'.format(get_query_count()))
+        return True
 
     def get_cn_stock_week_data_from_joint_quant(self):
         jq_stock_symbol_list = self.col_basic_info.distinct("joint_quant_code")
@@ -59,12 +101,12 @@ class StockInfoSpyder(Spyder):
                     symbol,
                     data.iloc[0, 6],  # start date
                     data.iloc[data.shape[0] - 1, 6],  # end date
-                    data[data.shape[0] - 1 :],
+                    data[data.shape[0] - 1:],
                 )
             )
         return True
 
-    def get_week_data_cn_stock(self, symbol, market_type: str, start_date: str = None):
+    def get_daily_data_cn_stock(self, symbol, market_type: str, start_date: str = None):
         db_name = self.database_name if market_type == "cn" else self.database_name_hk
         if start_date is None:
             stock_data = self.db_obj.get_data(db_name, symbol)
@@ -86,12 +128,18 @@ class StockInfoSpyder(Spyder):
         # to do 用joint quant的数据来更新money数据。
         stock_data["money"] = stock_data.apply(
             lambda row: 0.25
-            * (row["open"] + row["close"] + row["high"] + row["close"])
-            * row["volume"],
+                        * (row["open"] + row["close"] + row["high"] + row["low"])
+                        * row["volume"],
             axis=1,
         )
 
         stock_data.index = stock_data["date"]
+        return True, stock_data
+
+    def get_week_data_cn_stock(self, symbol, market_type: str, start_date: str = None):
+        res, stock_data = self.get_daily_data_cn_stock(symbol, market_type, start_date)
+        if not res:
+            return False, DataFrame()
         df2 = stock_data.resample("W").agg(
             {
                 "open": "first",
@@ -156,11 +204,11 @@ class StockInfoSpyder(Spyder):
         return data
 
     def get_historical_hk_stock_daily_price(
-        self,
-        start_date=None,
-        end_date=None,
-        start_symbol: str = None,
-        symbols: list = None,
+            self,
+            start_date=None,
+            end_date=None,
+            start_symbol: str = None,
+            symbols: list = None,
     ):
         if symbols is None:
             stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
@@ -216,7 +264,7 @@ class StockInfoSpyder(Spyder):
                     stock_hk_a_daily_hfq_df.iloc[
                         stock_hk_a_daily_hfq_df.shape[0] - 1, 0
                     ],  # end date
-                    stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1 :],
+                    stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1:],
                 )
             )
 
@@ -337,7 +385,7 @@ class StockInfoSpyder(Spyder):
                         symbol,
                         start_date,
                         end_date,
-                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1 :],
+                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1:],
                         cnt,
                     )
                 )
