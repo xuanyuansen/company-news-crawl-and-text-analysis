@@ -36,18 +36,19 @@ class GenStockNewsDB(object):
         self.generate_report = generate_report
         self.latest_news_report = dict()
         self.news_report_raw_version = list()
-        self.redis_client = redis.StrictRedis(
-            host=config.REDIS_IP,
-            port=config.REDIS_PORT,
-            db=config.CACHE_NEWS_REDIS_DB_ID,
-        )
-        self.redis_client.set(
-            "today_date", datetime.datetime.now().strftime("%Y-%m-%d")
-        )
-        self.redis_client.delete(
-            "stock_news_num_over_{}".format(config.MINIMUM_STOCK_NEWS_NUM_FOR_ML)
-        )
-        self.__stock_news_nums_stat()
+        # no use redis
+        # self.redis_client = redis.StrictRedis(
+        #     host=config.REDIS_IP,
+        #     port=config.REDIS_PORT,
+        #     db=config.CACHE_NEWS_REDIS_DB_ID,
+        # )
+        # self.redis_client.set(
+        #     "today_date", datetime.datetime.now().strftime("%Y-%m-%d")
+        # )
+        # self.redis_client.delete(
+        #     "stock_news_num_over_{}".format(config.MINIMUM_STOCK_NEWS_NUM_FOR_ML)
+        # )
+        # self.__stock_news_nums_stat()
 
     def get_report_raw_version(self):
         return self.news_report_raw_version

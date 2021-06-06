@@ -12,11 +12,11 @@ class Database(object):
         self.os_type = platform.system()
         self.ip = config.MONGODB_IP
         self.port = config.MONGODB_PORT
-        self.conn = self.__init_remote_client() if self.os_type == "Darwin" \
+        self.conn = self.init_remote_client() if self.os_type == "Darwin" \
             else MongoClient(self.ip, self.port, maxPoolSize=200)
         self.collection = None
 
-    def __init_remote_client(self):
+    def init_remote_client(self):
         uname = b'gAAAAABgvHJFrKFjhYB2_Ri49Ku7BVo0KwW-qKz1N7Bs20f70uNfDhGgd1rA1nRanHUnFKgPutTfMauATII2Kk5WxBuBbIDqnQ=='
         passwd = b'gAAAAABgvHJFTtvwhg3gbiaedLjlsEFMt_wdgkU1fgyIyYUizwRQXciBaSyG2DDoTvr3fD1qfRhnBzg-7rNt4rbDh7TUvyGEXQ=='
         _cipher = Fernet(config.cipher_key)

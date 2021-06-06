@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import platform
 BOT_NAME = "spider"
 
 PYTHONHASHSEED = 10
@@ -31,6 +31,3 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     "pipelines.MongoDBPipeline": 300,
 }
-
-MONGO_HOST = "127.0.0.1"
-MONGO_PORT = 27017

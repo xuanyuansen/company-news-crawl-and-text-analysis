@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-import pymongo
 from pymongo.errors import DuplicateKeyError
-
 from Utils import config
-from settings import MONGO_HOST, MONGO_PORT
+from Utils.database import Database
 import logging
 
 
 class MongoDBPipeline(object):
     def __init__(self):
-        client = pymongo.MongoClient(MONGO_HOST, MONGO_PORT)
-        self.db_stcn = client["stcn"]
-        self.db_jrj = client["jrj_news"]  # 金融界
-        self.db_nbd = client["nbd_news"]  # 每经网
+        db = Database()
+        client = db.conn
+        self.db_stcn = client[config.STCN_NEWS_DB]  # stcn
+        self.db_jrj = client[config.JRJ_NEWS_DB]  # 金融界
+        self.db_nbd = client[config.NBD_STOCK_NEWS_DB]  # 每经网
         self.db_net_ease = client[config.NET_EASE_STOCK_NEWS_DB]  # 163
         self.db_east_money = client[config.EAST_MONEY_NEWS_DB]  # east money
         self.db_shanghai_cn_stock = client[config.SHANG_HAI_STOCK_NEWS_DB]  # shanghai
-        self.db_zhong_jin_cn_stock = client[config.ZHONG_JIN_STOCK_NEWS_DB]  # zhongjin
+        self.db_zhong_jin_cn_stock = client[config.ZHONG_JIN_STOCK_NEWS_DB]  # zhong jin 中金
 
     def process_item(self, item, spider):
         col_name = str(spider.name).replace("spider", "data")
