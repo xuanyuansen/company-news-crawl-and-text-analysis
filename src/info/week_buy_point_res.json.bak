@@ -1,546 +1,126 @@
-{"symbol": "sz000009", "name": "中国宝安", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000010", "name": "美丽生态", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000011", "name": "深物业A", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-08-10", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000012", "name": "南玻A", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz000014", "name": "沙河股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000020", "name": "深华发A", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000027", "name": "深圳能源", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000031", "name": "大悦城", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-08-10", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000032", "name": "深桑达A", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000035", "name": "中国天楹", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000037", "name": "深南电A", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000040", "name": "东旭蓝天", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000055", "name": "方大集团", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000058", "name": "深赛格", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000060", "name": "中金岭南", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000065", "name": "北方国际", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000151", "name": "中成股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000158", "name": "常山北明", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz000401", "name": "冀东水泥", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000402", "name": "金融街", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000408", "name": "藏格控股", "last_cross": "2021-01-25", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-02-08"}
-{"symbol": "sz000410", "name": "*ST沈机", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000415", "name": "渤海租赁", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000425", "name": "徐工机械", "last_cross": "2021-02-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000426", "name": "兴业矿业", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000430", "name": "张家界", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000501", "name": "鄂武商A", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000503", "name": "国新健康", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-07-20", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000513", "name": "丽珠集团", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000520", "name": "长航凤凰", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000523", "name": "*ST浪奇", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000530", "name": "冰山冷热", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000537", "name": "广宇发展", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-08-31", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000546", "name": "金圆股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000555", "name": "神州信息", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000558", "name": "莱茵体育", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000559", "name": "万向钱潮", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000564", "name": "*ST大集", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000565", "name": "渝三峡A", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000572", "name": "海马汽车", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-02-01"}
-{"symbol": "sz000573", "name": "粤宏远A", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000587", "name": "*ST金洲", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000605", "name": "渤海股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000608", "name": "阳光股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000611", "name": "*ST天首", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-01-25", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000613", "name": "*ST东海A", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz000620", "name": "新华联", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000622", "name": "恒立实业", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000626", "name": "远大控股", "last_cross": "2020-07-13", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000630", "name": "铜陵有色", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz000632", "name": "三木集团", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000637", "name": "茂化实华", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000652", "name": "泰达股份", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000663", "name": "*ST永林", "last_cross": "2020-03-02", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-03-08"}
-{"symbol": "sz000668", "name": "荣丰控股", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz000670", "name": "*ST盈方", "last_cross": "2019-09-16", "last_valid_ding_date": "2020-01-06", "last_valid_di_date": "2020-02-03"}
-{"symbol": "sz000676", "name": "智度股份", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-08-17", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000681", "name": "视觉中国", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000683", "name": "远兴能源", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz000687", "name": "*ST华讯", "last_cross": "2020-09-07", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000698", "name": "沈阳化工", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000700", "name": "模塑科技", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000711", "name": "京蓝科技", "last_cross": "2021-03-01", "last_valid_ding_date": "2020-07-06", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000718", "name": "苏宁环球", "last_cross": "2020-12-28", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz000722", "name": "湖南发展", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000726", "name": "鲁泰A", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000729", "name": "燕京啤酒", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000731", "name": "四川美丰", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000732", "name": "泰禾集团", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000735", "name": "罗牛山", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000752", "name": "*ST西发", "last_cross": "2020-11-30", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000755", "name": "山西路桥", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000757", "name": "浩物股份", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000760", "name": "*ST斯太", "last_cross": "2019-12-02", "last_valid_ding_date": "2020-04-20", "last_valid_di_date": "2020-05-18"}
-{"symbol": "sz000762", "name": "西藏矿业", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000789", "name": "万年青", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000792", "name": "*ST盐湖", "last_cross": "2019-08-19", "last_valid_ding_date": "2020-03-02", "last_valid_di_date": "2020-03-30"}
-{"symbol": "sz000797", "name": "中国武夷", "last_cross": "2021-03-22", "last_valid_ding_date": "2020-03-02", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000799", "name": "酒鬼酒", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-03-08"}
-{"symbol": "sz000801", "name": "四川九洲", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz000806", "name": "*ST银河", "last_cross": "2020-06-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz000810", "name": "创维数字", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000826", "name": "启迪环境", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000828", "name": "东莞控股", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000831", "name": "五矿稀土", "last_cross": "2021-01-04", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000833", "name": "粤桂股份", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000848", "name": "承德露露", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000856", "name": "冀东装备", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000868", "name": "安凯客车", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000869", "name": "张裕A", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000875", "name": "吉电股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz000883", "name": "湖北能源", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000890", "name": "法尔胜", "last_cross": "2020-07-20", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000912", "name": "泸天化", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz000929", "name": "兰州黄河", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz000930", "name": "中粮科技", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000931", "name": "中关村", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz000936", "name": "华西股份", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000958", "name": "东方能源", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000968", "name": "蓝焰控股", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000982", "name": "*ST中绒", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz000989", "name": "九芝堂", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz000996", "name": "中国中期", "last_cross": "2021-02-08", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz000997", "name": "新大陆", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz000999", "name": "华润三九", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz001872", "name": "招商港口", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz001896", "name": "豫能控股", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz001914", "name": "招商积余", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz001979", "name": "招商蛇口", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz002002", "name": "鸿达兴业", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002006", "name": "精功科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002009", "name": "天奇股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002010", "name": "传化智联", "last_cross": "2021-01-18", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002015", "name": "协鑫能科", "last_cross": "2020-11-02", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002021", "name": "ST中捷", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002029", "name": "七匹狼", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002035", "name": "华帝股份", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-23", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002036", "name": "联创电子", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz002045", "name": "国光电器", "last_cross": "2021-01-11", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002047", "name": "宝鹰股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002049", "name": "紫光国微", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002051", "name": "中工国际", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002060", "name": "粤水电", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002061", "name": "浙江交科", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002065", "name": "东华软件", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002073", "name": "软控股份", "last_cross": "2020-06-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002076", "name": "*ST雪莱", "last_cross": "2021-01-11", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002086", "name": "*ST东洋", "last_cross": "2020-07-06", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002098", "name": "浔兴股份", "last_cross": "2020-07-06", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002106", "name": "莱宝高科", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002108", "name": "沧州明珠", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-12-28", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz002113", "name": "*ST天润", "last_cross": "2019-08-19", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002114", "name": "罗平锌电", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz002115", "name": "三维通信", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-08-17", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002117", "name": "东港股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002119", "name": "康强电子", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002120", "name": "韵达股份", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-01-25", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002121", "name": "*ST科陆", "last_cross": "2021-02-18", "last_valid_ding_date": "2020-09-07", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002122", "name": "*ST天马", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002123", "name": "梦网科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002125", "name": "湘潭电化", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002133", "name": "广宇集团", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002140", "name": "东华科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002146", "name": "荣盛发展", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002152", "name": "广电运通", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002159", "name": "三特索道", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002161", "name": "远望谷", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002167", "name": "东方锆业", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002178", "name": "延华智能", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002180", "name": "纳思达", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-25", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002186", "name": "全聚德", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002187", "name": "广百股份", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002189", "name": "中光学", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002191", "name": "劲嘉股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz002193", "name": "如意集团", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002195", "name": "二三四五", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002201", "name": "九鼎新材", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002205", "name": "国统股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002206", "name": "海利得", "last_cross": "2020-07-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002223", "name": "鱼跃医疗", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002227", "name": "奥特迅", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002231", "name": "奥维通信", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002234", "name": "民和股份", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002235", "name": "安妮股份", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002243", "name": "力合科创", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002248", "name": "华东数控", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-03-16", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002252", "name": "上海莱士", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-02-08", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002260", "name": "*ST德奥", "last_cross": "2018-10-08", "last_valid_ding_date": "2019-03-04", "last_valid_di_date": "2019-04-08"}
-{"symbol": "sz002261", "name": "拓维信息", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002262", "name": "恩华药业", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002267", "name": "陕天然气", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002268", "name": "卫士通", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002271", "name": "东方雨虹", "last_cross": "2021-01-25", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002273", "name": "水晶光电", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002277", "name": "友阿股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002279", "name": "久其软件", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002280", "name": "联络互动", "last_cross": "2020-08-17", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002291", "name": "星期六", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002292", "name": "奥飞娱乐", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002308", "name": "威创股份", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002309", "name": "中利集团", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002312", "name": "川发龙蟒", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002315", "name": "焦点科技", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002316", "name": "亚联发展", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002317", "name": "众生药业", "last_cross": "2021-04-26", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002322", "name": "理工环科", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002325", "name": "洪涛股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002326", "name": "永太科技", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz002330", "name": "得利斯", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-12-14", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002332", "name": "仙琚制药", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002337", "name": "赛象科技", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002340", "name": "格林美", "last_cross": "2020-12-14", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002341", "name": "新纶科技", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002354", "name": "天神娱乐", "last_cross": "2021-03-29", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-03-08"}
-{"symbol": "sz002359", "name": "*ST北讯", "last_cross": "2019-09-09", "last_valid_ding_date": "2020-03-09", "last_valid_di_date": "2020-05-25"}
-{"symbol": "sz002364", "name": "中恒电气", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002365", "name": "永安药业", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002369", "name": "卓翼科技", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002370", "name": "亚太药业", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002374", "name": "中锐股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002386", "name": "天原股份", "last_cross": "2020-11-09", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002391", "name": "长青股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002396", "name": "星网锐捷", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-07-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002397", "name": "梦洁股份", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz002400", "name": "省广集团", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002412", "name": "汉森制药", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002419", "name": "天虹股份", "last_cross": "2021-03-15", "last_valid_ding_date": "2020-07-13", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002422", "name": "科伦药业", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002427", "name": "ST尤夫", "last_cross": "2021-01-18", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002428", "name": "云南锗业", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-11-23", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002433", "name": "太安堂", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002436", "name": "兴森科技", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002446", "name": "盛路通信", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002449", "name": "国星光电", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002457", "name": "青龙管业", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002462", "name": "嘉事堂", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002465", "name": "海格通信", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002466", "name": "天齐锂业", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-25", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz002471", "name": "中超控股", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-09-07", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz002474", "name": "榕基软件", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002479", "name": "富春环保", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002486", "name": "嘉麟杰", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002491", "name": "通鼎互联", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002496", "name": "*ST辉丰", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002502", "name": "鼎龙文化", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002503", "name": "搜于特", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002508", "name": "老板电器", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002511", "name": "中顺洁柔", "last_cross": "2021-01-11", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz002512", "name": "达华智能", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002513", "name": "*ST蓝丰", "last_cross": "2020-08-10", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002515", "name": "金字火腿", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002519", "name": "银河电子", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002527", "name": "新时达", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002529", "name": "*ST海源", "last_cross": "2020-12-14", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002535", "name": "*ST林重", "last_cross": "2020-07-27", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002536", "name": "飞龙股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002537", "name": "海联金汇", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-12-14", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002542", "name": "中化岩土", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002547", "name": "春兴精工", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002549", "name": "凯美特气", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002552", "name": "宝鼎科技", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002554", "name": "惠博普", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002559", "name": "亚威股份", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002564", "name": "天沃科技", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002565", "name": "顺灏股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-01-25", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002568", "name": "百润股份", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002570", "name": "贝因美", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002573", "name": "清新环境", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002577", "name": "雷柏科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002578", "name": "闽发铝业", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002580", "name": "圣阳股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002586", "name": "*ST围海", "last_cross": "2020-06-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002587", "name": "奥拓电子", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002589", "name": "瑞康医药", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002591", "name": "恒大高新", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002596", "name": "海南瑞泽", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002602", "name": "世纪华通", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002614", "name": "奥佳华", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002617", "name": "露笑科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz002620", "name": "瑞和股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002621", "name": "美吉姆", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002622", "name": "融钰集团", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002624", "name": "完美世界", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002629", "name": "ST仁智", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002636", "name": "金安国纪", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002638", "name": "*ST勤上", "last_cross": "2020-11-02", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002642", "name": "荣联科技", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-03-23", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002644", "name": "佛慈制药", "last_cross": "2021-04-26", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-03-08"}
-{"symbol": "sz002647", "name": "仁东控股", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002652", "name": "扬子新材", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002653", "name": "海思科", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002654", "name": "万润科技", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-09-07", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002658", "name": "雪迪龙", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002659", "name": "凯文教育", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-12-14", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002663", "name": "普邦股份", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002666", "name": "德联集团", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002668", "name": "奥马电器", "last_cross": "2021-01-18", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002670", "name": "国盛金控", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002676", "name": "顺威股份", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002678", "name": "珠江钢琴", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-08-10", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002679", "name": "福建金森", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002682", "name": "龙洲股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002684", "name": "*ST猛狮", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002686", "name": "亿利达", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002699", "name": "美盛文化", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002700", "name": "ST浩源", "last_cross": "2020-08-17", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002701", "name": "奥瑞金", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002711", "name": "*ST欧浦", "last_cross": "2019-08-19", "last_valid_ding_date": "2019-12-23", "last_valid_di_date": "2020-02-24"}
-{"symbol": "sz002717", "name": "岭南股份", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002725", "name": "跃岭股份", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-09-21", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002728", "name": "特一药业", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz002738", "name": "中矿资源", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz002740", "name": "爱迪尔", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz002741", "name": "光华科技", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002746", "name": "仙坛股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-08-24", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002750", "name": "龙津药业", "last_cross": "2020-11-02", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002755", "name": "奥赛康", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002759", "name": "天际股份", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002763", "name": "汇洁股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-03-08"}
-{"symbol": "sz002767", "name": "先锋电子", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002769", "name": "普路通", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-08-24", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002770", "name": "*ST科迪", "last_cross": "2021-02-18", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002771", "name": "真视通", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002774", "name": "快意电梯", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002786", "name": "银宝山新", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002787", "name": "华源控股", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002790", "name": "瑞尔特", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002792", "name": "通宇通讯", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002798", "name": "帝欧家居", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002802", "name": "洪汇新材", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002805", "name": "丰元股份", "last_cross": "2020-11-16", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002807", "name": "江阴银行", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002811", "name": "郑中设计", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-03-16", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002815", "name": "崇达技术", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002820", "name": "桂发祥", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002861", "name": "瀛通通讯", "last_cross": "2021-05-10", "last_valid_ding_date": "2019-11-11", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz002864", "name": "盘龙药业", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002871", "name": "伟隆股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002877", "name": "智能自控", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002880", "name": "卫光生物", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz002881", "name": "美格智能", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002883", "name": "中设股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002885", "name": "京泉华", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002890", "name": "弘宇股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002892", "name": "科力尔", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002902", "name": "铭普光磁", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz002907", "name": "华森制药", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002912", "name": "中新赛克", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002915", "name": "中欣氟材", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002921", "name": "联诚精密", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002927", "name": "泰永长征", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002929", "name": "润建股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002931", "name": "锋龙股份", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002937", "name": "兴瑞科技", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002941", "name": "新疆交建", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002943", "name": "宇晶股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002947", "name": "恒铭达", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002955", "name": "鸿合科技", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz002957", "name": "科瑞技术", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002962", "name": "五方光电", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002963", "name": "豪尔赛", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002966", "name": "苏州银行", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002968", "name": "新大正", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002972", "name": "科安达", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz002981", "name": "朝阳科技", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz002995", "name": "天地在线", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-02", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz002997", "name": "瑞鹄模具", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz003001", "name": "中岩大地", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz003003", "name": "天元股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz003007", "name": "直真科技", "last_cross": "2021-03-22", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz003008", "name": "开普检测", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz003013", "name": "地铁设计", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz003816", "name": "中国广核", "last_cross": "2020-04-27", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300003", "name": "乐普医疗", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300011", "name": "鼎汉技术", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300016", "name": "北陆药业", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300020", "name": "银江股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300029", "name": "*ST天龙", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz300031", "name": "宝通科技", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300035", "name": "中科电气", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300036", "name": "超图软件", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300038", "name": "*ST数知", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300042", "name": "朗科科技", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300045", "name": "华力创通", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300047", "name": "天源迪科", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300056", "name": "中创环保", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300075", "name": "数字政通", "last_cross": "2021-04-26", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300079", "name": "数码视讯", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300093", "name": "金刚玻璃", "last_cross": "2021-03-01", "last_valid_ding_date": "2020-04-27", "last_valid_di_date": "2021-02-08"}
-{"symbol": "sz300096", "name": "易联众", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300098", "name": "高新兴", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300105", "name": "龙源技术", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300119", "name": "瑞普生物", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300130", "name": "新国都", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300134", "name": "大富科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300135", "name": "宝利国际", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300137", "name": "先河环保", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300140", "name": "中环装备", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300143", "name": "盈康生命", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300145", "name": "中金环境", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300147", "name": "香雪制药", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300162", "name": "雷曼光电", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300163", "name": "先锋新材", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300166", "name": "东方国信", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300167", "name": "迪威迅", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300169", "name": "天晟新材", "last_cross": "2021-03-22", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz300170", "name": "汉得信息", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300172", "name": "中电环保", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300182", "name": "捷成股份", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300191", "name": "潜能恒信", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-09-07", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300193", "name": "佳士科技", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300194", "name": "福安药业", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300201", "name": "海伦哲", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300205", "name": "天喻信息", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300207", "name": "欣旺达", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300215", "name": "电科院", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300220", "name": "金运激光", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300222", "name": "科大智能", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-02", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300226", "name": "上海钢联", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300230", "name": "永利股份", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300234", "name": "开尔新材", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300235", "name": "方直科技", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300238", "name": "冠昊生物", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300240", "name": "飞力达", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz300244", "name": "迪安诊断", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300250", "name": "初灵信息", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300254", "name": "仟源医药", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300260", "name": "新莱应材", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300262", "name": "巴安水务", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz300270", "name": "中威电子", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300271", "name": "华宇软件", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300276", "name": "三丰智能", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-02", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300284", "name": "苏交科", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300289", "name": "利德曼", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-05-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300295", "name": "三六五网", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300305", "name": "裕兴股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300309", "name": "吉艾科技", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300316", "name": "晶盛机电", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300319", "name": "麦捷科技", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300322", "name": "硕贝德", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-09-07", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300325", "name": "*ST德威", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300326", "name": "凯利泰", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz300333", "name": "兆日科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300336", "name": "新文化", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300338", "name": "开元教育", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-12-14", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300344", "name": "立方数科", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300345", "name": "华民股份", "last_cross": "2021-03-08", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300348", "name": "长亮科技", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-10-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300352", "name": "北信源", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-12-07", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300355", "name": "蒙草生态", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300362", "name": "天翔环境", "last_cross": "2019-06-17", "last_valid_ding_date": "2019-10-21", "last_valid_di_date": "2020-03-30"}
-{"symbol": "sz300366", "name": "创意信息", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300369", "name": "绿盟科技", "last_cross": "2021-03-15", "last_valid_ding_date": "2020-07-13", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300374", "name": "中铁装配", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300384", "name": "三联虹普", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300385", "name": "雪浪环境", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300388", "name": "节能国祯", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300394", "name": "天孚通信", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300398", "name": "飞凯材料", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300416", "name": "苏试试验", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300417", "name": "南华仪器", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300420", "name": "五洋停车", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300424", "name": "航新科技", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300425", "name": "中建环能", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300429", "name": "强力新材", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-08-17", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300437", "name": "清水源", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300440", "name": "运达科技", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300446", "name": "*ST乐材", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz300452", "name": "山河药辅", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300453", "name": "三鑫医疗", "last_cross": "2021-05-10", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-02-22"}
-{"symbol": "sz300472", "name": "新元科技", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-11-02", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300473", "name": "德尔股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300478", "name": "杭州高新", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300479", "name": "神思电子", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300482", "name": "万孚生物", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300488", "name": "恒锋工具", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300490", "name": "华自科技", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300492", "name": "华图山鼎", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz300494", "name": "盛天网络", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300496", "name": "中科创达", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300497", "name": "富祥药业", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300500", "name": "启迪设计", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300509", "name": "新美星", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300510", "name": "金冠股份", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300513", "name": "恒实科技", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300516", "name": "久之洋", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300518", "name": "盛讯达", "last_cross": "2021-04-12", "last_valid_ding_date": "2020-10-26", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300520", "name": "科大国创", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300522", "name": "世名科技", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300525", "name": "博思软件", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300530", "name": "*ST达志", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300533", "name": "冰川网络", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300537", "name": "广信材料", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300538", "name": "同益股份", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300541", "name": "先进数通", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300543", "name": "朗科智能", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300546", "name": "雄帝科技", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300547", "name": "川环科技", "last_cross": "2021-05-06", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300548", "name": "博创科技", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300555", "name": "路通视信", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300557", "name": "理工光科", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300570", "name": "太辰光", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300571", "name": "平治信息", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300573", "name": "兴齐眼药", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz300580", "name": "贝斯特", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-02", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300582", "name": "英飞特", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300584", "name": "海辰药业", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300591", "name": "万里马", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300592", "name": "华凯创意", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300595", "name": "欧普康视", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300596", "name": "利安隆", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz300608", "name": "思特奇", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300609", "name": "汇纳科技", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300615", "name": "欣天科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-11-23", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300620", "name": "光库科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-03-15"}
-{"symbol": "sz300621", "name": "维业股份", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300624", "name": "万兴科技", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300627", "name": "华测导航", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz300633", "name": "开立医疗", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300636", "name": "同和药业", "last_cross": "2021-03-22", "last_valid_ding_date": "2020-06-22", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300638", "name": "广和通", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300639", "name": "凯普生物", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300640", "name": "德艺文创", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300642", "name": "透景生命", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300652", "name": "雷迪克", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300655", "name": "晶瑞股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2020-11-09", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300657", "name": "弘信电子", "last_cross": "2021-02-22", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300661", "name": "圣邦股份", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300662", "name": "科锐国际", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-02-18", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz300663", "name": "科蓝软件", "last_cross": "2021-05-17", "last_valid_ding_date": "2020-11-30", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300668", "name": "杰恩设计", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300675", "name": "建科院", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300679", "name": "电连技术", "last_cross": "2021-03-22", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300687", "name": "赛意信息", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-04-26"}
-{"symbol": "sz300694", "name": "蠡湖股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300701", "name": "森霸传感", "last_cross": "2021-05-24", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300703", "name": "创源股份", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300706", "name": "阿石创", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-03-29"}
-{"symbol": "sz300709", "name": "精研科技", "last_cross": "2021-04-19", "last_valid_ding_date": "2020-08-03", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300716", "name": "国立科技", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300718", "name": "长盛轴承", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300732", "name": "设研院", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300736", "name": "百邦科技", "last_cross": "2021-05-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-04-06"}
-{"symbol": "sz300753", "name": "爱朋医疗", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300755", "name": "华致酒行", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-03-22"}
-{"symbol": "sz300757", "name": "罗博特科", "last_cross": "2021-04-26", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300766", "name": "每日互动", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300778", "name": "新城市", "last_cross": "2021-03-22", "last_valid_ding_date": "2020-08-24", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300779", "name": "惠城环保", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300781", "name": "因赛集团", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300796", "name": "贝斯美", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300800", "name": "力合科技", "last_cross": "2021-03-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300808", "name": "久量股份", "last_cross": "2021-04-06", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300811", "name": "铂科新材", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300812", "name": "易天股份", "last_cross": "2021-03-29", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300813", "name": "泰林生物", "last_cross": "2021-05-10", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300820", "name": "英杰电气", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
-{"symbol": "sz300833", "name": "浩洋股份", "last_cross": "2021-03-01", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-19"}
-{"symbol": "sz300838", "name": "浙江力诺", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-05-17"}
-{"symbol": "sz300848", "name": "美瑞新材", "last_cross": "2021-02-08", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-05-24"}
-{"symbol": "sz300851", "name": "交大思诺", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300858", "name": "科拓生物", "last_cross": "2021-05-17", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300861", "name": "美畅股份", "last_cross": "2021-04-19", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-04-12"}
-{"symbol": "sz300862", "name": "蓝盾光电", "last_cross": "2021-03-15", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300865", "name": "大宏立", "last_cross": "2021-05-24", "last_valid_ding_date": "2021-04-06", "last_valid_di_date": "2021-05-06"}
-{"symbol": "sz300867", "name": "圣元环保", "last_cross": "2021-04-12", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-10"}
+{"symbol": "00004", "name": "九龙仓集团", "last_cross": "2021-03-15", "last_cross_daily": "2021-03-15", "last_valid_ding_date": "2020-12-28", "last_valid_di_date": "2020-09-07", "distance": 0.544098718983524, "distance_daily": 0.6002949620164486}
+{"symbol": "00012", "name": "恒基地产", "last_cross": "2020-06-15", "last_cross_daily": "2020-06-29", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-02-08", "distance": 0.2300385833290246, "distance_daily": 0.5723637405242439}
+{"symbol": "00026", "name": "中华汽车", "last_cross": "2021-05-03", "last_cross_daily": "2021-04-26", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2020-03-16", "distance": 0.5079400551633806, "distance_daily": 0.5337104419261727}
+{"symbol": "00034", "name": "九龙建业", "last_cross": "2021-01-04", "last_cross_daily": "2021-01-18", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2020-09-21", "distance": 0.06256436456649203, "distance_daily": 0.112068946785371}
+{"symbol": "00046", "name": "科联系统", "last_cross": "2020-06-17", "last_cross_daily": "2020-10-14", "last_valid_ding_date": "2021-04-08", "last_valid_di_date": "2021-01-25", "distance": 0.0047819400010749025, "distance_daily": 0.04143385439868085}
+{"symbol": "00071", "name": "美丽华酒店", "last_cross": "2020-11-16", "last_cross_daily": "2020-09-07", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-10", "distance": 0.05549611302624258, "distance_daily": 0.21264827033975253}
+{"symbol": "00086", "name": "新鸿基公司", "last_cross": "2021-03-01", "last_cross_daily": "2020-08-17", "last_valid_ding_date": "2021-01-11", "last_valid_di_date": "2021-05-10", "distance": 0.051887667538080356, "distance_daily": 0.11873620805912538}
+{"symbol": "00098", "name": "兴发铝业", "last_cross": "2021-03-29", "last_cross_daily": "2021-04-07", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2020-11-02", "distance": 0.42734506965543995, "distance_daily": 0.43356022745336625}
+{"symbol": "00116", "name": "周生生", "last_cross": "2021-01-04", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2020-12-14", "distance": 0.11445424717250097, "distance_daily": 0.37327060581814875}
+{"symbol": "00123", "name": "越秀地产", "last_cross": "2021-02-22", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-03-08", "distance": 0.015130794524208402, "distance_daily": 0.031078011443993928}
+{"symbol": "00135", "name": "昆仑能源", "last_cross": "2020-11-09", "last_cross_daily": "2020-11-09", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2020-10-27", "distance": 0.033371859634955814, "distance_daily": 0.09531981391250643}
+{"symbol": "00168", "name": "青岛啤酒股份", "last_cross": "2021-05-10", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-03-08", "distance": 0.8436107180563766, "distance_daily": 0.5285487651630976}
+{"symbol": "00169", "name": "万达酒店发展", "last_cross": "2020-04-27", "last_cross_daily": "2019-12-02", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2020-09-28", "distance": 0.0025793786471515617, "distance_daily": 0.020697579837840437}
+{"symbol": "00184", "name": "激成投资", "last_cross": "2021-03-15", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-01-11", "distance": 0.10056459061549179, "distance_daily": 0.12557559407099075}
+{"symbol": "00240", "name": "利基控股", "last_cross": "2021-03-08", "last_cross_daily": "2020-05-11", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2020-10-27", "distance": 0.006520328343447485, "distance_daily": 0.020970709560559575}
+{"symbol": "00259", "name": "亿都(国际控股)", "last_cross": "2021-04-12", "last_cross_daily": "2021-05-03", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2020-07-20", "distance": 0.03697253125473152, "distance_daily": 0.029283646230844146}
+{"symbol": "00286", "name": "爱帝宫", "last_cross": "2021-05-24", "last_cross_daily": "2021-02-22", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-01-18", "distance": 0.013291710299745036, "distance_daily": 0.016826601692425024}
+{"symbol": "00301", "name": "三和精化", "last_cross": "2020-12-28", "last_cross_daily": "2021-01-11", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-04-07", "distance": 0.01882818462141262, "distance_daily": 0.027666827845131546}
+{"symbol": "00303", "name": "伟易达集团", "last_cross": "2021-05-17", "last_cross_daily": "2020-08-31", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2020-09-07", "distance": 0.4905193705168447, "distance_daily": 0.6775930065495839}
+{"symbol": "00329", "name": "东建国际", "last_cross": "2021-01-18", "last_cross_daily": "2020-08-10", "last_valid_ding_date": "2020-11-16", "last_valid_di_date": "2021-05-10", "distance": 0.03288634111804134, "distance_daily": 0.10111323116963478}
+{"symbol": "00331", "name": "丰盛生活服务", "last_cross": "2021-02-16", "last_cross_daily": "2020-09-28", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2020-12-14", "distance": 0.3217523430753375, "distance_daily": 0.421729151727523}
+{"symbol": "00343", "name": "文化传信", "last_cross": "2021-02-16", "last_cross_daily": "2019-12-16", "last_valid_ding_date": "2020-08-24", "last_valid_di_date": "2021-05-10", "distance": 0.017359645320096616, "distance_daily": 0.0330279962652719}
+{"symbol": "00361", "name": "顺龙控股", "last_cross": "2020-01-13", "last_cross_daily": "2020-01-29", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-02-22", "distance": 0.02624400132482977, "distance_daily": 0.028048892950891476}
+{"symbol": "00398", "name": "东方表行集团", "last_cross": "2021-04-26", "last_cross_daily": "2021-04-19", "last_valid_ding_date": "2021-02-16", "last_valid_di_date": "2021-03-29", "distance": 0.10019318313452527, "distance_daily": 0.10457608940697288}
+{"symbol": "00420", "name": "福田实业", "last_cross": "2020-10-05", "last_cross_daily": "2020-11-16", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-01-25", "distance": 0.0458488004914418, "distance_daily": 0.053705112095944925}
+{"symbol": "00455", "name": "天大药业", "last_cross": "2021-01-18", "last_cross_daily": "2021-01-11", "last_valid_ding_date": "2021-02-08", "last_valid_di_date": "2021-04-19", "distance": 0.005908733868554325, "distance_daily": 0.006740600274431595}
+{"symbol": "00459", "name": "美联工商铺", "last_cross": "2020-08-17", "last_cross_daily": "2019-11-11", "last_valid_ding_date": "2020-11-23", "last_valid_di_date": "2021-05-24", "distance": 0.0011079205838164501, "distance_daily": 0.006305177222965518}
+{"symbol": "00460", "name": "四环医药", "last_cross": "2021-01-18", "last_cross_daily": "2020-05-04", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-04-07", "distance": 0.07369395513406785, "distance_daily": 0.13014683509289615}
+{"symbol": "00476", "name": "中国动力控股", "last_cross": "2021-05-24", "last_cross_daily": "2020-07-13", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2020-09-07", "distance": 0.0013710300366681916, "distance_daily": 0.0028674849566973117}
+{"symbol": "00512", "name": "远大医药", "last_cross": "2021-04-12", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-03-08", "distance": 0.15447683080573235, "distance_daily": 0.10901153512701633}
+{"symbol": "00568", "name": "山东墨龙", "last_cross": "2020-06-01", "last_cross_daily": "2020-07-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2020-05-11", "distance": 0.5476521057166601, "distance_daily": 0.6207610454110897}
+{"symbol": "00590", "name": "六福集团", "last_cross": "2021-05-24", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-03", "distance": 0.16137019538507302, "distance_daily": 0.21536535642424948}
+{"symbol": "00592", "name": "堡狮龙国际", "last_cross": "2021-04-19", "last_cross_daily": "2021-05-10", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-03-08", "distance": 0.02795033217841387, "distance_daily": 0.01549126353040228}
+{"symbol": "00598", "name": "中国外运", "last_cross": "2021-04-12", "last_cross_daily": "2020-06-29", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-24", "distance": 0.03144250966039208, "distance_daily": 0.05672245616604349}
+{"symbol": "00610", "name": "WAI KEE HOLD", "last_cross": "2021-01-18", "last_cross_daily": "2020-08-24", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-03-22", "distance": 0.015605784762962899, "distance_daily": 0.02930325980297975}
+{"symbol": "00620", "name": "大唐西市", "last_cross": "2021-01-18", "last_cross_daily": "2021-02-16", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-02-08", "distance": 0.22124121341047231, "distance_daily": 0.392729851922385}
+{"symbol": "00656", "name": "复星国际", "last_cross": "2021-05-24", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-02-16", "last_valid_di_date": "2021-04-26", "distance": 0.05399605667290164, "distance_daily": 0.0704142760450156}
+{"symbol": "00701", "name": "CNT GROUP", "last_cross": "2020-10-19", "last_cross_daily": "2020-10-19", "last_valid_ding_date": "2021-03-17", "last_valid_di_date": "2020-08-24", "distance": 0.0022321820408915394, "distance_daily": 0.004742896279708442}
+{"symbol": "00733", "name": "合富辉煌", "last_cross": "2021-04-26", "last_cross_daily": "2020-12-21", "last_valid_ding_date": "2021-02-16", "last_valid_di_date": "2021-05-10", "distance": 0.10530831852854633, "distance_daily": 0.11384931518577218}
+{"symbol": "00738", "name": "莱尔斯丹", "last_cross": "2021-05-24", "last_cross_daily": "2020-06-22", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-04-07", "distance": 0.035880352361341517, "distance_daily": 0.05148088567466175}
+{"symbol": "00746", "name": "理文化工", "last_cross": "2020-08-10", "last_cross_daily": "2020-08-03", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-17", "distance": 0.034817296847169055, "distance_daily": 0.08205946272501285}
+{"symbol": "00754", "name": "合生创展集团", "last_cross": "2021-02-16", "last_cross_daily": "2020-04-27", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2020-12-21", "distance": 0.9026754916284228, "distance_daily": 0.7978435226303162}
+{"symbol": "00768", "name": "开明投资", "last_cross": "2021-02-16", "last_cross_daily": "2020-07-21", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-17", "distance": 0.0013703741523733645, "distance_daily": 0.003657375770997173}
+{"symbol": "00777", "name": "网龙", "last_cross": "2020-12-21", "last_cross_daily": "2021-01-25", "last_valid_ding_date": "2021-02-01", "last_valid_di_date": "2021-05-10", "distance": 0.28610926520235447, "distance_daily": 0.45452963444059696}
+{"symbol": "00811", "name": "新华文轩", "last_cross": "2021-02-08", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-03", "distance": 0.09170705524394585, "distance_daily": 0.10870460950115997}
+{"symbol": "00830", "name": "中国建筑兴业", "last_cross": "2021-02-16", "last_cross_daily": "2020-08-17", "last_valid_ding_date": "2020-10-19", "last_valid_di_date": "2021-03-08", "distance": 0.05558578651429265, "distance_daily": 0.08388663779467945}
+{"symbol": "00839", "name": "中教控股", "last_cross": "2021-04-19", "last_cross_daily": "2021-04-19", "last_valid_ding_date": "2021-02-16", "last_valid_di_date": "2021-04-07", "distance": 0.46370572883168704, "distance_daily": 0.5048012565612506}
+{"symbol": "00853", "name": "微创医疗", "last_cross": "2021-04-26", "last_cross_daily": "2021-04-26", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-03-08", "distance": 0.8893253998526305, "distance_daily": 0.9389191551812228}
+{"symbol": "00854", "name": "威雅利", "last_cross": "2020-06-29", "last_cross_daily": "2020-07-07", "last_valid_ding_date": "2021-02-08", "last_valid_di_date": "2021-03-01", "distance": 0.11687101498632285, "distance_daily": 0.17201938526804275}
+{"symbol": "00857", "name": "中国石油股份", "last_cross": "2020-11-09", "last_cross_daily": "2020-05-25", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2020-12-21", "distance": 0.05060090997312927, "distance_daily": 0.08624769026830047}
+{"symbol": "00867", "name": "康哲药业", "last_cross": "2020-12-28", "last_cross_daily": "2020-12-28", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-05-10", "distance": 0.3524438930109537, "distance_daily": 0.743074902081378}
+{"symbol": "00881", "name": "中升控股", "last_cross": "2021-03-29", "last_cross_daily": "2021-05-10", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-03-01", "distance": 1.1880005638440538, "distance_daily": 0.9230690082522988}
+{"symbol": "00887", "name": "英皇钟表珠宝", "last_cross": "2020-11-30", "last_cross_daily": "2020-07-13", "last_valid_ding_date": "2020-09-14", "last_valid_di_date": "2021-05-10", "distance": 0.0031699167315038575, "distance_daily": 0.007528085857376347}
+{"symbol": "00919", "name": "现代健康科技", "last_cross": "2021-02-08", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2021-03-24", "distance": 0.022432740243855623, "distance_daily": 0.02384220393152967}
+{"symbol": "00935", "name": "龙翔集团", "last_cross": "2021-05-10", "last_cross_daily": "2020-07-06", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-01-26", "distance": 0.0074274588055478, "distance_daily": 0.024305573853470056}
+{"symbol": "00956", "name": "新天绿色能源", "last_cross": "2020-11-23", "last_cross_daily": "2020-11-23", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-04-12", "distance": 0.044659851506871184, "distance_daily": 0.07198825108319304}
+{"symbol": "00991", "name": "大唐发电", "last_cross": "2020-05-25", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-04-26", "distance": 0.00534606619345715, "distance_daily": 0.018089319926900993}
+{"symbol": "01045", "name": "亚太卫星", "last_cross": "2021-01-11", "last_cross_daily": "2021-01-11", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-05-17", "distance": 0.04024555801854929, "distance_daily": 0.06349103600926348}
+{"symbol": "01057", "name": "浙江世宝", "last_cross": "2021-05-10", "last_cross_daily": "2021-05-10", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-04-26", "distance": 0.07516990743236157, "distance_daily": 0.06675216934287001}
+{"symbol": "01093", "name": "石药集团", "last_cross": "2021-01-18", "last_cross_daily": "2021-03-08", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2020-12-07", "distance": 0.3308940373605431, "distance_daily": 0.362292718447885}
+{"symbol": "01097", "name": "有线宽频", "last_cross": "2021-04-26", "last_cross_daily": "2019-10-21", "last_valid_ding_date": "2021-05-24", "last_valid_di_date": "2021-04-12", "distance": 0.002806703693115383, "distance_daily": 0.0036598560757406563}
+{"symbol": "01104", "name": "亚太资源", "last_cross": "2021-05-10", "last_cross_daily": "2021-04-27", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-04-12", "distance": 0.00477823492459066, "distance_daily": 0.012168071124178614}
+{"symbol": "01122", "name": "庆铃汽车股份", "last_cross": "2021-04-19", "last_cross_daily": "2020-05-04", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-03-08", "distance": 0.008767040114677514, "distance_daily": 0.037730030228110875}
+{"symbol": "01142", "name": "西伯利亚矿业", "last_cross": "2021-05-11", "last_cross_daily": "2020-06-29", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2021-04-20", "distance": 0.062177451904486175, "distance_daily": 0.09847897044783788}
+{"symbol": "01161", "name": "奥思集团", "last_cross": "2021-05-03", "last_cross_daily": "2021-05-03", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-24", "distance": 0.06636493332737364, "distance_daily": 0.06023727392689077}
+{"symbol": "01166", "name": "星凯控股", "last_cross": "2021-05-03", "last_cross_daily": "2019-04-08", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2020-12-17", "distance": 0.0017778634593830101, "distance_daily": 0.0035744335719884827}
+{"symbol": "01171", "name": "兖州煤业股份", "last_cross": "2021-02-16", "last_cross_daily": "2021-02-16", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-01-04", "distance": 0.09630229559168124, "distance_daily": 0.2959043943392269}
+{"symbol": "01177", "name": "中国生物制药", "last_cross": "2021-02-08", "last_cross_daily": "2021-03-08", "last_valid_ding_date": "2021-05-24", "last_valid_di_date": "2020-12-28", "distance": 0.08280904806955763, "distance_daily": 0.08993188011784561}
+{"symbol": "01193", "name": "华润燃气", "last_cross": "2021-03-08", "last_cross_daily": "2020-11-16", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-03-01", "distance": 0.709652177862691, "distance_daily": 0.7559904748285173}
+{"symbol": "01198", "name": "皇朝家居", "last_cross": "2021-04-29", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-05", "distance": 0.030295864887294792, "distance_daily": 0.027775457224468017}
+{"symbol": "01200", "name": "美联集团", "last_cross": "2020-08-24", "last_cross_daily": "2020-09-14", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2021-04-12", "distance": 0.028465959452494013, "distance_daily": 0.06651334631501939}
+{"symbol": "01224", "name": "中渝置地", "last_cross": "2021-05-17", "last_cross_daily": "2020-09-21", "last_valid_ding_date": "2021-05-24", "last_valid_di_date": "2021-02-08", "distance": 0.008368144893518698, "distance_daily": 0.011445607474979334}
+{"symbol": "01255", "name": "TATA健康", "last_cross": "2021-03-08", "last_cross_daily": "2020-07-06", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-02-24", "distance": 0.2546747671988462, "distance_daily": 0.4608293863235837}
+{"symbol": "01268", "name": "美东汽车", "last_cross": "2021-03-15", "last_cross_daily": "2021-03-15", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-04-12", "distance": 0.5104728870964728, "distance_daily": 0.43827787132525087}
+{"symbol": "01339", "name": "中国人民保险集团", "last_cross": "2020-11-09", "last_cross_daily": "2020-10-19", "last_valid_ding_date": "2021-03-08", "last_valid_di_date": "2021-02-08", "distance": 0.03818768610324354, "distance_daily": 0.046788137701151936}
+{"symbol": "01349", "name": "复旦张江", "last_cross": "2020-11-30", "last_cross_daily": "2020-11-30", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2021-03-08", "distance": 0.08163168471746216, "distance_daily": 0.09397645015496695}
+{"symbol": "01358", "name": "普华和顺", "last_cross": "2021-05-03", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-03-08", "distance": 0.029313691684638453, "distance_daily": 0.017293168231813448}
+{"symbol": "01359", "name": "中国信达", "last_cross": "2021-05-17", "last_cross_daily": "2021-01-04", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-05-03", "distance": 0.007125066064283574, "distance_daily": 0.011638872393593042}
+{"symbol": "01368", "name": "特步国际", "last_cross": "2021-03-15", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-01-04", "last_valid_di_date": "2021-03-08", "distance": 0.37955970205336587, "distance_daily": 0.478444318780455}
+{"symbol": "01373", "name": "国际家居零售", "last_cross": "2021-05-24", "last_cross_daily": "2020-07-06", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-07", "distance": 0.006485801613440589, "distance_daily": 0.013571390986246767}
+{"symbol": "01402", "name": "超智能控股", "last_cross": "2021-02-02", "last_cross_daily": "2020-05-11", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2020-12-21", "distance": 0.0021111356953809057, "distance_daily": 0.011400329706363135}
+{"symbol": "01442", "name": "INFINITY L&T", "last_cross": "2021-03-08", "last_cross_daily": "2020-08-10", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-03", "distance": 0.04390622488677304, "distance_daily": 0.05694230745523396}
+{"symbol": "01500", "name": "现恒建筑", "last_cross": "2021-05-06", "last_cross_daily": "2019-11-22", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-01-25", "distance": 0.0026078844267068083, "distance_daily": 0.00666153798746983}
+{"symbol": "01515", "name": "华润医疗", "last_cross": "2021-05-17", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-03-08", "distance": 0.11359681118222098, "distance_daily": 0.10131651527174246}
+{"symbol": "01521", "name": "方达控股", "last_cross": "2021-05-24", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-03-22", "distance": 0.08149074262188766, "distance_daily": 0.07891090736238238}
+{"symbol": "01533", "name": "庄园牧场", "last_cross": "2021-04-12", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2020-12-21", "last_valid_di_date": "2021-05-05", "distance": 0.02070338179548549, "distance_daily": 0.03588452686309385}
+{"symbol": "01540", "name": "澳狮环球", "last_cross": "2021-05-03", "last_cross_daily": "2020-07-27", "last_valid_ding_date": "2021-05-17", "last_valid_di_date": "2021-04-07", "distance": 0.0015757765737644917, "distance_daily": 0.017887510718564127}
+{"symbol": "01548", "name": "金斯瑞生物科技", "last_cross": "2021-02-01", "last_cross_daily": "2021-02-01", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-01-11", "distance": 1.7773635542703166, "distance_daily": 1.8463576255697416}
+{"symbol": "01553", "name": "迈科管业", "last_cross": "2020-12-28", "last_cross_daily": "2021-02-09", "last_valid_ding_date": "2021-05-25", "last_valid_di_date": "2021-04-19", "distance": 0.02033540301236876, "distance_daily": 0.03344346388227074}
+{"symbol": "01566", "name": "华夏文化科技", "last_cross": "2021-05-10", "last_cross_daily": "2021-05-10", "last_valid_ding_date": "2020-09-14", "last_valid_di_date": "2021-04-19", "distance": 0.04196897346654349, "distance_daily": 0.03884584075918657}
+{"symbol": "01600", "name": "天伦燃气", "last_cross": "2021-05-17", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2020-11-02", "distance": 0.050036012201957025, "distance_daily": 0.1023734890054751}
+{"symbol": "01606", "name": "国银租赁", "last_cross": "2021-03-15", "last_cross_daily": "2021-03-08", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-04-12", "distance": 0.0015514802055274814, "distance_daily": 0.00570327673670873}
+{"symbol": "01689", "name": "华禧控股", "last_cross": "2021-03-29", "last_cross_daily": "2021-03-22", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-05-03", "distance": 0.02910026518708958, "distance_daily": 0.05006088105256981}
+{"symbol": "01696", "name": "复锐医疗科技", "last_cross": "2021-04-12", "last_cross_daily": "2020-06-08", "last_valid_ding_date": "2021-02-16", "last_valid_di_date": "2020-12-07", "distance": 1.2874423624944296, "distance_daily": 1.3653327069133394}
+{"symbol": "01703", "name": "首沣控股", "last_cross": "2021-05-24", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2020-09-14", "distance": 0.011016098567895795, "distance_daily": 0.01027343483698534}
+{"symbol": "01711", "name": "欧化", "last_cross": "2021-05-18", "last_cross_daily": "2021-05-18", "last_valid_ding_date": "2021-02-08", "last_valid_di_date": "2021-04-07", "distance": 0.0011924104982602027, "distance_daily": 0.0012611395418093089}
+{"symbol": "01713", "name": "四川能投发展", "last_cross": "2020-10-12", "last_cross_daily": "2020-11-23", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-03", "distance": 0.01410417082311291, "distance_daily": 0.04535648314573887}
+{"symbol": "01730", "name": "贤能集团", "last_cross": "2021-04-19", "last_cross_daily": "2020-06-01", "last_valid_ding_date": "2021-04-07", "last_valid_di_date": "2021-03-08", "distance": 0.053533062081231764, "distance_daily": 0.06490342859960671}
+{"symbol": "01748", "name": "信源企业集团", "last_cross": "2021-05-10", "last_cross_daily": "2021-04-07", "last_valid_ding_date": "2021-02-25", "last_valid_di_date": "2021-04-07", "distance": 0.07788462050898054, "distance_daily": 0.05007189079824968}
+{"symbol": "01771", "name": "新丰泰集团", "last_cross": "2021-05-17", "last_cross_daily": "2020-07-06", "last_valid_ding_date": "2021-04-27", "last_valid_di_date": "2020-04-14", "distance": 0.02422701727526222, "distance_daily": 0.03784926056125798}
+{"symbol": "01785", "name": "成都高速", "last_cross": "2021-05-11", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-04-09", "distance": 0.014966567331861923, "distance_daily": 0.009484146308500037}
+{"symbol": "01811", "name": "中广核新能源", "last_cross": "2021-05-24", "last_cross_daily": "2021-01-04", "last_valid_ding_date": "2021-01-18", "last_valid_di_date": "2021-04-12", "distance": 0.014863795330272267, "distance_daily": 0.026692161589023128}
+{"symbol": "01823", "name": "华昱高速", "last_cross": "2020-12-01", "last_cross_daily": "2021-02-01", "last_valid_ding_date": "2021-02-08", "last_valid_di_date": "2021-05-10", "distance": 0.11330557789321843, "distance_daily": 0.12476509051637562}
+{"symbol": "01825", "name": "美臻集团", "last_cross": "2021-01-25", "last_cross_daily": "2020-07-27", "last_valid_ding_date": "2021-04-19", "last_valid_di_date": "2021-02-23", "distance": 0.014954524149497182, "distance_daily": 0.028825093590395846}
+{"symbol": "01830", "name": "必瘦站", "last_cross": "2021-02-08", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-03", "distance": 0.32088330794400965, "distance_daily": 0.3611505925477543}
+{"symbol": "01831", "name": "十方控股", "last_cross": "2021-04-27", "last_cross_daily": "2020-02-11", "last_valid_ding_date": "2020-11-23", "last_valid_di_date": "2021-03-29", "distance": 0.014204110205181893, "distance_daily": 0.017402990102347502}
+{"symbol": "01843", "name": "快餐帝国", "last_cross": "2020-05-11", "last_cross_daily": "2020-06-29", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2021-01-18", "distance": 0.012921217241541091, "distance_daily": 0.022643659186223734}
+{"symbol": "01902", "name": "银城国际控股", "last_cross": "2021-05-10", "last_cross_daily": "2021-02-01", "last_valid_ding_date": "2020-12-14", "last_valid_di_date": "2021-03-15", "distance": 0.0702680455224623, "distance_daily": 0.09964313667533573}
+{"symbol": "01907", "name": "中国旭阳集团", "last_cross": "2020-06-29", "last_cross_daily": "2020-08-31", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-03-22", "distance": 0.08234621847221757, "distance_daily": 0.14792928351649492}
+{"symbol": "01921", "name": "达力普控股", "last_cross": "2021-01-12", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-20", "distance": 0.08766675749787527, "distance_daily": 0.0959615012057306}
+{"symbol": "01929", "name": "周大福", "last_cross": "2021-02-22", "last_cross_daily": "2021-03-08", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-03", "distance": 0.2389444721959686, "distance_daily": 0.2780364884341473}
+{"symbol": "01935", "name": "嘉宏教育", "last_cross": "2021-05-17", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-05-24", "last_valid_di_date": "2021-03-29", "distance": 0.11206364796093982, "distance_daily": 0.07732647761179812}
+{"symbol": "01955", "name": "庄臣控股", "last_cross": "2020-11-02", "last_cross_daily": "2020-05-04", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2021-03-29", "distance": 0.027930439908375876, "distance_daily": 0.05433501546174456}
+{"symbol": "01963", "name": "重庆银行", "last_cross": "2021-05-24", "last_cross_daily": "2020-05-11", "last_valid_ding_date": "2021-04-12", "last_valid_di_date": "2021-05-03", "distance": 0.013706195610159871, "distance_daily": 0.027668040129380733}
+{"symbol": "01977", "name": "安乐工程", "last_cross": "2021-05-24", "last_cross_daily": "2019-11-11", "last_valid_ding_date": "2021-03-01", "last_valid_di_date": "2021-05-17", "distance": 0.012233065200765142, "distance_daily": 0.0364180354405112}
+{"symbol": "01983", "name": "泸州银行", "last_cross": "2020-12-28", "last_cross_daily": "2021-01-12", "last_valid_ding_date": "2021-03-09", "last_valid_di_date": "2020-12-22", "distance": 0.008016515161874418, "distance_daily": 0.04384799518001373}
+{"symbol": "01985", "name": "美高域", "last_cross": "2021-02-01", "last_cross_daily": "2021-03-01", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-26", "distance": 0.011781028150325838, "distance_daily": 0.018239766858156113}
+{"symbol": "01992", "name": "复星旅游文化", "last_cross": "2020-11-23", "last_cross_daily": "2020-06-15", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-05-03", "distance": 0.27112719713580313, "distance_daily": 0.502057177336532}
+{"symbol": "02006", "name": "锦江资本", "last_cross": "2020-11-16", "last_cross_daily": "2021-01-11", "last_valid_ding_date": "2021-03-15", "last_valid_di_date": "2021-04-12", "distance": 0.034778601373871926, "distance_daily": 0.053560893412327365}
+{"symbol": "02020", "name": "安踏体育", "last_cross": "2021-05-24", "last_cross_daily": "2021-05-24", "last_valid_ding_date": "2021-05-03", "last_valid_di_date": "2020-09-07", "distance": 1.041512362510277, "distance_daily": 0.85277594507704}
+{"symbol": "02101", "name": "福禄控股", "last_cross": "2021-01-04", "last_cross_daily": "2021-01-25", "last_valid_ding_date": "2021-03-29", "last_valid_di_date": "2021-04-19", "distance": 0.2513820769267453, "distance_daily": 0.299874982255083}
+{"symbol": "02103", "name": "新力控股集团", "last_cross": "2021-05-03", "last_cross_daily": "2021-05-17", "last_valid_ding_date": "2021-05-10", "last_valid_di_date": "2021-01-04", "distance": 0.02298557656165344, "distance_daily": 0.008098622405079903}
+{"symbol": "02108", "name": "K2 F&B", "last_cross": "2021-05-24", "last_cross_daily": "2020-07-20", "last_valid_ding_date": "2020-09-08", "last_valid_di_date": "2021-04-26", "distance": 0.0038632880582191286, "distance_daily": 0.01051042520367004}
+{"symbol": "02111", "name": "超盈国际控股", "last_cross": "2020-06-22", "last_cross_daily": "2020-08-24", "last_valid_ding_date": "2021-03-22", "last_valid_di_date": "2021-04-12", "distance": 0.10342846384174648, "distance_daily": 0.13850510596035195}
+{"symbol": "02116", "name": "江苏创新", "last_cross": "2021-02-22", "last_cross_daily": "2020-05-05", "last_valid_ding_date": "2021-02-22", "last_valid_di_date": "2021-05-25", "distance": 0.0016575258059006014, "distance_daily": 0.008405334736330854}
+{"symbol": "02128", "name": "中国联塑", "last_cross": "2021-02-08", "last_cross_daily": "2021-02-08", "last_valid_ding_date": "2021-04-26", "last_valid_di_date": "2020-12-21", "distance": 0.23701516647808307, "distance_daily": 0.29136978864186336}

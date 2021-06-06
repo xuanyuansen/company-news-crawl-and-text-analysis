@@ -22,26 +22,26 @@ if __name__ == "__main__":
     set_display()
     print(today_date)
     db = Database()
-    stock_type = sys.argv[1]
+    # stock_type = sys.argv[1]
     stock_info_spyder = StockInfoSpyder(
-        config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
+        config.HK_STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
     )
 
     data = db.get_data(
-        config.STOCK_DATABASE_NAME,
-        config.COLLECTION_NAME_STOCK_BASIC_INFO,
+        config.HK_STOCK_DATABASE_NAME,
+        config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
         keys=["symbol", "name", "end_date"],
     )
     with open("./info/week_buy_point_res.json", "w") as file:
         for _, row in data.iterrows():
-            if stock_type not in row["symbol"]:
-                print("市场不对 跳过{}".format(row["symbol"]))
-                continue
-            if row["end_date"] < datetime.datetime.now():
-                print("退市了，不考虑{}".format(row["symbol"]))
-                continue
+            # if stock_type not in row["symbol"]:
+            #    print("市场不对 跳过{}".format(row["symbol"]))
+            #    continue
+            # if row["end_date"] < datetime.datetime.now():
+                # print("退市了，不考虑{}".format(row["symbol"]))
+                # continue
             res, stock_data = stock_info_spyder.get_week_data_cn_stock(
-                row["symbol"], market_type="cn"
+                row["symbol"], market_type="hk"
             )
             if not res or stock_data.shape[0] < 33:
                 print("not enough data")
@@ -67,7 +67,7 @@ if __name__ == "__main__":
                 break
             # daily data
             res, stock_data_daily = stock_info_spyder.get_daily_data_cn_stock(
-                row["symbol"], market_type="cn", start_date='2019-01-01'
+                row["symbol"], market_type="hk", start_date='2019-01-01'
             )
             if not res or stock_data_daily.shape[0] < 33:
                 print("not enough data")

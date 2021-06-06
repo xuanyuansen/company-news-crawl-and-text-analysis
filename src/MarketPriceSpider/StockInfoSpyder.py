@@ -121,6 +121,10 @@ class StockInfoSpyder(Spyder):
                             int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
                         )
                     }
+                } if market_type == "cn" else {
+                    "date": {
+                        "$gt": start_date
+                    }
                 },
             )
         if stock_data is None:
@@ -132,8 +136,12 @@ class StockInfoSpyder(Spyder):
                         * row["volume"],
             axis=1,
         )
-
-        stock_data.index = stock_data["date"]
+        if market_type == "hk":
+            stock_data["date_time_index"] = stock_data.apply(lambda row:
+                                                           datetime.datetime.strptime(row['date'], "%Y-%m-%d"), axis=1)
+            stock_data.index = stock_data["date_time_index"]
+        else:
+            stock_data.index = stock_data["date"]
         return True, stock_data
 
     def get_week_data_cn_stock(self, symbol, market_type: str, start_date: str = None):
