@@ -1,14 +1,30 @@
 import logging
+
+from cryptography.fernet import Fernet
 from pymongo import MongoClient
 import pandas as pd
+import platform
+from Utils import config
 
 
 class Database(object):
-    def __init__(self, ip="localhost", port=27017):
-        self.ip = ip
-        self.port = port
-        self.conn = MongoClient(self.ip, self.port, maxPoolSize=200)
+    def __init__(self):
+        self.os_type = platform.system()
+        self.ip = config.MONGODB_IP
+        self.port = config.MONGODB_PORT
+        self.conn = self.__init_remote_client() if self.os_type == "Darwin" \
+            else MongoClient(self.ip, self.port, maxPoolSize=200)
         self.collection = None
+
+    def __init_remote_client(self):
+        uname = b'gAAAAABgvHJFrKFjhYB2_Ri49Ku7BVo0KwW-qKz1N7Bs20f70uNfDhGgd1rA1nRanHUnFKgPutTfMauATII2Kk5WxBuBbIDqnQ=='
+        passwd = b'gAAAAABgvHJFTtvwhg3gbiaedLjlsEFMt_wdgkU1fgyIyYUizwRQXciBaSyG2DDoTvr3fD1qfRhnBzg-7rNt4rbDh7TUvyGEXQ=='
+        _cipher = Fernet(config.cipher_key)
+        _uname = str(_cipher.decrypt(uname), encoding="utf-8")
+        _password = str(_cipher.decrypt(passwd), encoding="utf-8")
+        return MongoClient(self.ip, self.port, username=_uname,
+                           password=_password, authMechanism='SCRAM-SHA-1',
+                           serverSelectionTimeoutMS='5000', maxPoolSize=200)
 
     def connect_database(self, database_name):
         return self.conn[database_name]
@@ -36,12 +52,12 @@ class Database(object):
         return self.collection.find({_key: {"$regex": ".*{}.*".format(param)}})
 
     def get_data(
-        self,
-        database_name,
-        collection_name,
-        max_data_request=None,
-        query=None,
-        keys=None,
+            self,
+            database_name,
+            collection_name,
+            max_data_request=None,
+            query=None,
+            keys=None,
     ):
         database = self.conn[database_name]
         collection = database.get_collection(collection_name)
@@ -96,7 +112,7 @@ class Database(object):
             _dict = {_key: [] for _key in data_keys}
             # print(_dict)
             for _id, row in enumerate(
-                collection.find(query) if len(query) != 0 else collection.find()
+                    collection.find(query) if len(query) != 0 else collection.find()
             ):
                 if _id + 1 <= max_data_request:
                     for _key in data_keys:

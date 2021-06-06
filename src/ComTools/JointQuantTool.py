@@ -38,3 +38,7 @@ class JointQuantTool(object):
         return self.all_stock
 
     pass
+
+
+if __name__ == "__main__":
+    pass

@@ -15,10 +15,10 @@
 清理指定包的旧版本：brew cleanup $FORMULA
 查看可清理的旧版本包，不执行实际操作：brew cleanup -n
 
-作者：SWITCH__c801
-链接：https://www.jianshu.com/p/032ce92e4c7b
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+my remote mongo
+name pass user:"my_mongodb",pwd:"my_mongodb"
+https://www.jianshu.com/p/0a7452d8843d
+'user':'dbadmin',pwd:'my_mongodb'
 
 mac install mongo
 mac install redis
@@ -26,6 +26,7 @@ brew install mangodb
 brew install mongodb
 brew tap mongodb/brew
 brew install mongodb-community
+launchctl limit maxfiles 2048 unlimited
 brew services start mongodb-community
 ps -ef |grep mongodb
 mongo visual tool
@@ -37,7 +38,8 @@ pip install https://github.com/lancopku/pkuseg-python/archive/master.zip
 
 chrome driver
 https://stackoverflow.com/questions/47148872/webdrivers-executable-may-have-wrong-permissions-please-see-https-sites-goo
-
+mac:
+sudo launchctl limit
 sudo launchctl limit maxfiles 64000 64000
 https://docs.mongodb.com/manual/reference/ulimit/
 
