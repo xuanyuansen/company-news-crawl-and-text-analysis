@@ -12,8 +12,7 @@ class Database(object):
         self.os_type = platform.system()
         self.ip = config.MONGODB_IP
         self.port = config.MONGODB_PORT
-        self.conn = self.init_remote_client() if self.os_type == "Darwin" \
-            else MongoClient(self.ip, self.port, maxPoolSize=200)
+        self.conn = self.init_remote_client()
         self.collection = None
 
     def init_remote_client(self):
