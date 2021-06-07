@@ -2,6 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 import numpy
 from .BasicUtil import ZhongShu
+import logging
 
 
 # input data frame of day data
@@ -89,7 +90,7 @@ def inner_get_average_volume(
 def from_xian_duan_to_zhong_shu(input_lines: list):
     line_cnt = len(input_lines)
     if line_cnt < 3:
-        print("没有足够线段")
+        logging.info("没有足够线段")
         return []
     idx_duan = 0
     zhong_shu_list = []
@@ -104,17 +105,17 @@ def from_xian_duan_to_zhong_shu(input_lines: list):
                 zhong_shu_list.append(res[1])
                 idx_duan = idx_duan + 3
             else:
-                print("not zhong shu, continue")
+                logging.info("not zhong shu, continue")
                 idx_duan += 1
         else:
-            print("看是否包含，如果不包含尝试新的中枢")
+            logging.info("看是否包含，如果不包含尝试新的中枢")
             if len(zhong_shu_list) < 1:
                 idx_duan += 1
                 continue
             last_zhong_shu = zhong_shu_list[-1]
             contain_flag = last_zhong_shu.is_contain_duan(input_lines[idx_duan])
             if contain_flag:
-                print("包含，合并")
+                logging.info("包含，合并")
                 zhong_shu_list[-1].merge_duan(input_lines[idx_duan])
                 idx_duan += 1
             elif idx_duan + 2 < line_cnt:
@@ -127,10 +128,10 @@ def from_xian_duan_to_zhong_shu(input_lines: list):
                     zhong_shu_list.append(res[1])
                     idx_duan = idx_duan + 3
                 else:
-                    print("not zhong shu, continue")
+                    logging.info("not zhong shu, continue")
                     idx_duan += 1
             else:
-                print("没有足够线段形成中枢，结束")
+                logging.info("没有足够线段形成中枢，结束")
                 idx_duan += 1
     return zhong_shu_list
 

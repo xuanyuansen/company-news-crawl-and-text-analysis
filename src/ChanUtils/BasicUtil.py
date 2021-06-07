@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
+import logging
 import math
 import datetime
 import copy
@@ -406,9 +407,9 @@ class ZhongShu(object):
             )
 
         self.max_low_value = max(self.max_low_value, next_line.low)
-        print("merge", type(self.max_low_value), self.max_low_value)
+        logging.info("merge {} {}".format(type(self.max_low_value), self.max_low_value))
         self.min_max_value = min(self.min_max_value, next_line.high)
-        print("merge", type(self.min_max_value), self.min_max_value)
+        logging.info("merge {} {}".format(type(self.min_max_value), self.min_max_value))
         self.end_index = next_line.end_index
         self.list_of_duan.append(next_line)  # 2020.10.21 fix bug
         self.zhong_shu_middle_price = 0.5 * (self.max_low_value + self.min_max_value)

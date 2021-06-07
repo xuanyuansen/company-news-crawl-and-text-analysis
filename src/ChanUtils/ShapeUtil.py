@@ -288,6 +288,8 @@ class ChanSourceDataObject(object):
     # 新增条件，离0轴不是太远
     # MACD线应该在0轴上方，三类买点，一类卖点。
     # 最近一周macd和
+    # 2021.06.07 新增
+    # 计算MACD的variance
     def is_valid_buy_sell_point_on_k_line(self, level: str = 'week'):
         # 强势市场，防狼术，至少周线级别上面多空力量已经有了胜负
         # 不要在周线级别下跌的区间里面去做日线级别的买入，刀口舔血
@@ -295,12 +297,17 @@ class ChanSourceDataObject(object):
         # 操作体系，操作级别，操作节奏，大的级别决定大的利润
         # 再大的级别就是月线。
         # 周线级别可以放松，日线要求严格
+        # print(self.histogram[-8:])
+        if 'week' == level:
+            variance = self.histogram[-8:].var()
+        else:
+            variance = self.histogram[-40:].var()
         h_param = -0.3 if 'week' == level else 0.0
         last_2_macd = self.macd[-2:]
         last_2_signal = self.signal[-2:]
         if last_2_macd[0] < h_param or last_2_macd[1] < h_param \
                 or last_2_signal[0] < h_param or last_2_signal[1] < h_param:
-            return False, None, None, None, None
+            return False, None, None, None, None, None
 
         last_cross = self.cross_list[-1]
         valid_ding = self.data_to_plot_frame.loc[
@@ -331,6 +338,7 @@ class ChanSourceDataObject(object):
                 valid_ding_date,
                 valid_di_date,
                 distance,
+                variance
             )
         else:
             if valid_ding_date is None or valid_di_date is None:
@@ -340,6 +348,7 @@ class ChanSourceDataObject(object):
                     valid_ding_date,
                     valid_di_date,
                     distance,
+                    variance
                 )
             else:
                 return (
@@ -349,6 +358,7 @@ class ChanSourceDataObject(object):
                     valid_ding_date,
                     valid_di_date,
                     distance,
+                    variance
                 )
 
     # 像图1这种，第二K线高点是相邻三K线高点中最高的，而低点也是相邻三K线低点中最高的，本ID给一个定义叫顶分型；

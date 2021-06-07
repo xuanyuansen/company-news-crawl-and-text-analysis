@@ -15,7 +15,9 @@ class MongoDBPipeline(object):
         self.db_net_ease = client[config.NET_EASE_STOCK_NEWS_DB]  # 163
         self.db_east_money = client[config.EAST_MONEY_NEWS_DB]  # east money
         self.db_shanghai_cn_stock = client[config.SHANG_HAI_STOCK_NEWS_DB]  # shanghai
-        self.db_zhong_jin_cn_stock = client[config.ZHONG_JIN_STOCK_NEWS_DB]  # zhong jin 中金
+        self.db_zhong_jin_cn_stock = client[
+            config.ZHONG_JIN_STOCK_NEWS_DB
+        ]  # zhong jin 中金
 
     def process_item(self, item, spider):
         col_name = str(spider.name).replace("spider", "data")

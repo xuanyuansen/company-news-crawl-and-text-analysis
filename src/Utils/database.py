@@ -1,10 +1,32 @@
+import functools
 import logging
+import time
 
+import pymongo
 from cryptography.fernet import Fernet
 from pymongo import MongoClient
 import pandas as pd
 import platform
 from Utils import config
+
+MAX_AUTO_RECONNECT_ATTEMPTS = 5
+
+
+def graceful_auto_reconnect(mongo_op_func):
+    """Gracefully handle a reconnection event."""
+
+    # https://stackoverflow.com/questions/42502879/connection-reset-by-peer-pymongo
+    @functools.wraps(mongo_op_func)
+    def wrapper(*args, **kwargs):
+        for attempt in range(MAX_AUTO_RECONNECT_ATTEMPTS):
+            try:
+                return mongo_op_func(*args, **kwargs)
+            except pymongo.errors.AutoReconnect as e:
+                wait_t = 0.5 * pow(2, attempt)  # exponential back off
+                logging.warning("PyMongo auto-reconnecting... %s. Waiting %.1f seconds.", str(e), wait_t)
+                time.sleep(wait_t)
+
+    return wrapper
 
 
 class Database(object):
@@ -21,9 +43,11 @@ class Database(object):
         _cipher = Fernet(config.cipher_key)
         _uname = str(_cipher.decrypt(uname), encoding="utf-8")
         _password = str(_cipher.decrypt(passwd), encoding="utf-8")
-        return MongoClient(self.ip, self.port, username=_uname,
-                           password=_password, authMechanism='SCRAM-SHA-1',
-                           serverSelectionTimeoutMS='5000', maxPoolSize=200)
+        mc = MongoClient(self.ip, self.port, username=_uname,
+                         password=_password, authMechanism='SCRAM-SHA-1',
+                         serverSelectionTimeoutMS='5000', maxPoolSize=200)
+        logging.info('init db done!')
+        return mc
 
     def connect_database(self, database_name):
         return self.conn[database_name]
@@ -33,6 +57,13 @@ class Database(object):
             collection_name
         )
         return self.collection
+
+    def find_max(self, database_name, collection_name, key: str):
+        self.get_collection(database_name, collection_name)
+        max_key_value = self.collection.find_one(sort=[(key, pymongo.DESCENDING)]).get(
+            key
+        )
+        return max_key_value
 
     def insert_data(self, database_name, collection_name, data_dict):
         collection = self.get_collection(database_name, collection_name)
@@ -50,6 +81,7 @@ class Database(object):
         # 模糊查询
         return self.collection.find({_key: {"$regex": ".*{}.*".format(param)}})
 
+    @graceful_auto_reconnect
     def get_data(
             self,
             database_name,

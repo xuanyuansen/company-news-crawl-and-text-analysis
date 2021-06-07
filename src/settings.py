@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import platform
+
 BOT_NAME = "spider"
 
 PYTHONHASHSEED = 10

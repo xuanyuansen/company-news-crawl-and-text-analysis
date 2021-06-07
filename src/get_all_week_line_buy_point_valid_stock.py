@@ -16,15 +16,15 @@ from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 from Utils.utils import set_display, today_date
 from Utils import config
 from Utils.database import Database
-import warnings
-warnings.filterwarnings("ignore")
+
+# import warnings
+# warnings.filterwarnings("ignore")
 
 
 def check_buy_point_data(market_type, stock_symbol, data_level):
     res, stock_data = (
-        stock_info_spyder.get_week_data_stock(
-            stock_symbol, market_type=market_type
-        ) if "week" == data_level
+        stock_info_spyder.get_week_data_stock(stock_symbol, market_type=market_type)
+        if "week" == data_level
         else stock_info_spyder.get_daily_data_stock(
             stock_symbol, market_type=market_type, start_date="2019-01-01"
         )
@@ -37,16 +37,17 @@ def check_buy_point_data(market_type, stock_symbol, data_level):
     stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
     stock_data.set_index("Date", inplace=True)
     # 周线不合并K线
-    _merge = True if "daily" == data_level else False
-    merged_k_line_data = KiLineObject.k_line_merge(
-        row["symbol"], stock_data, merge_or_not=_merge
-    )
-    chan_data = ChanSourceDataObject(data_level, merged_k_line_data)
-    chan_data.gen_data_frame()
     try:
+        _merge = True if "daily" == data_level else False
+        merged_k_line_data = KiLineObject.k_line_merge(
+            row["symbol"], stock_data, merge_or_not=_merge
+        )
+        chan_data = ChanSourceDataObject(data_level, merged_k_line_data)
+        chan_data.gen_data_frame()
+
         return True, chan_data.is_valid_buy_sell_point_on_k_line(level=data_level)
     except Exception as e:
-        print(stock_symbol)
+        print("error".format(stock_symbol))
         print(e)
         return False, tuple()
 
@@ -117,11 +118,13 @@ if __name__ == "__main__":
                 args.market, row["symbol"], data_level="week"
             )
             if week_result[0]:
+                logging.info('week: {}'.format(week_result))
                 valid = week_result[1][0]
                 last_cross = week_result[1][1]
                 valid_ding_date = week_result[1][2]
                 valid_di_date = week_result[1][3]
                 distance = week_result[1][4]
+                variance_week = week_result[1][5]
             else:
                 continue
 
@@ -129,11 +132,13 @@ if __name__ == "__main__":
                 args.market, row["symbol"], data_level="daily"
             )
             if daily_result[0]:
+                logging.info('daily: {}'.format(daily_result))
                 valid_daily = daily_result[1][0]
                 last_cross_daily = daily_result[1][1]
                 valid_ding_date_daily = daily_result[1][2]
                 valid_di_date_daily = daily_result[1][3]
                 distance_daily = daily_result[1][4]
+                variance_daily = daily_result[1][5]
             else:
                 continue
 
@@ -174,6 +179,8 @@ if __name__ == "__main__":
                                 else "",
                                 "distance_week": distance,
                                 "distance_daily": distance_daily,
+                                "variance_week": variance_week,
+                                "variance_daily": variance_daily,
                             },
                             ensure_ascii=False,
                         )

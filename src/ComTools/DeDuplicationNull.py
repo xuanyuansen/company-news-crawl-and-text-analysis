@@ -42,7 +42,8 @@ class Deduplication(object):
                     self.collection_name,
                     query={"Date": {"$regex": _date}},
                 )
-            except Exception:
+            except Exception as e:
+                logging.error(e)
                 continue
             if data_df is None:
                 continue
