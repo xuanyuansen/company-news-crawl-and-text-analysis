@@ -5,9 +5,11 @@ date 2021/06/03
 """
 import datetime
 import json
-import sys
-import pandas as pd
+import logging
 
+# import sys
+import pandas as pd
+import argparse
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
@@ -15,90 +17,139 @@ from Utils.utils import set_display, today_date
 from Utils import config
 from Utils.database import Database
 import warnings
-
 warnings.filterwarnings("ignore")
+
+
+def check_buy_point_data(market_type, stock_symbol, data_level):
+    res, stock_data = (
+        stock_info_spyder.get_week_data_stock(
+            stock_symbol, market_type=market_type
+        ) if "week" == data_level
+        else stock_info_spyder.get_daily_data_stock(
+            stock_symbol, market_type=market_type, start_date="2019-01-01"
+        )
+    )
+    if not res or stock_data.shape[0] < 33:
+        print("not enough data")
+        return False, tuple()
+
+    print("current stock is {}".format(stock_symbol))
+    stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
+    stock_data.set_index("Date", inplace=True)
+    # 周线不合并K线
+    _merge = True if "daily" == data_level else False
+    merged_k_line_data = KiLineObject.k_line_merge(
+        row["symbol"], stock_data, merge_or_not=_merge
+    )
+    chan_data = ChanSourceDataObject(data_level, merged_k_line_data)
+    chan_data.gen_data_frame()
+    try:
+        return True, chan_data.is_valid_buy_sell_point_on_k_line(level=data_level)
+    except Exception as e:
+        print(stock_symbol)
+        print(e)
+        return False, tuple()
+
 
 if __name__ == "__main__":
     set_display()
     print(today_date)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--market", help="market type, cn or hk")
+    parser.add_argument("-c", "--city", help="cn, sh or sz")
+    args = parser.parse_args()
+
+    if args.market:
+        logging.info("market type is {}".format(args.market))
+        if "cn" == args.market:
+            if not args.city:
+                logging.error("cn market should specify city!")
+                exit(-3)
+            price_spider = StockInfoSpyder(
+                config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
+            )
+        elif "hk" == args.market:
+            price_spider = StockInfoSpyder(
+                config.HK_STOCK_DATABASE_NAME,
+                config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
+            )
+        else:
+            price_spider = None
+            logging.error("check args {}".format(args.market))
+            exit(-1)
+    else:
+        price_spider = None
+        logging.error("check args")
+        exit(-2)
+
     db = Database()
-    # stock_type = sys.argv[1]
-    stock_info_spyder = StockInfoSpyder(
-        config.HK_STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
+    data = (
+        db.get_data(
+            config.HK_STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
+            keys=["symbol", "name"],
+        )
+        if "hk" == args.market
+        else db.get_data(
+            config.STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO,
+            keys=["symbol", "name", "end_date"],
+        )
     )
 
-    data = db.get_data(
-        config.HK_STOCK_DATABASE_NAME,
-        config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
-        keys=["symbol", "name", "end_date"],
-    )
-    with open("./info/week_buy_point_res.json", "w") as file:
+    stock_city = args.city if args.market == "cn" else ""
+    stock_info_spyder = price_spider
+    with open(
+        "./info/week_buy_point_res_{}_{}.json".format(args.market, stock_city), "w"
+    ) as file:
         for _, row in data.iterrows():
-            # if stock_type not in row["symbol"]:
-            #    print("市场不对 跳过{}".format(row["symbol"]))
-            #    continue
-            # if row["end_date"] < datetime.datetime.now():
-                # print("退市了，不考虑{}".format(row["symbol"]))
-                # continue
-            res, stock_data = stock_info_spyder.get_week_data_cn_stock(
-                row["symbol"], market_type="hk"
-            )
-            if not res or stock_data.shape[0] < 33:
-                print("not enough data")
-                continue
-            print("current stock is {}".format(row["symbol"]))
-            stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
-            stock_data.set_index("Date", inplace=True)
-            # 周线不合并K线
-            merged_k_line_data = KiLineObject.k_line_merge(row["symbol"], stock_data, merge_or_not=False)
-            chan_data = ChanSourceDataObject("week", merged_k_line_data)
-            chan_data.gen_data_frame()
-            try:
-                (
-                    valid,
-                    last_cross,
-                    valid_ding_date,
-                    valid_di_date,
-                    distance,
-                ) = chan_data.is_valid_buy_sell_point_on_k_line(level='week')
-            except Exception as e:
-                print(row)
-                print(e)
-                break
-            # daily data
-            res, stock_data_daily = stock_info_spyder.get_daily_data_cn_stock(
-                row["symbol"], market_type="hk", start_date='2019-01-01'
-            )
-            if not res or stock_data_daily.shape[0] < 33:
-                print("not enough data")
-                continue
-            # print("current stock is {}".format(row["symbol"]))
-            stock_data_daily["Date"] = pd.to_datetime(stock_data_daily["date"], format="%Y-%m-%d")
-            stock_data_daily.set_index("Date", inplace=True)
-            # 周线不合并K线
-            merged_k_line_data_daily = KiLineObject.k_line_merge(row["symbol"], stock_data, merge_or_not=True)
-            chan_data_daily = ChanSourceDataObject("daily", merged_k_line_data_daily)
-            chan_data_daily.gen_data_frame()
+            # cn, needs more condition
+            if "cn" == args.market:
+                if stock_city not in row["symbol"]:
+                    print("市场不对 跳过{}".format(row["symbol"]))
+                    continue
+                if row["end_date"] < datetime.datetime.now():
+                    print("退市了，不考虑{}".format(row["symbol"]))
+                    continue
 
-            try:
-                (
-                    valid_daily,
-                    last_cross_daily,
-                    valid_ding_date_daily,
-                    valid_di_date_daily,
-                    distance_daily,
-                ) = chan_data_daily.is_valid_buy_sell_point_on_k_line(level='daily')
-            except Exception as e:
-                print(row)
-                print(e)
-                break
+            week_result = check_buy_point_data(
+                args.market, row["symbol"], data_level="week"
+            )
+            if week_result[0]:
+                valid = week_result[1][0]
+                last_cross = week_result[1][1]
+                valid_ding_date = week_result[1][2]
+                valid_di_date = week_result[1][3]
+                distance = week_result[1][4]
+            else:
+                continue
+
+            daily_result = check_buy_point_data(
+                args.market, row["symbol"], data_level="daily"
+            )
+            if daily_result[0]:
+                valid_daily = daily_result[1][0]
+                last_cross_daily = daily_result[1][1]
+                valid_ding_date_daily = daily_result[1][2]
+                valid_di_date_daily = daily_result[1][3]
+                distance_daily = daily_result[1][4]
+            else:
+                continue
 
             if valid and valid_daily:
                 print(row)
                 print(
                     "{} is buy point {},{},{},{}, {},{},{},{}".format(
-                        row["symbol"], valid, valid_daily, last_cross, valid_ding_date, valid_di_date,
-                        last_cross_daily, valid_ding_date_daily, valid_di_date_daily
+                        row["symbol"],
+                        valid,
+                        valid_daily,
+                        last_cross,
+                        valid_ding_date,
+                        valid_di_date,
+                        last_cross_daily,
+                        valid_ding_date_daily,
+                        valid_di_date_daily,
                     )
                 )
                 file.writelines(
@@ -107,17 +158,21 @@ if __name__ == "__main__":
                             {
                                 "symbol": row["symbol"],
                                 "name": row["name"],
-                                "last_cross": last_cross[0].strftime("%Y-%m-%d"),
-                                "last_cross_daily": last_cross_daily[0].strftime("%Y-%m-%d"),
-                                "last_valid_ding_date": valid_ding_date.strftime(
+                                "last_cross_week": last_cross[0].strftime("%Y-%m-%d"),
+                                "last_cross_daily": last_cross_daily[0].strftime(
+                                    "%Y-%m-%d"
+                                ),
+                                "last_valid_ding_date_week": valid_ding_date.strftime(
                                     "%Y-%m-%d"
                                 )
                                 if valid_ding_date is not None
                                 else "",
-                                "last_valid_di_date": valid_di_date.strftime("%Y-%m-%d")
+                                "last_valid_di_date_week": valid_di_date.strftime(
+                                    "%Y-%m-%d"
+                                )
                                 if valid_di_date is not None
                                 else "",
-                                "distance": distance,
+                                "distance_week": distance,
                                 "distance_daily": distance_daily,
                             },
                             ensure_ascii=False,
