@@ -11,7 +11,7 @@ import pandas as pd
 class JointQuantTool(object):
     def __init__(self):
         self.account = b"gAAAAABgsGvpKHcpU381JQ4z-bmo4AhIzYO6OVKguG1ZyZfJDKvLFb_xc8bB6lBDeaDRoyxzY1-QXfhtdNZ7UT-YZAVeoGTMwQ=="
-        self.pass_word = b"gAAAAABgsGvpFAyS5pOwXJof7kcrqtTnT-i3CKcLKjZNgnbBdIqn27b0_DZ4cHG6-PXKSgYs5vev-OJmFGeLWnifx9GW22vnAQ=="
+        self.pass_word = b"gAAAAABgwF2bvKX1IFzv6jW6-uofbNWvt-Thoktd_pEUNeCL3UkaFewmEtzUX_KFe3YnjMlf9M3m4fGiEo-NkvzGktTo8QUfe-RPn4GFW2jK9FtLY6lXOiY="
         self.__init_account()
         self.all_stock = None
         self.__set_display()
@@ -41,4 +41,8 @@ class JointQuantTool(object):
 
 
 if __name__ == "__main__":
+    # _cipher = Fernet(config.cipher_key)
+    # encrypted_text = _cipher.encrypt(b'Fighton.jukuan999')
+    # print(encrypted_text)
+    tool = JointQuantTool()
     pass
