@@ -5,7 +5,6 @@ import sys
 
 import pandas as pd
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
-from Utils import config
 from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
@@ -15,14 +14,12 @@ if __name__ == "__main__":
     set_display()
     print(today_date)
 
-    stock_info_spyder = StockInfoSpyder(
-        config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
-    )
+    stock_info_spyder = StockInfoSpyder()
 
     t_stock = sys.argv[1]
     k_level = "week"
     name = sys.argv[1]
-    data_res, df = stock_info_spyder.get_week_data_cn_stock(
+    data_res, df = stock_info_spyder.get_week_data_stock(
         symbol=t_stock, market_type="cn"
     )
     if not data_res:
@@ -49,8 +46,8 @@ if __name__ == "__main__":
     ding_di_data = chan_data.get_ding_di()
     print(ding_di_data)
 
-    res, cross, ding, di, distance = chan_data.is_valid_buy_sell_point_on_week_line()
-    print("is buy point {} {} {} {} {}".format(res, cross, ding, di, distance))
+    res, cross, ding, di, distance, variance = chan_data.is_valid_buy_sell_point_on_k_line()
+    print("is buy point {} {} {} {} {} {}".format(res, cross, ding, di, distance, variance))
 
     plot_with_mlf_v2(
         chan_data, "{0},{1},{2}".format(t_stock, name, k_level), today_date

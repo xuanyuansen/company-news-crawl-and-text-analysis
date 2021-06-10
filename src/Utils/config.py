@@ -56,6 +56,10 @@ ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE = "stock_specific_news"
 HK_STOCK_DATABASE_NAME = "stock_hk"
 COLLECTION_NAME_STOCK_BASIC_INFO_HK = "hk_stock_basic_info"
 
+US_STOCK_DATABASE_NAME = "stock_us"
+COLLECTION_NAME_STOCK_BASIC_INFO_US = "us_stock_basic_info"
+# 中国概念股
+COLLECTION_NAME_STOCK_BASIC_INFO_US_ZH = "us_zh_stock_basic_info"
 
 STCN_NEWS_DB = "stcn"
 STCN_DJSJ = dict(

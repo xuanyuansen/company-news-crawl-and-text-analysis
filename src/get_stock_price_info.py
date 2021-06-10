@@ -3,28 +3,24 @@
 import logging
 
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
-from Utils import config
-import sys
+from Utils import config, utils
+# import sys
 
-hk_stock_info_spyder = StockInfoSpyder(
-    config.HK_STOCK_DATABASE_NAME,
-    config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
-    joint_quant_on=False,
-)
+utils.set_display()
+
+stock_info_spyder = StockInfoSpyder(joint_quant_on=False)
+stock_info_spyder.get_historical_us_zh_stock_daily_price()
+exit(-1)
 # get all name and code
-max_date_hk = hk_stock_info_spyder.db_obj.find_max(
+max_date_hk = stock_info_spyder.db_obj.find_max(
     config.HK_STOCK_DATABASE_NAME, "00156", "date"
 )
 logging.info("max date is {}".format(max_date_hk))
 
-hk_stock_info_spyder.get_historical_hk_stock_daily_price(start_date=max_date_hk, start_symbol='00036')
+stock_info_spyder.get_historical_hk_stock_daily_price(start_date=max_date_hk, start_symbol='00036')
 
-cn_stock_info_spyder = StockInfoSpyder(
-    config.STOCK_DATABASE_NAME,
-    config.COLLECTION_NAME_STOCK_BASIC_INFO,
-    joint_quant_on=False,
-)
-max_date_cn = cn_stock_info_spyder.db_obj.find_max(
+# cn_stock_info_spyder = StockInfoSpyder(joint_quant_on=False)
+max_date_cn = stock_info_spyder.db_obj.find_max(
     config.STOCK_DATABASE_NAME, "sz002181", "date"
 )
 logging.info("max date cn is {}".format(max_date_cn))

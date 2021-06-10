@@ -25,7 +25,7 @@ def check_buy_point_data(market_type, stock_symbol, data_level):
     res, stock_data = (
         stock_info_spyder.get_week_data_stock(stock_symbol, market_type=market_type)
         if "week" == data_level
-        else stock_info_spyder.get_daily_data_stock(
+        else stock_info_spyder.get_daily_price_data_of_specific_stock(
             stock_symbol, market_type=market_type, start_date="2019-01-01"
         )
     )
@@ -67,14 +67,9 @@ if __name__ == "__main__":
             if not args.city:
                 logging.error("cn market should specify city!")
                 exit(-3)
-            price_spider = StockInfoSpyder(
-                config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO
-            )
+            price_spider = StockInfoSpyder()
         elif "hk" == args.market:
-            price_spider = StockInfoSpyder(
-                config.HK_STOCK_DATABASE_NAME,
-                config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
-            )
+            price_spider = StockInfoSpyder()
         else:
             price_spider = None
             logging.error("check args {}".format(args.market))
