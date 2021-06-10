@@ -4,6 +4,7 @@
 https://www.akshare.xyz/zh_CN/latest/
 """
 # import redis
+import random
 import datetime
 import logging
 import time
@@ -236,9 +237,45 @@ class StockInfoSpyder(Spyder):
             stock_symbol_list = symbols
         for symbol in stock_symbol_list:
             stock_us_daily_qfq_df = ak.stock_us_daily(symbol)
-            print(stock_us_daily_qfq_df.shape)
-            print(stock_us_daily_qfq_df[:100])
-            break
+            stock_us_daily_qfq_df["date"] = stock_us_daily_qfq_df.index
+            # stock_us_daily_qfq_df["date_py"] = stock_us_daily_qfq_df.apply(lambda row: row['date'].to_pydatetime(), axis=1)  
+            self.logger.info('start processing {}, from date {}'.format(symbol, start_date))
+            if start_date is not None:
+                try:
+                    stock_us_daily_qfq_df = stock_us_daily_qfq_df[
+                        stock_us_daily_qfq_df["date"] >= datetime.datetime.strptime(start_date,"%Y-%m-%d")
+                    ]
+                except Exception as e:
+                    self.logger.error(e)
+                    # print(self.__get_single_hk_stock_data(symbol))
+                    continue
+
+            self.logger.info(stock_us_daily_qfq_df.shape)
+            self.logger.info(stock_us_daily_qfq_df[:10])
+
+            _col = self.db_obj.get_collection(self.database_name_us, symbol)
+
+            for index, row in stock_us_daily_qfq_df.iterrows():
+                _tmp_dict = row.to_dict()
+                # print(_tmp_dict)
+                _date_ = row['date'].strftime('%Y-%m-%d')
+
+                id_md5 = hashlib.md5(
+                    ("{0} {1}".format(symbol, _date_)).encode(
+                        encoding="utf-8"
+                    )
+                ).hexdigest()
+
+                if _col.find_one({"_id": id_md5}) is not None:
+                    self.logger.info(
+                        "id already exist {0} {1} {2} {3}".format(id_md5, _tmp_dict, symbol, _date_)
+                    )
+                    continue
+                else:
+                    _col.insert_one(_tmp_dict)
+            self.logger.info('{} insert data done, count {}'.format(symbol, stock_us_daily_qfq_df.shape[0]))
+            time.sleep(random.randint(5,10))
+            # break
         return True
 
     def get_historical_us_zh_stock_daily_price(self, symbols: list = None):
@@ -251,10 +288,10 @@ class StockInfoSpyder(Spyder):
             stock_us_zh_daily_qfq_df = ak.stock_us_zh_daily(symbol)
             print(stock_us_zh_daily_qfq_df.shape)
             print(stock_us_zh_daily_qfq_df[:100])
+            _col = self.db_obj.get_collection(self.database_name_us, symbol)
             for index, row in stock_us_zh_daily_qfq_df.iterrows():
                 # print(row)
                 # print(type(row['时间']))
-                _col = self.db_obj.get_collection(self.database_name_us, symbol)
                 _tmp_dict = stock_us_zh_daily_qfq_df.iloc[index].to_dict()
                 date_raw = _tmp_dict.get('时间')
                 _date_time = datetime.datetime.strptime(date_raw, '%Y%m%d')
@@ -282,7 +319,7 @@ class StockInfoSpyder(Spyder):
                                     }
                     _col.insert_one(_insert_data)
             self.logger.info('{} insert data done, count {}'.format(symbol, stock_us_zh_daily_qfq_df.shape[0]))
-            time.sleep(2)
+            time.sleep(random.randint(5,10))
         return True
 
     # 获取港股历史行情

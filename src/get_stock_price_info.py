@@ -9,7 +9,8 @@ from Utils import config, utils
 utils.set_display()
 
 stock_info_spyder = StockInfoSpyder(joint_quant_on=False)
-stock_info_spyder.get_historical_us_zh_stock_daily_price()
+# stock_info_spyder.get_historical_us_zh_stock_daily_price()
+stock_info_spyder.get_historical_us_stock_daily_price(start_date= '2017-01-01')
 exit(-1)
 # get all name and code
 max_date_hk = stock_info_spyder.db_obj.find_max(
