@@ -108,14 +108,14 @@ def from_xian_duan_to_zhong_shu(input_lines: list):
                 logging.info("not zhong shu, continue")
                 idx_duan += 1
         else:
-            logging.info("看是否包含，如果不包含尝试新的中枢")
+            # logging.info("看是否包含，如果不包含尝试新的中枢")
             if len(zhong_shu_list) < 1:
                 idx_duan += 1
                 continue
             last_zhong_shu = zhong_shu_list[-1]
             contain_flag = last_zhong_shu.is_contain_duan(input_lines[idx_duan])
             if contain_flag:
-                logging.info("包含，合并")
+                # logging.info("包含，合并")
                 zhong_shu_list[-1].merge_duan(input_lines[idx_duan])
                 idx_duan += 1
             elif idx_duan + 2 < line_cnt:

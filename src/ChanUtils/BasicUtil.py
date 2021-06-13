@@ -112,10 +112,10 @@ class ChanBi(KiLineObject):
 
     def __init__(self, direction, start_index, end_index, start_value, end_value):
         self.direction = direction
-        self.start_index = start_index
-        self.end_index = end_index
-        self.start_value = start_value
-        self.end_value = end_value
+        self.start_index: int = start_index
+        self.end_index: int = end_index
+        self.start_value: float = start_value
+        self.end_value: float = end_value
         self.value_list_with_index = []
 
         super(ChanBi, self).__init__(
@@ -154,6 +154,12 @@ class ChanBi(KiLineObject):
             )
             idx += 1
         # self.asKLine = KiLineObject('', [start_index], 0.0, 0.0, self.high, self.low, 0.0, 0.0)
+
+    def get_start_index(self):
+        return self.start_index
+
+    def get_end_index(self):
+        return self.end_index
 
     def get_min(self):
         return min(self.start_value, self.end_value)
@@ -407,9 +413,9 @@ class ZhongShu(object):
             )
 
         self.max_low_value = max(self.max_low_value, next_line.low)
-        logging.info("merge {} {}".format(type(self.max_low_value), self.max_low_value))
+        # logging.info("merge {} {}".format(type(self.max_low_value), self.max_low_value))
         self.min_max_value = min(self.min_max_value, next_line.high)
-        logging.info("merge {} {}".format(type(self.min_max_value), self.min_max_value))
+        # logging.info("merge {} {}".format(type(self.min_max_value), self.min_max_value))
         self.end_index = next_line.end_index
         self.list_of_duan.append(next_line)  # 2020.10.21 fix bug
         self.zhong_shu_middle_price = 0.5 * (self.max_low_value + self.min_max_value)

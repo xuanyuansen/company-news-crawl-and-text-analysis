@@ -40,14 +40,14 @@ class ChanSourceDataObject(object):
         self.data_to_plot_frame = None
 
         # MACD形态学
-        self.histogram = None
-        self.histogram_positive = None
-        self.histogram_negative = None
-        self.macd = None
-        self.exp12 = None
-        self.exp26 = None
-        self.signal = None
-        self.boll = None
+        self.histogram: pd.DataFrame = pd.DataFrame()
+        self.histogram_positive: pd.DataFrame = pd.DataFrame()
+        self.histogram_negative: pd.DataFrame = pd.DataFrame()
+        self.macd: pd.DataFrame = pd.DataFrame()
+        self.exp12: pd.DataFrame = pd.DataFrame()
+        self.exp26: pd.DataFrame = pd.DataFrame()
+        self.signal: pd.DataFrame = pd.DataFrame()
+        self.boll: pd.DataFrame = pd.DataFrame()
         self.cross_list = list()
 
         if len(data) > 0:
