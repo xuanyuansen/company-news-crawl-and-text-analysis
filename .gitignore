@@ -3,7 +3,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
 .idea/*
+data_dictionary.npy
+
 # C extensions
 *.so
 src/info/week_buy_point_res.json
