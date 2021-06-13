@@ -99,23 +99,16 @@ class KiLineObject(object):
 
 
 class ChanBi(KiLineObject):
-    # def __init__(self):
-    #     self.direction = ''
-    #     self.start_index = 0
-    #     self.end_index = 0
-    #     self.start_value = 0.0
-    #     self.end_value = 0.0
-    #     self.value_list_with_index = []
-    #     self.high = 0.0
-    #     self.low = 0.0
-    #     self.asKLine = None
-
-    def __init__(self, direction, start_index, end_index, start_value, end_value):
+    def __init__(
+        self, direction, start_index, end_index, start_value, end_value, volume
+    ):
         self.direction = direction
         self.start_index: int = start_index
         self.end_index: int = end_index
         self.start_value: float = start_value
         self.end_value: float = end_value
+        # 成交量作弊右开
+        self.whole_volume: float = volume
         self.value_list_with_index = []
 
         super(ChanBi, self).__init__(
@@ -164,6 +157,9 @@ class ChanBi(KiLineObject):
     def get_min(self):
         return min(self.start_value, self.end_value)
 
+    def get_max(self):
+        return max(self.start_value, self.end_value)
+
     # 这里还有问题，合并的时候并没有解决性质问题
     # 目前解决了
     def __add__(self, other):
@@ -194,6 +190,7 @@ class ChanBi(KiLineObject):
             max(self.end_index, other.end_index),
             start_value,
             end_value,
+            self.whole_volume + other.whole_volume,
         )
         t.date = [self.start_index, other.start_index]
 
@@ -209,7 +206,7 @@ class ChanBi(KiLineObject):
         return t
 
     def __str__(self):
-        return "date index is: {0}, direction: {1}, start idx: {2}, end idx: {3}, start value is: {4}," " end value is: {5}, high: {6}, low: {7}".format(
+        return "date index is: {0}, direction: {1}, start idx: {2}, end idx: {3}, start value is: {4}," " end value is: {5}, high: {6}, low: {7}, whole volume {8}".format(
             ",".join([str(ele) for ele in self.date]),
             self.direction,
             self.start_index,
@@ -218,6 +215,7 @@ class ChanBi(KiLineObject):
             self.end_value,
             self.high,
             self.low,
+            self.whole_volume,
         )
 
     pass
@@ -265,21 +263,38 @@ class ChanLine(ChanBi):
         end_index,
         start_value,
         end_value,
-        list_of_bi: list,
+        list_of_bi: list[ChanBi],
     ):
         super(ChanLine, self).__init__(
-            direction, start_index, end_index, start_value, end_value
+            direction,
+            start_index,
+            end_index,
+            start_value,
+            end_value,
+            0 if len(list_of_bi) <= 0 else sum([bi.whole_volume for bi in list_of_bi]),
         )
         self.list_of_bi = list_of_bi
+
+    def append_bi(self, new_bi: ChanBi):
+        assert self.direction == new_bi.direction
+        self.end_index = new_bi.end_index
+        self.end_value = new_bi.end_value
+        self.list_of_bi.append(new_bi)
+        self.whole_volume += new_bi.whole_volume
+        self.value_list_with_index = []
+        gap = (self.end_value - self.start_value) / (self.end_index - self.start_index)
+        idx = self.start_index + 1
+        while idx < self.end_index:
+            self.value_list_with_index.append(
+                (idx, self.start_value + (idx - self.start_index) * gap)
+            )
+            idx += 1
 
     def get_start_index(self):
         return self.start_index
 
     def get_end_index(self):
         return self.end_index
-
-    def print(self):
-        print(self.start_index)
 
     def get_max(self):
         if self.direction == "up":
@@ -295,7 +310,7 @@ class ChanLine(ChanBi):
 
     def __str__(self):
 
-        return "direction {0}, start_index {1}, end_index {2}, start_value {3}, end_value {4}, values: {5}".format(
+        return "direction {0}, start_index {1}, end_index {2}, start_value {3}, end_value {4}, values: {5}, volume {6}".format(
             self.direction,
             self.start_index,
             self.end_index,
@@ -307,6 +322,7 @@ class ChanLine(ChanBi):
                     for element in self.value_list_with_index
                 ]
             ),
+            self.whole_volume,
         )
 
     def __add__(self, other):
@@ -325,6 +341,8 @@ class ChanLine(ChanBi):
     # 20201004发现问题，少了最后一笔
     @staticmethod
     def merge(in_line_list: list):
+        if len(in_line_list) == 1:
+            return in_line_list
         out_line_list = []
         idx = 0
         while idx < len(in_line_list) - 1:
@@ -377,7 +395,7 @@ class ZhongShu(object):
         end_index: int,
         max_low_value: float,
         min_max_value: float,
-        list_of_duan: list,
+        list_of_duan: list[ChanLine],
     ):
         self.start_index = start_index
         self.end_index = end_index
