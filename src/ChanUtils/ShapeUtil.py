@@ -931,7 +931,8 @@ def check_current_direction_line_with_other_direction_bi(
 
 
 def __bi_to_line(bi_list: list[ChanBi]):
-    assert len(bi_list) == 3
+    if len(bi_list) != 3:
+        raise Exception('{}'.format(len(bi_list)))
     if bi_list[0].direction == "up":
         if bi_list[2].low >= bi_list[0].low and bi_list[2].high >= bi_list[0].high:
             return True, ChanLine(
@@ -996,7 +997,10 @@ def bi_to_line_inner_check(
         if len(chan_line_list) == 0:
             if start_idx + 2 <= len(bi_list) - 1:
                 # 是否可以形成一个线段
-                res = __bi_to_line(bi_list[start_idx : start_idx + 2])
+
+                print(len(bi_list[start_idx : start_idx + 3]))
+                res = __bi_to_line(bi_list[start_idx : start_idx + 3])
+
                 if res[0]:
                     chan_line_list.append(res[1])
             else:
@@ -1179,11 +1183,11 @@ def from_bi_list_to_line(bi_list: list, is_debug: bool = False):
             idx, bi_list, chan_line_list, direction=bi_list[idx].direction
         )
         idx = out_idx
-        print(
-            "current idx is {} chan line is {}".format(
-                idx, ",".join([str(ele) for ele in chan_line_list])
-            )
-        )
+        # print(
+        #     "current idx is {} chan line is {}".format(
+        #         idx, ",".join([str(ele) for ele in chan_line_list])
+        #     )
+        # )
 
         # if 'up' == bi_list[idx].direction:
         #     # 如果第二个向上笔出问题，那么换方向

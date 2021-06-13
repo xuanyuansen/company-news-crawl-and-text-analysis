@@ -28,7 +28,7 @@ class BasicFeatureGen(object):
             return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         value_list = [bi_s[0].high, bi_s[0].low]
         length_list = [bi_s[0].end_index - bi_s[0].start_index]
-        volume_list = [bi_s[0].whole_volume]
+        volume_list = [np.log(bi_s[0].whole_volume)]
         for idx in range(1, len(bi_s)):
             if bi_s[idx].high not in value_list[-2:]:
                 value_list.append(bi_s[idx].high)
