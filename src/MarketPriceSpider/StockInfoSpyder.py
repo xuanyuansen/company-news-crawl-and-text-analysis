@@ -118,7 +118,7 @@ class StockInfoSpyder(Spyder):
             )
         return True
 
-    def get_daily_price_data_of_specific_stock(self, symbol, market_type: str, start_date: str = None):
+    def get_daily_price_data_of_specific_stock(self, symbol, market_type: str, start_date: str = None, _keys: list=None):
         if market_type == "cn":
             db_name = self.database_name_cn
         elif market_type == "hk":
@@ -144,6 +144,7 @@ class StockInfoSpyder(Spyder):
                 }
                 if market_type == "cn"
                 else {"date": {"$gt": start_date}},
+                keys = _keys,
             )
         if stock_data is None:
             return False, DataFrame()
@@ -163,8 +164,8 @@ class StockInfoSpyder(Spyder):
             stock_data.index = stock_data["date"]
         return True, stock_data
 
-    def get_week_data_stock(self, symbol, market_type: str, start_date: str = None):
-        res, stock_data = self.get_daily_price_data_of_specific_stock(symbol, market_type, start_date)
+    def get_week_data_stock(self, symbol, market_type: str, start_date: str = None, _keys: list = None):
+        res, stock_data = self.get_daily_price_data_of_specific_stock(symbol, market_type, start_date, _keys)
         if not res:
             return False, DataFrame()
         df2 = stock_data.resample("W").agg(

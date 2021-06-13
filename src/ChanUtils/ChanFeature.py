@@ -12,8 +12,11 @@ import numpy as np
 
 # 特征工程，然后用XGBOOST
 class BasicFeatureGen(object):
-    def __init__(self, chan_data: ChanSourceDataObject):
+    def __init__(self, chan_data: ChanSourceDataObject = None):
         self.data: ChanSourceDataObject = chan_data
+    
+    def set_base_data(self, chan_data: ChanSourceDataObject):
+        self.data = chan_data
 
     # 10
     @staticmethod
@@ -28,16 +31,16 @@ class BasicFeatureGen(object):
             return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         value_list = [bi_s[0].high, bi_s[0].low]
         length_list = [bi_s[0].end_index - bi_s[0].start_index]
-        volume_list = [np.log(bi_s[0].whole_volume)]
+        volume_list = [np.log(bi_s[0].whole_volume) if bi_s[0].whole_volume!=0.0 else 0.0]
         for idx in range(1, len(bi_s)):
             if bi_s[idx].high not in value_list[-2:]:
                 value_list.append(bi_s[idx].high)
             if bi_s[idx].low not in value_list[-2:]:
                 value_list.append(bi_s[idx].low)
             length_list.append(bi_s[idx].end_index - bi_s[idx].start_index)
-            volume_list.append(np.log(bi_s[idx].whole_volume))
+            volume_list.append(np.log(bi_s[idx].whole_volume) if bi_s[idx].whole_volume!=0.0 else 0.0)
 
-        return [
+        _feature= [
             f1,
             np.average(value_list),
             np.var(value_list),
@@ -45,10 +48,14 @@ class BasicFeatureGen(object):
             np.average(length_list),
             np.var(length_list),
             np.std(length_list),
-            np.average(volume_list),
-            np.var(volume_list),
-            np.std(volume_list),
+            float(np.average(volume_list)),
+            float(np.var(volume_list)),
+            float(np.std(volume_list)),
         ]
+        for i, _word in enumerate(_feature):
+            if np.isnan(_word):
+                _feature[i] = 0.0
+        return _feature
 
     # 10 + 10 + 13
     def get_feature(self):

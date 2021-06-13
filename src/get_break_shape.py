@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     res, stock_data = price_spider.get_daily_price_data_of_specific_stock(symbol=sys.argv[1],
                                                                           market_type='cn',
-                                                                          start_date="2020-07-01")
+                                                                          start_date="2021-01-01")
     # print(stock_data[:10])
     stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
     stock_data.set_index("Date", inplace=True)

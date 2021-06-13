@@ -108,7 +108,9 @@ class Database(object):
         if len(keys) != 0:
             _dict = {_key: [] for _key in keys}
             data = collection.find(query) if len(query) != 0 else collection.find()
+            _data_cnt =0 
             for _id, row in enumerate(data):
+                _data_cnt += 1
                 if _id + 1 <= max_data_request:
                     for _key in keys:
                         # print("key is {0}, row is {1}".format(_key, row))
@@ -118,7 +120,7 @@ class Database(object):
                             _dict[_key].append("null")
                 else:
                     break
-            logging.info("fine done, data cnt is {}".format(len(_dict.get(keys[0]))))
+            logging.info("fine done, data cnt is {}".format(_data_cnt))
         else:
             # data = collection.find()
             data = collection.find(query) if len(query) != 0 else collection.find()
@@ -133,7 +135,7 @@ class Database(object):
                 return None
             else:
                 logging.info(
-                    "query {0} data {1} data length is {2}".format(
+                    "query done! {0} data {1} data length is {2}".format(
                         query, data, data_length
                     )
                 )
@@ -142,15 +144,13 @@ class Database(object):
             )  # ['_id', 'Date', 'PageId', 'Url', 'Title', 'Article', 'RelevantStockCodes']
             _dict = {_key: [] for _key in data_keys}
             # print(_dict)
-            for _id, row in enumerate(
-                    collection.find(query) if len(query) != 0 else collection.find()
-            ):
+            for _id, row in enumerate(data_list):
                 if _id + 1 <= max_data_request:
                     for _key in data_keys:
                         _dict[_key].append(row[_key])
                 else:
                     break
-            logging.info("find done {0}".format(len(_dict.get(data_keys[0]))))
+            logging.info("find done, data cnt is {0}".format(data_length))
         return pd.DataFrame(_dict)
 
     def drop_db(self, database):
