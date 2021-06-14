@@ -57,7 +57,7 @@ class BasicFeatureGen(object):
                 _feature[i] = 0.0
         return _feature
 
-    # 10 + 10 + 13
+    # 10 + 10 + 13 + 5
     def get_feature(self):
         bi_feature = self.__gen_feature(self.data.get_bi_list())
         if len(self.data.merged_chan_line_list) > 0:
@@ -74,11 +74,14 @@ class BasicFeatureGen(object):
                     return -1
             else:
                 return 0
+        
+        # print('macd feature is {}'.format(self.__get_macd_feature()))
 
         return (
             bi_feature
             + xian_duan_feature
             + self.__gen_zhong_shu_feature()
+            + self.__get_macd_feature()
             + [
                 direction_feature(self.data.get_bi_list()),
                 direction_feature(self.data.merged_chan_line_list),
@@ -114,4 +117,23 @@ class BasicFeatureGen(object):
         else:
             return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
+    def __get_macd_feature(self):
+        zhong_shu_list = self.data.zhong_shu_list
+        if len(zhong_shu_list) > 0:
+            start_index = zhong_shu_list[0].start_index
+            end_index = zhong_shu_list[-1].end_index
+        else:
+            xian_duan_list = self.data.merged_chan_line_list if len(self.data.merged_chan_line_list) > 0 else self.data.origin_chan_line_list
+            if len(xian_duan_list) > 0:
+                start_index = xian_duan_list[0].get_start_index()
+                end_index = xian_duan_list[-1].get_end_index()
+            else:
+                start_index = 0
+                end_index = 0
+        if 0 == start_index and 0 == end_index:
+            return [0.0, 0.0, 0.0, 0.0, 0.0]
+        else:
+            sub_his = self.data.histogram[start_index:end_index]
+            sub_macd = self.data.macd[start_index: end_index]
+            return [float(end_index-start_index), sub_his.var(), sub_his.std(), sub_macd.var(), sub_macd.std()]
     pass

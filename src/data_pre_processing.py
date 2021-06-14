@@ -8,15 +8,17 @@ from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject
 from ChanUtils.ChanFeature import BasicFeatureGen
 import xgboost as xgb
+from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn import model_selection, metrics
 
 
 class DataPreProcessing(object):
-    def __init__(self):
+    def __init__(self, feature_size:int):
         self.price_spider = StockInfoSpyder()
         self.db = self.price_spider.db_obj
         self.bfg = BasicFeatureGen()
+        self.feature_size = feature_size
         pd.set_option("mode.use_inf_as_na", True)
         pass
 
@@ -48,7 +50,8 @@ class DataPreProcessing(object):
             )
         return data
 
-    def from_symbol_to_feature(self, _symbol):
+    # 加入end_date过滤数据，不能有未来数据！！！
+    def from_symbol_to_feature(self, _symbol, end_date):
         res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(
             symbol=_symbol, market_type="cn", start_date="2020-01-01"
         )
@@ -56,16 +59,24 @@ class DataPreProcessing(object):
             return None
 
         stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
+        
+        # 注意这里通过start_date获得最后一周的标签，
+        # 那么用于计算特征的数据不能包含这周的数据
+        stock_data = stock_data[stock_data["Date"] < end_date]
+        # print(stock_data[-40:])
+
         stock_data.set_index("Date", inplace=True)
 
         k_line_data = KiLineObject.k_line_merge(_symbol, stock_data, merge_or_not=True)
         chan_data = ChanSourceDataObject("daily", k_line_data)
         chan_data.gen_data_frame()
+        chan_data.get_plot_data_frame()
 
         self.bfg.set_base_data(chan_data)
 
         return self.bfg.get_feature()
 
+   
     def get_label(
         self,
         symbols: pd.DataFrame,
@@ -90,7 +101,18 @@ class DataPreProcessing(object):
 
         # 过滤没有标签的数据
         week_data = week_data[week_data["week_data_shape"] >= 1]
+        week_data['week_data_start_date'] = week_data.apply(lambda row:row['week'].index[-1], axis=1)
         # print(week_data)
+
+        # week_data_start_date_cnt = week_data.groupby(['week_data_start_date']).size()
+        # print(type(week_data_start_date_cnt))
+        # print(week_data_start_date_cnt)
+        # print(week_data_start_date_cnt.shape)
+        # print(week_data_start_date_cnt.values)
+        # print(week_data_start_date_cnt.index)
+        # week_data_start_date_cnt.index is 
+        # DatetimeIndex(['2021-06-07'], dtype='datetime64[ns]', name='week_data_start_date', freq=None)
+
         week_data["ratio"] = week_data.apply(
             lambda row: 100
             * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
@@ -114,14 +136,14 @@ class DataPreProcessing(object):
             lambda row: _set_label(row["ratio"]), axis=1
         )
         week_data["features"] = week_data.apply(
-            lambda row: self.from_symbol_to_feature(row["symbol"]), axis=1
+            lambda row: self.from_symbol_to_feature(row["symbol"], row['week_data_start_date']), axis=1
         )
 
         # week_data = week_data[week_data['features'] is not None]
 
         # 10 + 10 + 13
         #
-        for idx in range(0, 33):
+        for idx in range(0, self.feature_size):
             week_data["feature_{}".format(idx)] = week_data.apply(
                 lambda row: row["features"][idx], axis=1
             )
@@ -142,18 +164,18 @@ class DataPreProcessing(object):
 
 if __name__ == "__main__":
     set_display()
-    dpp = DataPreProcessing()
+    dpp = DataPreProcessing(feature_size = 38)
     symbol_data = dpp.get_symbols("cn")
 
     data_set, label_sum = dpp.get_label(
-        symbols=symbol_data, market_type="cn", start_date="2021-06-01", cnt_limit_start=1000, cnt_limit_end=1500
+        symbols=symbol_data, market_type="cn", start_date="2021-06-01", cnt_limit_start=0, cnt_limit_end=2500
     )
     label_set=data_set["label"]
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(data_set, label_set, test_size=0.33, random_state=42)
 
     f_names = []
-    for idx in range(0, 33):
+    for idx in range(0, dpp.feature_size):
         f_names.append("feature_{}".format(idx))
 
     # https://xgboost.readthedocs.io/en/latest/python/python_intro.html#setting-parameters
@@ -169,9 +191,10 @@ if __name__ == "__main__":
         "num_class": 4,
         "tree_method": "gpu_hist",
     }
-    num_round = 3
+    num_round = 10
+    evallist = [(dtest, 'eval'), (dtrain, 'train')]
+    bst = xgb.train(param, dtrain, num_round, evallist)
 
-    bst = xgb.train(param, dtrain, num_round)
     y_pred_train = bst.predict(dtrain)
     accuracy = accuracy_score(y_train, y_pred_train)
     # roc_auc = metrics.roc_auc_score(y_train, y_pred_train)
@@ -182,8 +205,12 @@ if __name__ == "__main__":
 
     # 计算准确率
     y_pred = bst.predict(dtest)
+    print(y_pred)
     accuracy = accuracy_score(y_test, y_pred)
     # roc_auc = metrics.roc_auc_score(y_test, y_pred)
     print("test accuarcy: %.2f%%" % (accuracy * 100.0))
     # print(roc_auc)
+
+    print(bst.get_fscore())
+    bst.save_model('0001.model')
     pass
