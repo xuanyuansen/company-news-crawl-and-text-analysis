@@ -577,6 +577,7 @@ def from_point_to_bi(data: list[KiLineObject], value_data):
                 # up bi done
                 bi_list.append(
                     ChanBi(
+                        data[idx_start].code,
                         "up",
                         idx_start,
                         idx_end_j,
@@ -602,6 +603,7 @@ def from_point_to_bi(data: list[KiLineObject], value_data):
                 try:
                     bi_list.append(
                         ChanBi(
+                            data[idx_start].code,
                             "down",
                             idx_start,
                             idx_end_j,
@@ -936,6 +938,7 @@ def __bi_to_line(bi_list: list[ChanBi]):
     if bi_list[0].direction == "up":
         if bi_list[2].low >= bi_list[0].low and bi_list[2].high >= bi_list[0].high:
             return True, ChanLine(
+                bi_list[0].code,
                 "up",
                 bi_list[0].start_index,
                 bi_list[2].end_index,
@@ -946,6 +949,7 @@ def __bi_to_line(bi_list: list[ChanBi]):
     else:
         if bi_list[2].low <= bi_list[0].low and bi_list[2].high <= bi_list[0].high:
             return True, ChanLine(
+                bi_list[0].code,
                 "down",
                 bi_list[0].start_index,
                 bi_list[2].end_index,
@@ -1019,11 +1023,11 @@ def bi_to_line_inner_check(
                         and bi_list[start_idx].high >= chan_line_list[-1].high
                     ):
                         chan_line_list[-1].append_bi(bi_list[start_idx])
-                        print(
-                            "xian duan {1} merge bi {0}".format(
-                                start_idx, chan_line_list[-1]
-                            )
-                        )
+                        # print(
+                        #     "xian duan {1} merge bi {0}".format(
+                        #         start_idx, chan_line_list[-1]
+                        #     )
+                        # )
                     start_idx += 2
             elif (
                 chan_line_list[-1].direction == "down"
@@ -1075,6 +1079,7 @@ def bi_to_line_inner_check(
                 if "up" == direction and bi_list[idx].low <= bi_list[stop_idx].high:
                     chan_line_list.append(
                         ChanLine(
+                            bi_list[idx].code,
                             direction,
                             bi_list[idx].start_index,
                             bi_list[stop_idx].start_index,
@@ -1086,6 +1091,7 @@ def bi_to_line_inner_check(
                 elif "down" == direction and bi_list[idx].high > bi_list[stop_idx].low:
                     chan_line_list.append(
                         ChanLine(
+                            bi_list[idx].code,
                             direction,
                             bi_list[idx].start_index,
                             bi_list[stop_idx].start_index,
@@ -1110,6 +1116,7 @@ def bi_to_line_inner_check(
                 if "up" == direction and bi_list[idx].low <= bi_list[stop_idx].high:
                     chan_line_list.append(
                         ChanLine(
+                            bi_list[idx].code,
                             direction,
                             bi_list[idx].start_index,
                             bi_list[stop_idx].end_index,
@@ -1121,6 +1128,7 @@ def bi_to_line_inner_check(
                 elif "down" == direction and bi_list[idx].high > bi_list[stop_idx].low:
                     chan_line_list.append(
                         ChanLine(
+                            bi_list[idx].code,
                             direction,
                             bi_list[idx].start_index,
                             bi_list[stop_idx].end_index,

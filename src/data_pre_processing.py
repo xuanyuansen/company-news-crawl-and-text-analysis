@@ -9,6 +9,7 @@ from ChanUtils.ShapeUtil import ChanSourceDataObject
 from ChanUtils.ChanFeature import BasicFeatureGen
 import xgboost as xgb
 from sklearn.metrics import accuracy_score
+from sklearn import model_selection, metrics
 
 
 class DataPreProcessing(object):
@@ -16,24 +17,24 @@ class DataPreProcessing(object):
         self.price_spider = StockInfoSpyder()
         self.db = self.price_spider.db_obj
         self.bfg = BasicFeatureGen()
-        pd.set_option('mode.use_inf_as_na', True)
+        pd.set_option("mode.use_inf_as_na", True)
         pass
 
     def get_symbols(self, market_type):
-        if 'cn' == market_type:
+        if "cn" == market_type:
             data = self.db.get_data(
                 config.STOCK_DATABASE_NAME,
                 config.COLLECTION_NAME_STOCK_BASIC_INFO,
                 query={"end_date": {"$gt": datetime(2021, 1, 1, 0, 0, 0, 000000)}},
                 keys=["symbol", "name", "end_date"],
             )
-        elif 'hk' == market_type:
+        elif "hk" == market_type:
             data = self.db.get_data(
                 config.HK_STOCK_DATABASE_NAME,
                 config.COLLECTION_NAME_STOCK_BASIC_INFO_HK,
                 keys=["symbol", "name"],
             )
-        elif 'us' == market_type:
+        elif "us" == market_type:
             data = self.db.get_data(
                 config.US_STOCK_DATABASE_NAME,
                 config.COLLECTION_NAME_STOCK_BASIC_INFO_US,
@@ -48,9 +49,9 @@ class DataPreProcessing(object):
         return data
 
     def from_symbol_to_feature(self, _symbol):
-        res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(symbol=_symbol,
-                                                                          market_type='cn',
-                                                                          start_date="2021-01-01")
+        res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(
+            symbol=_symbol, market_type="cn", start_date="2020-01-01"
+        )
         if not res:
             return None
 
@@ -59,95 +60,130 @@ class DataPreProcessing(object):
 
         k_line_data = KiLineObject.k_line_merge(_symbol, stock_data, merge_or_not=True)
         chan_data = ChanSourceDataObject("daily", k_line_data)
-        chan_data.gen_data_frame()    
+        chan_data.gen_data_frame()
 
-        self.bfg.set_base_data(chan_data)                                          
+        self.bfg.set_base_data(chan_data)
 
         return self.bfg.get_feature()
 
-    def get_label(self, symbols: pd.DataFrame,
-                  market_type: str,
-                  start_date: str = None,
-                  cnt_limit: int = None):
-        week_data = symbols[:cnt_limit]
-        week_data['week'] = week_data.apply(
-            lambda row:
-            self.price_spider.get_week_data_stock(row['symbol'], 
-            market_type=market_type, 
-            start_date=start_date, 
+    def get_label(
+        self,
+        symbols: pd.DataFrame,
+        market_type: str,
+        start_date: str = None,
+        cnt_limit_start: int = None,
+        cnt_limit_end: int = None,
+    ):
+        week_data = symbols[cnt_limit_start:cnt_limit_end]
+        week_data["week"] = week_data.apply(
+            lambda row: self.price_spider.get_week_data_stock(
+                row["symbol"],
+                market_type=market_type,
+                start_date=start_date,
             )[1],
-            axis=1
+            axis=1,
         )
 
-        week_data['week_data_shape'] = week_data.apply(lambda row: row['week'].shape[0], axis = 1)
+        week_data["week_data_shape"] = week_data.apply(
+            lambda row: row["week"].shape[0], axis=1
+        )
 
         # 过滤没有标签的数据
-        week_data = week_data[week_data['week_data_shape']>=1]
+        week_data = week_data[week_data["week_data_shape"] >= 1]
         # print(week_data)
-        week_data['ratio'] = week_data.apply(
-            lambda row: 100 * (row['week'].iloc[-1, 1] - row['week'].iloc[-1, 0]) / row['week'].iloc[-1, 0], axis=1)
-        print(week_data['ratio'].max())
-        print(week_data['ratio'].min())
+        week_data["ratio"] = week_data.apply(
+            lambda row: 100
+            * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
+            / row["week"].iloc[-1, 0],
+            axis=1,
+        )
+        print(week_data["ratio"].max())
+        print(week_data["ratio"].min())
 
         def _set_label(_value: float):
-            if _value <= -20.0:
+            if _value <= -10.0:
                 return 0
-            elif -20 < _value <= -3:
+            elif -10 < _value <= 0:
                 return 1
-            elif -3 < _value <= 3:
+            elif 0 < _value <= 10:
                 return 2
-            elif 3 < _value <= 20:
-                return 3
             else:
-                return 4
+                return 3
 
-        week_data['label'] = week_data.apply(lambda row: _set_label(row['ratio']), axis=1)
-        week_data['features'] = week_data.apply(lambda row: self.from_symbol_to_feature(row['symbol']), axis=1)
+        week_data["label"] = week_data.apply(
+            lambda row: _set_label(row["ratio"]), axis=1
+        )
+        week_data["features"] = week_data.apply(
+            lambda row: self.from_symbol_to_feature(row["symbol"]), axis=1
+        )
 
         # week_data = week_data[week_data['features'] is not None]
 
         # 10 + 10 + 13
         #
-        for idx in range(0,33):
-            week_data['feature_{}'.format(idx)] = week_data.apply(lambda row: row['features'][idx], axis=1)
+        for idx in range(0, 33):
+            week_data["feature_{}".format(idx)] = week_data.apply(
+                lambda row: row["features"][idx], axis=1
+            )
 
         # week_data.drop(['features'], axis=1, inplace=True)
 
-        null_data = week_data[week_data.isnull().T.any()] 
+        null_data = week_data[week_data.isnull().T.any()]
         print(null_data)
         print(week_data.shape)
 
-        label_cnt = week_data.groupby(['label']).size()
+        label_cnt = week_data.groupby(["label"]).size()
         print(label_cnt)
 
         return week_data, label_cnt
+
     pass
 
 
 if __name__ == "__main__":
     set_display()
     dpp = DataPreProcessing()
-    symbol_data = dpp.get_symbols('cn')
-    
-    data_set, label_sum = dpp.get_label(symbols=symbol_data, market_type='cn', start_date='2021-06-01', cnt_limit=1000)
+    symbol_data = dpp.get_symbols("cn")
+
+    data_set, label_sum = dpp.get_label(
+        symbols=symbol_data, market_type="cn", start_date="2021-06-01", cnt_limit_start=1000, cnt_limit_end=1500
+    )
+    label_set=data_set["label"]
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(data_set, label_set, test_size=0.33, random_state=42)
 
     f_names = []
     for idx in range(0, 33):
-        f_names.append('feature_{}'.format(idx))
+        f_names.append("feature_{}".format(idx))
 
     # https://xgboost.readthedocs.io/en/latest/python/python_intro.html#setting-parameters
     # data = pandas.DataFrame(np.arange(12).reshape((4,3)), columns=['a', 'b', 'c'])
     # label = pandas.DataFrame(np.random.randint(2, size=4))
     # dtrain = xgb.DMatrix(data, label=label)
-    dtrain = xgb.DMatrix(data_set[f_names], label=data_set['label'])
-    param = {'max_depth':5, 'eta':1, 'objective':'multi:softmax', 'num_class':5, 'tree_method':'gpu_hist'}
+    dtrain = xgb.DMatrix(X_train[f_names], label=y_train)
+    dtest = xgb.DMatrix(X_test[f_names])
+    param = {
+        "max_depth": 5,
+        "eta": 1,
+        "objective": "multi:softmax",
+        "num_class": 4,
+        "tree_method": "gpu_hist",
+    }
     num_round = 3
-    bst = xgb.train(param, dtrain, num_round)
 
-    y_pred = bst.predict(dtrain)
+    bst = xgb.train(param, dtrain, num_round)
+    y_pred_train = bst.predict(dtrain)
+    accuracy = accuracy_score(y_train, y_pred_train)
+    # roc_auc = metrics.roc_auc_score(y_train, y_pred_train)
+    print("train accuarcy: %.2f%%" % (accuracy * 100.0))
+    # print(roc_auc)
+
+
 
     # 计算准确率
-    accuracy = accuracy_score(data_set['label'], y_pred)
-    print( "accuarcy: %.2f%%"% (accuracy* 100.0))
-    
+    y_pred = bst.predict(dtest)
+    accuracy = accuracy_score(y_test, y_pred)
+    # roc_auc = metrics.roc_auc_score(y_test, y_pred)
+    print("test accuarcy: %.2f%%" % (accuracy * 100.0))
+    # print(roc_auc)
     pass

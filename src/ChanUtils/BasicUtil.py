@@ -100,43 +100,66 @@ class KiLineObject(object):
 
 class ChanBi(KiLineObject):
     def __init__(
-        self, direction, start_index, end_index, start_value, end_value, volume
+        self, code, direction, start_index, end_index, start_value, end_value, volume
     ):
+        #         code: str,
+        #         date: list,
+        #         open_price: float,
+        #         close: float,
+        #         high: float,
+        #         low: float,
+        #         volume: float,
+        #         money: float,
+        super().__init__(
+            code, [start_index], start_value, end_value, 0.0, 0.0, volume, 0.0
+        )
+        self.code = code
         self.direction = direction
         self.start_index: int = start_index
         self.end_index: int = end_index
         self.start_value: float = start_value
         self.end_value: float = end_value
-        # 成交量作弊右开
+        # 成交量左闭右开
         self.whole_volume: float = volume
         self.value_list_with_index = []
 
-        super(ChanBi, self).__init__(
-            direction, [start_index], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        )
+       
 
         if start_index >= end_index:
-            raise Exception("index error")
+            raise Exception("index error, {} {} {} {} {}".format(
+                    self.code,
+                    self.start_index,
+                    self.end_index,
+                    self.start_value,
+                    self.end_value
+                ))
 
         if direction == "up":
             self.low = start_value
             self.high = end_value
-            if start_value >= end_value:
-                raise Exception("value error")
+            if start_value > end_value:
+                raise Exception("value error, {} {} {} {} {}".format(
+                    self.code,
+                    self.start_index,
+                    self.end_index,
+                    self.start_value,
+                    self.end_value
+                ))
         if direction == "down":
             self.low = end_value
             self.high = start_value
-            if start_value <= end_value:
+            if start_value < end_value:
                 raise Exception(
                     "value error date: {0}, direction: {1},"
                     " start_value: {2}, end_value: {3}, "
-                    "start_index: {4}, end_index: {5}".format(
+                    "start_index: {4}, end_index: {5}, symbol is {6}".format(
                         self.date,
                         self.direction,
                         self.start_value,
                         self.end_value,
                         self.start_index,
                         self.end_index,
+                        self.code
                     )
                 )
         gap = (end_value - start_value) / (end_index - start_index)
@@ -185,6 +208,7 @@ class ChanBi(KiLineObject):
             end_value = low
 
         t = ChanBi(
+            other.code,
             other.direction,
             min(self.start_index, other.start_index),
             max(self.end_index, other.end_index),
@@ -237,13 +261,13 @@ def merge(k1: ChanBi, k2: ChanBi, merge_direction: str, domain_ele: str):
     if "k1" == domain_ele:
 
         new_bi = ChanBi(
-            k1.direction, k1.start_index, k2.end_index, k1.start_value, k1.end_value
+            k1.code, k1.direction, k1.start_index, k2.end_index, k1.start_value, k1.end_value
         )
 
         new_bi.start_index = k1.start_index
     else:
         new_bi = ChanBi(
-            k1.direction, k1.start_index, k2.end_index, k2.start_value, k2.end_value
+            k1.code, k1.direction, k1.start_index, k2.end_index, k2.start_value, k2.end_value
         )
 
         new_bi.start_index = k2.start_index
@@ -258,6 +282,7 @@ def merge(k1: ChanBi, k2: ChanBi, merge_direction: str, domain_ele: str):
 class ChanLine(ChanBi):
     def __init__(
         self,
+        code,
         direction,
         start_index,
         end_index,
@@ -266,6 +291,7 @@ class ChanLine(ChanBi):
         list_of_bi: list[ChanBi],
     ):
         super(ChanLine, self).__init__(
+            code,
             direction,
             start_index,
             end_index,
@@ -276,6 +302,7 @@ class ChanLine(ChanBi):
         self.list_of_bi = list_of_bi
 
     def append_bi(self, new_bi: ChanBi):
+        assert self.code == new_bi.code
         assert self.direction == new_bi.direction
         self.end_index = new_bi.end_index
         self.end_value = new_bi.end_value
@@ -328,8 +355,9 @@ class ChanLine(ChanBi):
     def __add__(self, other):
         if self.direction != other.direction:
             raise Exception("{0}, {1}".format(self.direction, other.direction))
-
+        assert self.code == other.code
         return ChanLine(
+            self.code,
             self.direction,
             min(self.start_index, other.start_index),
             max(self.end_index, other.end_index),
@@ -357,6 +385,7 @@ class ChanLine(ChanBi):
                     # 在二者之间增加一个段，注意此段是虚拟的，所以bi list是空
                     if in_line_list[idx].direction == "up":
                         new_line_element = ChanLine(
+                            in_line_list[idx].code,
                             "down",
                             in_line_list[idx].end_index,
                             in_line_list[idx + 1].start_index,
@@ -366,6 +395,7 @@ class ChanLine(ChanBi):
                         )
                     else:
                         new_line_element = ChanLine(
+                            in_line_list[idx].code,
                             "up",
                             in_line_list[idx].end_index,
                             in_line_list[idx + 1].start_index,
