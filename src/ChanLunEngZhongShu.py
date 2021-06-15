@@ -46,8 +46,19 @@ if __name__ == "__main__":
     ding_di_data = chan_data.get_ding_di()
     print(ding_di_data)
 
-    res, cross, ding, di, distance, variance = chan_data.is_valid_buy_sell_point_on_k_line()
-    print("is buy point {} {} {} {} {} {}".format(res, cross, ding, di, distance, variance))
+    (
+        res,
+        cross,
+        ding,
+        di,
+        distance,
+        variance,
+    ) = chan_data.is_valid_buy_sell_point_on_k_line()
+    print(
+        "is buy point {} {} {} {} {} {}".format(
+            res, cross, ding, di, distance, variance
+        )
+    )
 
     plot_with_mlf_v2(
         chan_data, "{0},{1},{2}".format(t_stock, name, k_level), today_date

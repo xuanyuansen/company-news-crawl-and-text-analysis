@@ -13,9 +13,11 @@ import numpy as np
 class BaseFeatureGen(object):
     def __init__(self, chan_data: ChanSourceDataObject = None):
         self.data: ChanSourceDataObject = chan_data
-        self.base_length = 500 # 交易日的长度。后续这里要改为自动获取数据的最大长度。
+        self.base_length = 500  # 交易日的长度。后续这里要改为自动获取数据的最大长度。
+
     def set_base_data(self, chan_data: ChanSourceDataObject):
         self.data = chan_data
+
     pass
 
 
@@ -23,25 +25,48 @@ class BaseFeatureGen(object):
 class DeepFeatureGen(BaseFeatureGen):
     def __init__(self, chan_data: ChanSourceDataObject = None):
         super().__init__(chan_data=chan_data)
-    
+
     # 笔 线段 前三个序列，顶底序列（0，1序列），长度序列，角度序列
     # 后三个序列， volume ， hist， macd
     def __get_feature(self, _data: list[ChanLine]):
-        ding_di_sequence = [1.0 if 'up' == element.direction  else 0.0  for element in _data]
+        if len(_data) <= 1:
+            return None
+        ding_di_sequence = [
+            1.0 if "up" == element.direction else 0.0 for element in _data
+        ]
 
-        length_sequence = [float(element.end_index-element.start_index)  for element in _data]
+        length_sequence = [
+            float(element.end_index - element.start_index) for element in _data
+        ]
         # length_sequence_sum = sum(length_sequence)
         # 不能这么归一化，要看笔的强度，所以要在整个数据的区间上归一化
-        length_sequence = [element/self.base_length for element in length_sequence]
+        length_sequence = [element / self.base_length for element in length_sequence]
 
         volume = [element.whole_volume for element in _data]
-        volume_sum= sum(volume)
-        volume_sequence = [element/volume_sum for element in volume]
-        
-        angle_sequence = [((1.0 if 'up' == element.direction else -1.0)*(np.arctan(element.get_max() - element.get_min())/(element.end_index-element.start_index))+1.5)/3.0  for element in _data]
+        volume_sum = sum(volume)
+        volume_sequence = [element / volume_sum for element in volume]
 
-        sub_his  = [sum(self.data.histogram[element.start_index: element.end_index])  for element in _data]
-        sub_macd  = [sum(self.data.macd[element.start_index: element.end_index])  for element in _data]
+        angle_sequence = [
+            (
+                (1.0 if "up" == element.direction else -1.0)
+                * (
+                    np.arctan(element.get_max() - element.get_min())
+                    / (element.end_index - element.start_index)
+                )
+                + 1.5
+            )
+            / 3.0
+            for element in _data
+        ]
+
+        sub_his = [
+            sum(self.data.histogram[element.start_index : element.end_index])
+            for element in _data
+        ]
+        sub_macd = [
+            sum(self.data.macd[element.start_index : element.end_index])
+            for element in _data
+        ]
 
         max_sub_his = max(sub_his)
         min_sub_his = min(sub_his)
@@ -49,17 +74,40 @@ class DeepFeatureGen(BaseFeatureGen):
         max_sub_macd = max(sub_macd)
         min_sub_macd = min(sub_macd)
 
-        sub_his_sequence = [ element/(max_sub_his-min_sub_his)-min_sub_his/(max_sub_his-min_sub_his) for element in sub_his]
-        sub_macd_sequence = [ element/(max_sub_macd-min_sub_macd)-min_sub_macd/(max_sub_macd-min_sub_macd) for element in sub_macd]
+        sub_his_sequence = [
+            element / (max_sub_his - min_sub_his)
+            - min_sub_his / (max_sub_his - min_sub_his)
+            if max_sub_his != min_sub_his
+            else 1.0
+            for element in sub_his
+        ]
+        sub_macd_sequence = [
+            element / (max_sub_macd - min_sub_macd)
+            - min_sub_macd / (max_sub_macd - min_sub_macd)
+            if max_sub_macd != min_sub_macd
+            else 1.0
+            for element in sub_macd
+        ]
 
         # print('sub_his_sequence', sub_his_sequence)
         # print('sub_macd_sequence', sub_macd_sequence)
 
-        feature =list(zip(ding_di_sequence, length_sequence, angle_sequence, volume_sequence, sub_his_sequence, sub_macd_sequence))
+        feature = list(
+            zip(
+                ding_di_sequence,
+                length_sequence,
+                angle_sequence,
+                volume_sequence,
+                sub_his_sequence,
+                sub_macd_sequence,
+            )
+        )
         return [list(ele) for ele in feature]
 
     def get_sequence_feature(self):
-        return self.__get_feature(self.data.get_bi_list()), self.__get_feature(self.data.merged_chan_line_list)
+        return self.__get_feature(self.data.get_bi_list()), self.__get_feature(
+            self.data.merged_chan_line_list
+        )
 
     def get_bi_sequence_feature(self):
         return self.__get_feature(self.data.get_bi_list())
@@ -70,19 +118,31 @@ class DeepFeatureGen(BaseFeatureGen):
         else:
             # self.max_low_value = max_low_value  # low point
             # self.min_max_value = min_max_value  # high point
-            max_min_sequence = [ (zs.min_max_value - zs.max_low_value)/zs.min_max_value  for zs in self.data.zhong_shu_list]
+            max_min_sequence = [
+                (zs.min_max_value - zs.max_low_value) / zs.min_max_value
+                for zs in self.data.zhong_shu_list
+            ]
 
-            length_sequence = [len(zs.list_of_duan)/len(self.data.merged_chan_line_list) for zs in self.data.zhong_shu_list]
+            length_sequence = [
+                len(zs.list_of_duan) / len(self.data.merged_chan_line_list)
+                for zs in self.data.zhong_shu_list
+            ]
 
-            zhong_shu_strength_length_sequence = [zs.zhong_shu_time_strength_length/self.base_length for zs in self.data.zhong_shu_list]
+            zhong_shu_strength_length_sequence = [
+                zs.zhong_shu_time_strength_length / self.base_length
+                for zs in self.data.zhong_shu_list
+            ]
 
-        return list(zip(max_min_sequence, length_sequence, zhong_shu_strength_length_sequence))
+        return list(
+            zip(max_min_sequence, length_sequence, zhong_shu_strength_length_sequence)
+        )
+
     pass
 
 
 # 特征工程，然后用XGBOOST
 class BasicFeatureGen(BaseFeatureGen):
-    def __init__(self, chan_data: ChanSourceDataObject=None):
+    def __init__(self, chan_data: ChanSourceDataObject = None):
         super().__init__(chan_data=chan_data)
 
     # 10
@@ -98,16 +158,20 @@ class BasicFeatureGen(BaseFeatureGen):
             return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         value_list = [bi_s[0].high, bi_s[0].low]
         length_list = [bi_s[0].end_index - bi_s[0].start_index]
-        volume_list = [np.log(bi_s[0].whole_volume) if bi_s[0].whole_volume!=0.0 else 0.0]
+        volume_list = [
+            np.log(bi_s[0].whole_volume) if bi_s[0].whole_volume != 0.0 else 0.0
+        ]
         for idx in range(1, len(bi_s)):
             if bi_s[idx].high not in value_list[-2:]:
                 value_list.append(bi_s[idx].high)
             if bi_s[idx].low not in value_list[-2:]:
                 value_list.append(bi_s[idx].low)
             length_list.append(bi_s[idx].end_index - bi_s[idx].start_index)
-            volume_list.append(np.log(bi_s[idx].whole_volume) if bi_s[idx].whole_volume!=0.0 else 0.0)
+            volume_list.append(
+                np.log(bi_s[idx].whole_volume) if bi_s[idx].whole_volume != 0.0 else 0.0
+            )
 
-        _feature= [
+        _feature = [
             f1,
             np.average(value_list),
             np.var(value_list),
@@ -141,7 +205,7 @@ class BasicFeatureGen(BaseFeatureGen):
                     return -1
             else:
                 return 0
-        
+
         # print('macd feature is {}'.format(self.__get_macd_feature()))
 
         return (
@@ -190,7 +254,11 @@ class BasicFeatureGen(BaseFeatureGen):
             start_index = zhong_shu_list[0].start_index
             end_index = zhong_shu_list[-1].end_index
         else:
-            xian_duan_list = self.data.merged_chan_line_list if len(self.data.merged_chan_line_list) > 0 else self.data.origin_chan_line_list
+            xian_duan_list = (
+                self.data.merged_chan_line_list
+                if len(self.data.merged_chan_line_list) > 0
+                else self.data.origin_chan_line_list
+            )
             if len(xian_duan_list) > 0:
                 start_index = xian_duan_list[0].get_start_index()
                 end_index = xian_duan_list[-1].get_end_index()
@@ -201,6 +269,13 @@ class BasicFeatureGen(BaseFeatureGen):
             return [0.0, 0.0, 0.0, 0.0, 0.0]
         else:
             sub_his = self.data.histogram[start_index:end_index]
-            sub_macd = self.data.macd[start_index: end_index]
-            return [float(end_index-start_index), sub_his.var(), sub_his.std(), sub_macd.var(), sub_macd.std()]
+            sub_macd = self.data.macd[start_index:end_index]
+            return [
+                float(end_index - start_index),
+                sub_his.var(),
+                sub_his.std(),
+                sub_macd.var(),
+                sub_macd.std(),
+            ]
+
     pass

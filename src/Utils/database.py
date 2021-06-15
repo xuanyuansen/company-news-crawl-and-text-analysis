@@ -23,7 +23,11 @@ def graceful_auto_reconnect(mongo_op_func):
                 return mongo_op_func(*args, **kwargs)
             except pymongo.errors.AutoReconnect as e:
                 wait_t = 0.5 * pow(2, attempt)  # exponential back off
-                logging.warning("PyMongo auto-reconnecting... %s. Waiting %.1f seconds.", str(e), wait_t)
+                logging.warning(
+                    "PyMongo auto-reconnecting... %s. Waiting %.1f seconds.",
+                    str(e),
+                    wait_t,
+                )
                 time.sleep(wait_t)
 
     return wrapper
@@ -38,15 +42,21 @@ class Database(object):
         self.collection = None
 
     def init_remote_client(self):
-        uname = b'gAAAAABgvHJFrKFjhYB2_Ri49Ku7BVo0KwW-qKz1N7Bs20f70uNfDhGgd1rA1nRanHUnFKgPutTfMauATII2Kk5WxBuBbIDqnQ=='
-        passwd = b'gAAAAABgvHJFTtvwhg3gbiaedLjlsEFMt_wdgkU1fgyIyYUizwRQXciBaSyG2DDoTvr3fD1qfRhnBzg-7rNt4rbDh7TUvyGEXQ=='
+        uname = b"gAAAAABgvHJFrKFjhYB2_Ri49Ku7BVo0KwW-qKz1N7Bs20f70uNfDhGgd1rA1nRanHUnFKgPutTfMauATII2Kk5WxBuBbIDqnQ=="
+        passwd = b"gAAAAABgvHJFTtvwhg3gbiaedLjlsEFMt_wdgkU1fgyIyYUizwRQXciBaSyG2DDoTvr3fD1qfRhnBzg-7rNt4rbDh7TUvyGEXQ=="
         _cipher = Fernet(config.cipher_key)
         _uname = str(_cipher.decrypt(uname), encoding="utf-8")
         _password = str(_cipher.decrypt(passwd), encoding="utf-8")
-        mc = MongoClient(self.ip, self.port, username=_uname,
-                         password=_password, authMechanism='SCRAM-SHA-1',
-                         serverSelectionTimeoutMS='5000', maxPoolSize=200)
-        logging.info('init db done!')
+        mc = MongoClient(
+            self.ip,
+            self.port,
+            username=_uname,
+            password=_password,
+            authMechanism="SCRAM-SHA-1",
+            serverSelectionTimeoutMS="5000",
+            maxPoolSize=200,
+        )
+        logging.info("init db done!")
         return mc
 
     def connect_database(self, database_name):
@@ -83,12 +93,12 @@ class Database(object):
 
     @graceful_auto_reconnect
     def get_data(
-            self,
-            database_name,
-            collection_name,
-            max_data_request=None,
-            query=None,
-            keys=None,
+        self,
+        database_name,
+        collection_name,
+        max_data_request=None,
+        query=None,
+        keys=None,
     ):
         database = self.conn[database_name]
         collection = database.get_collection(collection_name)
@@ -108,7 +118,7 @@ class Database(object):
         if len(keys) != 0:
             _dict = {_key: [] for _key in keys}
             data = collection.find(query) if len(query) != 0 else collection.find()
-            _data_cnt =0 
+            _data_cnt = 0
             for _id, row in enumerate(data):
                 _data_cnt += 1
                 if _id + 1 <= max_data_request:

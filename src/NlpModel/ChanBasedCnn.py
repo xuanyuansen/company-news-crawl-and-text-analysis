@@ -38,6 +38,7 @@ class RNN(nn.Module):
 
     def initHidden(self):
         return torch.zeros(1, self.hidden_size)
+
     pass
 
 
@@ -82,7 +83,9 @@ def train_rnn(rnn: RNN, category_tensor, line_tensor):
 
 # N*W的数据
 class CustomChanDataset(Dataset):
-    def __init__(self, feature_data_frame: pd.DataFrame, label_data_frame: pd.DataFrame):
+    def __init__(
+        self, feature_data_frame: pd.DataFrame, label_data_frame: pd.DataFrame
+    ):
         assert feature_data_frame.shape[0] == label_data_frame.shape[0]
         self.feature_data: pd.DataFrame = feature_data_frame
         self.label: pd.DataFrame = label_data_frame
@@ -99,17 +102,11 @@ class CustomChanDataset(Dataset):
 
 def process_data(data: list[np.ndarray]):
     training_data = datasets.FashionMNIST(
-        root="data",
-        train=True,
-        download=True,
-        transform=ToTensor()
+        root="data", train=True, download=True, transform=ToTensor()
     )
     print(type(training_data))
     test_data = datasets.FashionMNIST(
-        root="data",
-        train=False,
-        download=True,
-        transform=ToTensor()
+        root="data", train=False, download=True, transform=ToTensor()
     )
     print(type(test_data))
 
@@ -140,6 +137,7 @@ class TextClassificationModel(nn.Module):
     Additionally, since nn.EmbeddingBag accumulates the average across the embeddings on the fly,
     nn.EmbeddingBag can enhance the performance and memory efficiency to process a sequence of tensors.
     """
+
     def __init__(self, vocab_size, embed_dim, num_class):
         super(TextClassificationModel, self).__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=True)
@@ -160,9 +158,9 @@ class TextClassificationModel(nn.Module):
 def save(model, save_dir, save_prefix, steps):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    save_prefix = os.path.join(save_dir,save_prefix)
-    save_path = '{}_steps_{}.pt'.format(save_prefix,steps)
-    torch.save(model.state_dict(),save_path)
+    save_prefix = os.path.join(save_dir, save_prefix)
+    save_path = "{}_steps_{}.pt".format(save_prefix, steps)
+    torch.save(model.state_dict(), save_path)
 
 
 def evaluate(data_iter, model, args):
@@ -185,7 +183,11 @@ def evaluate(data_iter, model, args):
     size = len(data_iter.dataset)
     avg_loss /= size
     accuracy = 100.0 * corrects / size
-    print('\nEvaluation - loss: {:.6f} acc: {:.4f}%({}/{}) \n'.format(avg_loss, accuracy, corrects, size))
+    print(
+        "\nEvaluation - loss: {:.6f} acc: {:.4f}%({}/{}) \n".format(
+            avg_loss, accuracy, corrects, size
+        )
+    )
 
     return accuracy
 
@@ -200,7 +202,7 @@ def train(train_iter, dev_iter, model, args):
     best_acc = 0
     last_step = 0
     model.train()
-    print('training...')
+    print("training...")
     for epoch in range(1, args.epochs + 1):
         for batch in train_iter:
             feature, target = batch.text, batch.label  # (W,N) (N)
@@ -220,23 +222,23 @@ def train(train_iter, dev_iter, model, args):
                 result = torch.max(logit, 1)[1].view(target.size())
                 corrects = (result.data == target.data).sum()
                 accuracy = corrects * 100.0 / batch.batch_size
-                sys.stdout.write('\rBatch[{}] - loss: {:.6f} acc: {:.4f}$({}/{})'.format(steps,
-                                                                                         loss.data.item(),
-                                                                                         accuracy,
-                                                                                         corrects,
-                                                                                         batch.batch_size))
+                sys.stdout.write(
+                    "\rBatch[{}] - loss: {:.6f} acc: {:.4f}$({}/{})".format(
+                        steps, loss.data.item(), accuracy, corrects, batch.batch_size
+                    )
+                )
             if steps % args.dev_interval == 0:
                 dev_acc = evaluate(dev_iter, model, args)
                 if dev_acc > best_acc:
                     best_acc = dev_acc
                     last_step = steps
                     if args.save_best:
-                        save(model, args.save_dir, 'best', steps)
+                        save(model, args.save_dir, "best", steps)
                 else:
                     if steps - last_step >= args.early_stop:
-                        print('early stop by {} steps.'.format(args.early_stop))
+                        print("early stop by {} steps.".format(args.early_stop))
             elif steps % args.save_interval == 0:
-                save(model, args.save_dir, 'snapshot', steps)
+                save(model, args.save_dir, "snapshot", steps)
 
 
 class TextCNN(nn.Module):
@@ -259,7 +261,7 @@ class TextCNN(nn.Module):
             [nn.Conv2d(channel, kernel_num, (K, dim)) for K in Ks]
         )  # 卷积层
         self.dropout = nn.Dropout(args.dropout)
-        self.fc = nn.Linear(len(Ks) * kernel_num, class_num)  #全连接层
+        self.fc = nn.Linear(len(Ks) * kernel_num, class_num)  # 全连接层
 
     # bi 对应的data是N*6的
     def forward(self, x):
@@ -277,5 +279,3 @@ class TextCNN(nn.Module):
         x = self.dropout(x)
         logit = self.fc(x)
         return logit
-
-

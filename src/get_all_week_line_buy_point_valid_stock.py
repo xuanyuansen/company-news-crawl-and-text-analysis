@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 args.market, row["symbol"], data_level="week"
             )
             if week_result[0]:
-                logging.info('week: {}'.format(week_result))
+                logging.info("week: {}".format(week_result))
                 valid = week_result[1][0]
                 last_cross = week_result[1][1]
                 valid_ding_date = week_result[1][2]
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 args.market, row["symbol"], data_level="daily"
             )
             if daily_result[0]:
-                logging.info('daily: {}'.format(daily_result))
+                logging.info("daily: {}".format(daily_result))
                 valid_daily = daily_result[1][0]
                 last_cross_daily = daily_result[1][1]
                 valid_ding_date_daily = daily_result[1][2]

@@ -1,6 +1,6 @@
 from xgboost import XGBClassifier
 
-import  xgboost as xgb
+import xgboost as xgb
 
 xgb.train()
 

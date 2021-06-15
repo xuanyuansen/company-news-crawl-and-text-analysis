@@ -188,4 +188,5 @@ class GenStockNewsDB(object):
                 _tmp_num_stat, collection_name, already_in_news_cnt, find_news_cnt
             )
         )
+
     pass

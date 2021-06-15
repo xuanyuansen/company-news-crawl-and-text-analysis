@@ -17,7 +17,7 @@ import pickle
 
 
 class DataPreProcessing(object):
-    def __init__(self, feature_size:int):
+    def __init__(self, feature_size: int):
         self.price_spider = StockInfoSpyder()
         self.db = self.price_spider.db_obj
         self.bfg = BasicFeatureGen()
@@ -55,7 +55,7 @@ class DataPreProcessing(object):
         return data
 
     # 加入end_date过滤数据，不能有未来数据！！！
-    def from_symbol_to_feature(self, _symbol, end_date, type: str= 'xgb'):
+    def from_symbol_to_feature(self, _symbol, end_date, type: str = "xgb"):
         res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(
             symbol=_symbol, market_type="cn", start_date="2020-01-01"
         )
@@ -63,7 +63,7 @@ class DataPreProcessing(object):
             return None
 
         stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
-        
+
         # 注意这里通过start_date获得最后一周的标签，
         # 那么用于计算特征的数据不能包含这周的数据
         stock_data = stock_data[stock_data["Date"] < end_date]
@@ -76,13 +76,13 @@ class DataPreProcessing(object):
         chan_data.gen_data_frame()
         chan_data.get_plot_data_frame()
 
-        if 'deep' == type:
+        if "deep" == type:
             self.deep_feature_gen.set_base_data(chan_data)
             return self.deep_feature_gen.get_bi_sequence_feature()
         else:
             self.bfg.set_base_data(chan_data)
             return self.bfg.get_feature()
-   
+
     def get_label(
         self,
         symbols: pd.DataFrame,
@@ -90,7 +90,7 @@ class DataPreProcessing(object):
         start_date: str = None,
         cnt_limit_start: int = None,
         cnt_limit_end: int = None,
-        feature_type:str = 'xgb'
+        feature_type: str = "xgb",
     ):
         week_data = symbols[cnt_limit_start:cnt_limit_end]
         week_data["week"] = week_data.apply(
@@ -108,7 +108,9 @@ class DataPreProcessing(object):
 
         # 过滤没有标签的数据
         week_data = week_data[week_data["week_data_shape"] >= 1]
-        week_data['week_data_start_date'] = week_data.apply(lambda row: row['week'].index[-1], axis=1)
+        week_data["week_data_start_date"] = week_data.apply(
+            lambda row: row["week"].index[-1], axis=1
+        )
         # print(week_data)
 
         # week_data_start_date_cnt = week_data.groupby(['week_data_start_date']).size()
@@ -117,7 +119,7 @@ class DataPreProcessing(object):
         # print(week_data_start_date_cnt.shape)
         # print(week_data_start_date_cnt.values)
         # print(week_data_start_date_cnt.index)
-        # week_data_start_date_cnt.index is 
+        # week_data_start_date_cnt.index is
         # DatetimeIndex(['2021-06-07'], dtype='datetime64[ns]', name='week_data_start_date', freq=None)
 
         week_data["ratio"] = week_data.apply(
@@ -143,14 +145,17 @@ class DataPreProcessing(object):
             lambda row: _set_label(row["ratio"]), axis=1
         )
         week_data["features"] = week_data.apply(
-            lambda row: self.from_symbol_to_feature(row["symbol"], row['week_data_start_date'], feature_type), axis=1
+            lambda row: self.from_symbol_to_feature(
+                row["symbol"], row["week_data_start_date"], feature_type
+            ),
+            axis=1,
         )
 
-        # week_data = week_data[week_data['features'] is not None]
+        week_data = week_data[week_data["features"] is not None]
 
         # 10 + 10 + 13
         #
-        if 'xgb' == feature_type:
+        if "xgb" == feature_type:
             for idx in range(0, self.feature_size):
                 week_data["feature_{}".format(idx)] = week_data.apply(
                     lambda row: row["features"][idx], axis=1
@@ -158,7 +163,9 @@ class DataPreProcessing(object):
         # week_data.drop(['features'], axis=1, inplace=True)
 
         null_data = week_data[week_data.isnull().T.any()]
+        print("null feature")
         print(null_data)
+        print("null feature shape")
         print(week_data.shape)
 
         label_cnt = week_data.groupby(["label"]).size()
@@ -171,18 +178,24 @@ class DataPreProcessing(object):
 
 if __name__ == "__main__":
     set_display()
-    dpp = DataPreProcessing(feature_size = 38)
+    dpp = DataPreProcessing(feature_size=38)
     symbol_data = dpp.get_symbols("cn")
 
     data_set, label_sum = dpp.get_label(
-        symbols=symbol_data, market_type="cn", start_date="2021-06-01", cnt_limit_start=0, cnt_limit_end=2500
+        symbols=symbol_data,
+        market_type="cn",
+        start_date="2021-06-01",
+        cnt_limit_start=0,
+        cnt_limit_end=2500,
     )
-    label_set=data_set["label"]
+    label_set = data_set["label"]
 
-    with open('train_data.dataframe', 'wb') as f_file:
+    with open("train_data.dataframe", "wb") as f_file:
         pickle.dump(data_set, f_file)
 
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(data_set, label_set, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        data_set, label_set, test_size=0.33, random_state=42
+    )
 
     f_names = []
     for idx in range(0, dpp.feature_size):
@@ -202,7 +215,7 @@ if __name__ == "__main__":
         "tree_method": "gpu_hist",
     }
     num_round = 10
-    
+
     bst = xgb.train(param, dtrain, num_round)
 
     y_pred_train = bst.predict(dtrain)
@@ -210,8 +223,6 @@ if __name__ == "__main__":
     # roc_auc = metrics.roc_auc_score(y_train, y_pred_train)
     print("train accuarcy: %.2f%%" % (accuracy * 100.0))
     # print(roc_auc)
-
-
 
     # 计算准确率
     y_pred = bst.predict(dtest)
@@ -222,11 +233,11 @@ if __name__ == "__main__":
     # print(roc_auc)
 
     print(bst.get_fscore())
-    bst.save_model('0001.model')
+    bst.save_model("0001.model")
 
     # data_set, label_set
     rf = RandomForestClassifier(n_estimators=200)
-    score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring='accuracy')
+    score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring="accuracy")
     print(score)
     print(score.mean())
     pass

@@ -8,6 +8,7 @@ import sys
 from torchtext.experimental.datasets import text_classification
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
+
 r"""
 The model is composed of the embedding bag layer and the linear layer.
 nn.EmbeddingBag computes the mean of 'bags' of embeddings.
@@ -117,7 +118,10 @@ def train_and_valid(lr_, sub_train_, sub_valid_):
                 print(type(cls))
                 sys.stderr.write(
                     "\rProgress: {:3.0f}% lr: {:3.3f} loss: {:3.3f}, latest lr {:3.3f}".format(
-                        progress * 100, scheduler.get_lr()[0], loss, scheduler.get_last_lr()[0]
+                        progress * 100,
+                        scheduler.get_lr()[0],
+                        loss,
+                        scheduler.get_last_lr()[0],
                     )
                 )
         # Adjust the learning rate

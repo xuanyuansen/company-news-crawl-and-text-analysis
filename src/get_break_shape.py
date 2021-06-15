@@ -18,28 +18,32 @@ from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
 from Surpriver import feature_generator
 import torch
 import numpy as np
-from NlpModel.ChanBasedCnn import RNN, train_rnn, random_training_example, category_from_output
+from NlpModel.ChanBasedCnn import (
+    RNN,
+    train_rnn,
+    random_training_example,
+    category_from_output,
+)
 import time
 import math
 import random
 from data_pre_processing import DataPreProcessing
+import logging
 
 
 if __name__ == "__main__":
     set_display()
-    print(today_date)
+    logging.info(today_date)
     price_spider = StockInfoSpyder()
 
-    _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(symbol=sys.argv[1],
-                                                                          market_type='cn',
-                                                                          start_date=sys.argv[2])
+    _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(
+        symbol=sys.argv[1], market_type="cn", start_date=sys.argv[2]
+    )
     # print(stock_data[:10])
     stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
     stock_data.set_index("Date", inplace=True)
 
-    k_line_data = KiLineObject.k_line_merge(
-        sys.argv[1], stock_data, merge_or_not=True
-    )
+    k_line_data = KiLineObject.k_line_merge(sys.argv[1], stock_data, merge_or_not=True)
     chan_data = ChanSourceDataObject("daily", k_line_data)
     chan_data.gen_data_frame()
     _stock_data = chan_data.get_plot_data_frame()
@@ -54,11 +58,11 @@ if __name__ == "__main__":
 
     dedp_fea_gen = DeepFeatureGen(chan_data)
     res = dedp_fea_gen.get_sequence_feature()
-    print('bi feature length {}'.format(len(res[0])))
+    logging.info("bi feature length {}".format(len(res[0])))
     print(res[0])
-    print('xian duan feature length {}'.format(len(res[1])))
+    print("xian duan feature length {}".format(len(res[1])))
     print(res[1])
-    print('zhong shu feature')
+    print("zhong shu feature")
     print(dedp_fea_gen.get_zhong_shu_feature_sequence())
 
     ##################
@@ -67,9 +71,12 @@ if __name__ == "__main__":
     symbol_data = data_prepare.get_symbols("cn")
 
     data_set, label_sum = data_prepare.get_label(
-        symbols=symbol_data, market_type="cn",
-        start_date="2021-06-01", cnt_limit_start=0, cnt_limit_end=5,
-        feature_type = 'deep'
+        symbols=symbol_data,
+        market_type="cn",
+        start_date="2021-06-01",
+        cnt_limit_start=0,
+        cnt_limit_end=3000,
+        feature_type="deep",
     )
     label_set = data_set["label"]
 
@@ -87,8 +94,8 @@ if __name__ == "__main__":
     hidden = torch.zeros(1, n_hidden)
 
     output, next_hidden = rnn(_input, hidden)
-    print('output', output)
-    print('next_hidden', next_hidden)
+    print("output", output)
+    print("next_hidden", next_hidden)
 
     n_iters = 100000
     print_every = 5000
@@ -98,19 +105,20 @@ if __name__ == "__main__":
     current_loss = 0
     all_losses = []
     print(data_set)
+
     def timeSince(since):
         now = time.time()
         s = now - since
         m = math.floor(s / 60)
         s -= m * 60
-        return '%dm %ds' % (m, s)
+        return "%dm %ds" % (m, s)
 
     start = time.time()
     for iter in range(1, n_iters + 1):
-        data_idx = random.randint(0, data_cnt-1)
-        _data = data_set.loc[data_idx, ['features']].values.tolist()[0]
+        data_idx = random.randint(0, data_cnt - 1)
+        _data = data_set.loc[data_idx, ["features"]].values.tolist()[0]
         # print(type(_data), _data)
-        _label = data_set.loc[data_idx, ['label']].values.tolist()[0]
+        _label = data_set.loc[data_idx, ["label"]].values.tolist()[0]
         # print(type(_label), _label)
         category, category_tensor, line_tensor = random_training_example(_data, _label)
 
@@ -123,9 +131,19 @@ if __name__ == "__main__":
         # Print iter number, loss, name and guess
         if iter % print_every == 0:
             guess, guess_i = category_from_output(output)
-            correct = '✓' if guess == category else '✗ (%s)' % category
-            print('%d %d%% (%s) %.4f %s / %s %s' % (
-            iter, iter / n_iters * 100, timeSince(start), loss, 0, guess, correct))
+            correct = "✓" if guess == category else "✗ (%s)" % category
+            logging.info(
+                "%d %d%% (%s) %.4f %s / %s %s"
+                % (
+                    iter,
+                    iter / n_iters * 100,
+                    timeSince(start),
+                    loss,
+                    0,
+                    guess,
+                    correct,
+                )
+            )
 
         # Add current loss avg to list of losses
         if iter % plot_every == 0:
@@ -135,5 +153,5 @@ if __name__ == "__main__":
     # plot_with_mlf_v2(
     #     chan_data, "{0},{1},{2}".format(sys.argv[1], sys.argv[1], "daily"), today_date
     # )
-    print('print done!')
+    print("print done!")
     pass

@@ -934,7 +934,7 @@ def check_current_direction_line_with_other_direction_bi(
 
 def __bi_to_line(bi_list: list[ChanBi]):
     if len(bi_list) != 3:
-        raise Exception('{}'.format(len(bi_list)))
+        raise Exception("{}".format(len(bi_list)))
     if bi_list[0].direction == "up":
         if bi_list[2].low >= bi_list[0].low and bi_list[2].high >= bi_list[0].high:
             return True, ChanLine(

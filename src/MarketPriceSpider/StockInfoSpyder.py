@@ -28,19 +28,27 @@ class StockInfoSpyder(Spyder):
         # cn stock market
         self.database_name_cn = config.STOCK_DATABASE_NAME
         self.collection_name_cn = config.COLLECTION_NAME_STOCK_BASIC_INFO
-        self.col_basic_info_cn = self.db_obj.get_collection(self.database_name_cn, self.collection_name_cn)
+        self.col_basic_info_cn = self.db_obj.get_collection(
+            self.database_name_cn, self.collection_name_cn
+        )
         # hk stock market
         self.database_name_hk = config.HK_STOCK_DATABASE_NAME
         self.collection_name_hk = config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
-        self.col_basic_info_hk = self.db_obj.get_collection(self.database_name_hk, self.collection_name_hk)
+        self.col_basic_info_hk = self.db_obj.get_collection(
+            self.database_name_hk, self.collection_name_hk
+        )
         # us stock market
         self.database_name_us = config.US_STOCK_DATABASE_NAME
         self.collection_name_us = config.COLLECTION_NAME_STOCK_BASIC_INFO_US
-        self.col_basic_info_us = self.db_obj.get_collection(self.database_name_us, self.collection_name_us)
+        self.col_basic_info_us = self.db_obj.get_collection(
+            self.database_name_us, self.collection_name_us
+        )
         # "stock_us_zh_spot"  # 中国概念股行情
         # "stock_us_zh_daily"  # 中国概念股历史数据
         self.collection_name_us_zh = config.COLLECTION_NAME_STOCK_BASIC_INFO_US_ZH
-        self.col_basic_info_us_zh = self.db_obj.get_collection(self.database_name_us, self.collection_name_us_zh)
+        self.col_basic_info_us_zh = self.db_obj.get_collection(
+            self.database_name_us, self.collection_name_us_zh
+        )
 
         if joint_quant_on:
             self.joint_quant_tool = JointQuantTool()
@@ -113,12 +121,14 @@ class StockInfoSpyder(Spyder):
                     symbol,
                     data.iloc[0, 6],  # start date
                     data.iloc[data.shape[0] - 1, 6],  # end date
-                    data[data.shape[0] - 1:],
+                    data[data.shape[0] - 1 :],
                 )
             )
         return True
 
-    def get_daily_price_data_of_specific_stock(self, symbol, market_type: str, start_date: str = None, _keys: list=None):
+    def get_daily_price_data_of_specific_stock(
+        self, symbol, market_type: str, start_date: str = None, _keys: list = None
+    ):
         if market_type == "cn":
             db_name = self.database_name_cn
         elif market_type == "hk":
@@ -144,7 +154,7 @@ class StockInfoSpyder(Spyder):
                 }
                 if market_type == "cn"
                 else {"date": {"$gt": start_date}},
-                keys = _keys,
+                keys=_keys,
             )
         if stock_data is None:
             return False, DataFrame()
@@ -164,8 +174,12 @@ class StockInfoSpyder(Spyder):
             stock_data.index = stock_data["date"]
         return True, stock_data
 
-    def get_week_data_stock(self, symbol, market_type: str, start_date: str = None, _keys: list = None):
-        res, stock_data = self.get_daily_price_data_of_specific_stock(symbol, market_type, start_date, _keys)
+    def get_week_data_stock(
+        self, symbol, market_type: str, start_date: str = None, _keys: list = None
+    ):
+        res, stock_data = self.get_daily_price_data_of_specific_stock(
+            symbol, market_type, start_date, _keys
+        )
         if not res:
             return False, DataFrame()
         df2 = stock_data.resample("W").agg(
@@ -231,7 +245,9 @@ class StockInfoSpyder(Spyder):
         data = ak.stock_hk_daily(symbol=symbol, adjust=adjust)
         return data
 
-    def get_historical_us_stock_daily_price(self, start_date=None, symbols: list = None):
+    def get_historical_us_stock_daily_price(
+        self, start_date=None, symbols: list = None
+    ):
         if symbols is None:
             stock_symbol_list = self.col_basic_info_us.distinct("symbol")
         else:
@@ -239,12 +255,15 @@ class StockInfoSpyder(Spyder):
         for symbol in stock_symbol_list:
             stock_us_daily_qfq_df = ak.stock_us_daily(symbol)
             stock_us_daily_qfq_df["date"] = stock_us_daily_qfq_df.index
-            # stock_us_daily_qfq_df["date_py"] = stock_us_daily_qfq_df.apply(lambda row: row['date'].to_pydatetime(), axis=1)  
-            self.logger.info('start processing {}, from date {}'.format(symbol, start_date))
+            # stock_us_daily_qfq_df["date_py"] = stock_us_daily_qfq_df.apply(lambda row: row['date'].to_pydatetime(), axis=1)
+            self.logger.info(
+                "start processing {}, from date {}".format(symbol, start_date)
+            )
             if start_date is not None:
                 try:
                     stock_us_daily_qfq_df = stock_us_daily_qfq_df[
-                        stock_us_daily_qfq_df["date"] >= datetime.datetime.strptime(start_date,"%Y-%m-%d")
+                        stock_us_daily_qfq_df["date"]
+                        >= datetime.datetime.strptime(start_date, "%Y-%m-%d")
                     ]
                 except Exception as e:
                     self.logger.error(e)
@@ -259,23 +278,27 @@ class StockInfoSpyder(Spyder):
             for index, row in stock_us_daily_qfq_df.iterrows():
                 _tmp_dict = row.to_dict()
                 # print(_tmp_dict)
-                _date_ = row['date'].strftime('%Y-%m-%d')
+                _date_ = row["date"].strftime("%Y-%m-%d")
 
                 id_md5 = hashlib.md5(
-                    ("{0} {1}".format(symbol, _date_)).encode(
-                        encoding="utf-8"
-                    )
+                    ("{0} {1}".format(symbol, _date_)).encode(encoding="utf-8")
                 ).hexdigest()
 
                 if _col.find_one({"_id": id_md5}) is not None:
                     self.logger.info(
-                        "id already exist {0} {1} {2} {3}".format(id_md5, _tmp_dict, symbol, _date_)
+                        "id already exist {0} {1} {2} {3}".format(
+                            id_md5, _tmp_dict, symbol, _date_
+                        )
                     )
                     continue
                 else:
                     _col.insert_one(_tmp_dict)
-            self.logger.info('{} insert data done, count {}'.format(symbol, stock_us_daily_qfq_df.shape[0]))
-            time.sleep(random.randint(5,10))
+            self.logger.info(
+                "{} insert data done, count {}".format(
+                    symbol, stock_us_daily_qfq_df.shape[0]
+                )
+            )
+            time.sleep(random.randint(5, 10))
             # break
         return True
 
@@ -294,33 +317,38 @@ class StockInfoSpyder(Spyder):
                 # print(row)
                 # print(type(row['时间']))
                 _tmp_dict = stock_us_zh_daily_qfq_df.iloc[index].to_dict()
-                date_raw = _tmp_dict.get('时间')
-                _date_time = datetime.datetime.strptime(date_raw, '%Y%m%d')
-                _date_ = _date_time.strftime('%Y-%m-%d')
+                date_raw = _tmp_dict.get("时间")
+                _date_time = datetime.datetime.strptime(date_raw, "%Y%m%d")
+                _date_ = _date_time.strftime("%Y-%m-%d")
                 # 时间 # 前收盘价 # 开盘价 # 收盘价 # 最高价 # 最低价 # 成交量
                 id_md5 = hashlib.md5(
-                    ("{0} {1}".format(symbol, _date_)).encode(
-                        encoding="utf-8"
-                    )
+                    ("{0} {1}".format(symbol, _date_)).encode(encoding="utf-8")
                 ).hexdigest()
                 if _col.find_one({"_id": id_md5}) is not None:
                     self.logger.info(
-                        "id already exist {0} {1} {2} {3}".format(id_md5, _tmp_dict, symbol, _date_)
+                        "id already exist {0} {1} {2} {3}".format(
+                            id_md5, _tmp_dict, symbol, _date_
+                        )
                     )
                     continue
                 else:
-                    _insert_data = {"_id": id_md5,
-                                    'date': _date_time,
-                                    'open': _tmp_dict['开盘价'],
-                                    'close': _tmp_dict['收盘价'],
-                                    'high': _tmp_dict['最高价'],
-                                    'low': _tmp_dict['最低价'],
-                                    'pre_close': _tmp_dict['前收盘价'],
-                                    'volume': float(_tmp_dict['成交量']),
-                                    }
+                    _insert_data = {
+                        "_id": id_md5,
+                        "date": _date_time,
+                        "open": _tmp_dict["开盘价"],
+                        "close": _tmp_dict["收盘价"],
+                        "high": _tmp_dict["最高价"],
+                        "low": _tmp_dict["最低价"],
+                        "pre_close": _tmp_dict["前收盘价"],
+                        "volume": float(_tmp_dict["成交量"]),
+                    }
                     _col.insert_one(_insert_data)
-            self.logger.info('{} insert data done, count {}'.format(symbol, stock_us_zh_daily_qfq_df.shape[0]))
-            time.sleep(random.randint(5,10))
+            self.logger.info(
+                "{} insert data done, count {}".format(
+                    symbol, stock_us_zh_daily_qfq_df.shape[0]
+                )
+            )
+            time.sleep(random.randint(5, 10))
         return True
 
     # 获取港股历史行情
@@ -401,7 +429,7 @@ class StockInfoSpyder(Spyder):
                         stock_hk_a_daily_hfq_df.iloc[
                             stock_hk_a_daily_hfq_df.shape[0] - 1, 0
                         ],  # end date
-                        stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1:],
+                        stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1 :],
                     )
                 )
             else:
@@ -445,8 +473,8 @@ class StockInfoSpyder(Spyder):
     # name cname symbol
     def get_all_stock_code_info_of_us(self):
         us_data = ak.get_us_stock_name()
-        logging.info('shape is {}'.format(us_data.shape))
-        print(us_data[us_data.shape[0]-100:])
+        logging.info("shape is {}".format(us_data.shape))
+        print(us_data[us_data.shape[0] - 100 :])
         # bao_jia = ak.stock_us_spot()
         # print(bao_jia.shape)
         # print(bao_jia[bao_jia.shape[0] - 100:])
@@ -471,7 +499,7 @@ class StockInfoSpyder(Spyder):
                     "cname": row["cname"],
                 }
                 self.col_basic_info_us.insert_one(_data)
-        logging.info('us market symbol get info complete!!!')
+        logging.info("us market symbol get info complete!!!")
         return True
 
     # 美股-中国概念股行情和历史数据
@@ -479,8 +507,8 @@ class StockInfoSpyder(Spyder):
     # "stock_us_zh_daily"  # 中国概念股历史数据
     def get_all_stock_code_info_of_us_zh(self):
         us_zh_data = ak.stock_us_zh_spot()
-        logging.info('shape is {}'.format(us_zh_data.shape))
-        print(us_zh_data[us_zh_data.shape[0] - 100:])
+        logging.info("shape is {}".format(us_zh_data.shape))
+        print(us_zh_data[us_zh_data.shape[0] - 100 :])
         for index, row in us_zh_data.iterrows():
             str_md5 = hashlib.md5(
                 ("{0} {1}".format(row["代码"], row["名称"])).encode(encoding="utf-8")
@@ -501,7 +529,7 @@ class StockInfoSpyder(Spyder):
                     # "cname": row["cname"],
                 }
                 self.col_basic_info_us_zh.insert_one(_data)
-        logging.info('us zh market 中国概念股 symbol get info complete!!!')
+        logging.info("us zh market 中国概念股 symbol get info complete!!!")
         return True
 
     # 获取CN股票信息数据
@@ -538,7 +566,9 @@ class StockInfoSpyder(Spyder):
         return True
 
     # 获取A股历史行情
-    def get_historical_cn_stock_daily_price(self, start_date=None, end_date=None, freq="day"):
+    def get_historical_cn_stock_daily_price(
+        self, start_date=None, end_date=None, freq="day"
+    ):
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y%m%d")
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
@@ -594,7 +624,7 @@ class StockInfoSpyder(Spyder):
                         symbol,
                         start_date,
                         end_date,
-                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1:],
+                        stock_zh_a_daily_hfq_df[stock_zh_a_daily_hfq_df.shape[0] - 1 :],
                         cnt,
                     )
                 )

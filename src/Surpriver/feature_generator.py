@@ -41,14 +41,16 @@ class TAEngine:
             rsi = (
                 ta.momentum.RSIIndicator(
                     price_data["Close"], window=history, fillna=True
-                ).rsi().values.tolist()
+                )
+                .rsi()
+                .values.tolist()
             )
             slope_rsi, r_value_rsi, p_value_rsi = self.__calculate_slope(
-                rsi[-self.HISTORY_TO_USE:]
+                rsi[-self.HISTORY_TO_USE :]
             )
             technical_indicators_dictionary["rsi-" + str(history)] = rsi[
-                                                                     -self.HISTORY_TO_USE:
-                                                                     ] + [slope_rsi, r_value_rsi, p_value_rsi]
+                -self.HISTORY_TO_USE :
+            ] + [slope_rsi, r_value_rsi, p_value_rsi]
 
         # Stochastic
         stochastic_history = [5, 10, 15]
@@ -61,14 +63,16 @@ class TAEngine:
                     window=history,
                     smooth_window=int(history / 3),
                     fillna=True,
-                ).stoch().values.tolist()
+                )
+                .stoch()
+                .values.tolist()
             )
             slope_stoch, r_value_stoch, p_value_stoch = self.__calculate_slope(
-                stochastics[-self.HISTORY_TO_USE:]
+                stochastics[-self.HISTORY_TO_USE :]
             )
             technical_indicators_dictionary["stochs-" + str(history)] = stochastics[
-                                                                        -self.HISTORY_TO_USE:
-                                                                        ] + [slope_stoch, r_value_stoch, p_value_stoch]
+                -self.HISTORY_TO_USE :
+            ] + [slope_stoch, r_value_stoch, p_value_stoch]
 
         # Accumulation Distribution
         acc_dist = ta.volume.acc_dist_index(
@@ -78,7 +82,7 @@ class TAEngine:
             price_data["Volume"],
             fillna=True,
         ).values.tolist()
-        acc_dist = acc_dist[-self.HISTORY_TO_USE:]
+        acc_dist = acc_dist[-self.HISTORY_TO_USE :]
         slope_acc_dist, r_value_acc_dist, p_value_acc_dist = self.__calculate_slope(
             acc_dist
         )
@@ -101,7 +105,7 @@ class TAEngine:
                 fillna=True,
             ).values.tolist()
             slope_eom, r_value_eom, p_value_eom = self.__calculate_slope(
-                eom[-self.HISTORY_TO_USE:]
+                eom[-self.HISTORY_TO_USE :]
             )
             technical_indicators_dictionary["eom-" + str(history)] = [
                 slope_eom,
@@ -122,11 +126,11 @@ class TAEngine:
                 fillna=True,
             ).values.tolist()
             slope_cci, r_value_cci, p_value_cci = self.__calculate_slope(
-                cci[-self.HISTORY_TO_USE:]
+                cci[-self.HISTORY_TO_USE :]
             )
             technical_indicators_dictionary["cci-" + str(history)] = cci[
-                                                                     -self.HISTORY_TO_USE:
-                                                                     ] + [slope_cci, r_value_cci, p_value_cci]
+                -self.HISTORY_TO_USE :
+            ] + [slope_cci, r_value_cci, p_value_cci]
 
         # Daily log return
         # daily_return = ta.others.daily_return(
@@ -136,8 +140,8 @@ class TAEngine:
             price_data["Close"], fillna=True
         ).values.tolist()
         technical_indicators_dictionary["daily_log_return"] = daily_log_return[
-                                                              -self.HISTORY_TO_USE:
-                                                              ]
+            -self.HISTORY_TO_USE :
+        ]
 
         # Volume difference
         volume_list = price_data["Volume"].values.tolist()
@@ -146,11 +150,11 @@ class TAEngine:
             volume_list[x] / volume_list[x - 1] for x in range(1, len(volume_list))
         ]
         slope_vol, r_value_vol, p_value_vol = self.__calculate_slope(
-            volume_returns[-self.HISTORY_TO_USE:]
+            volume_returns[-self.HISTORY_TO_USE :]
         )
         technical_indicators_dictionary["volume_returns"] = volume_returns[
-                                                            -self.HISTORY_TO_USE:
-                                                            ] + [slope_vol, r_value_vol, p_value_vol]
+            -self.HISTORY_TO_USE :
+        ] + [slope_vol, r_value_vol, p_value_vol]
 
         return technical_indicators_dictionary
 

@@ -61,13 +61,27 @@ class PlotUtil(object):
             # mpf.make_addplot(exp26, type='line', color='r'),
             # MACD图上面的面积柱子，红柱子，绿柱子
             mpf.make_addplot(
-                self.histogram_positive, type="bar", width=0.7, panel=2, color="red", ylim=(y_min-0.1, y_max+0.1)
+                self.histogram_positive,
+                type="bar",
+                width=0.7,
+                panel=2,
+                color="red",
+                ylim=(y_min - 0.1, y_max + 0.1),
             ),
             mpf.make_addplot(
-                self.histogram_negative, type="bar", width=0.7, panel=2, color="green",  ylim=(y_min-0.1, y_max+0.1)
+                self.histogram_negative,
+                type="bar",
+                width=0.7,
+                panel=2,
+                color="green",
+                ylim=(y_min - 0.1, y_max + 0.1),
             ),
-            mpf.make_addplot(self.macd, panel=2, color="fuchsia", ylim=(y_min-0.1, y_max+0.1)),
-            mpf.make_addplot(self.signal, panel=2, color="b", ylim=(y_min-0.1, y_max+0.1)),
+            mpf.make_addplot(
+                self.macd, panel=2, color="fuchsia", ylim=(y_min - 0.1, y_max + 0.1)
+            ),
+            mpf.make_addplot(
+                self.signal, panel=2, color="b", ylim=(y_min - 0.1, y_max + 0.1)
+            ),
             # BOLL线
             mpf.make_addplot(
                 self.data_to_plot_frame["upper"], type="line", color="r", panel=1

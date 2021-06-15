@@ -123,28 +123,30 @@ class ChanBi(KiLineObject):
         self.whole_volume: float = volume
         self.value_list_with_index = []
 
-       
-
         if start_index >= end_index:
-            raise Exception("index error, {} {} {} {} {}".format(
+            raise Exception(
+                "index error, {} {} {} {} {}".format(
                     self.code,
                     self.start_index,
                     self.end_index,
                     self.start_value,
-                    self.end_value
-                ))
+                    self.end_value,
+                )
+            )
 
         if direction == "up":
             self.low = start_value
             self.high = end_value
             if start_value > end_value:
-                raise Exception("value error, {} {} {} {} {}".format(
-                    self.code,
-                    self.start_index,
-                    self.end_index,
-                    self.start_value,
-                    self.end_value
-                ))
+                raise Exception(
+                    "value error, {} {} {} {} {}".format(
+                        self.code,
+                        self.start_index,
+                        self.end_index,
+                        self.start_value,
+                        self.end_value,
+                    )
+                )
         if direction == "down":
             self.low = end_value
             self.high = start_value
@@ -159,7 +161,7 @@ class ChanBi(KiLineObject):
                         self.end_value,
                         self.start_index,
                         self.end_index,
-                        self.code
+                        self.code,
                     )
                 )
         gap = (end_value - start_value) / (end_index - start_index)
@@ -261,13 +263,23 @@ def merge(k1: ChanBi, k2: ChanBi, merge_direction: str, domain_ele: str):
     if "k1" == domain_ele:
 
         new_bi = ChanBi(
-            k1.code, k1.direction, k1.start_index, k2.end_index, k1.start_value, k1.end_value
+            k1.code,
+            k1.direction,
+            k1.start_index,
+            k2.end_index,
+            k1.start_value,
+            k1.end_value,
         )
 
         new_bi.start_index = k1.start_index
     else:
         new_bi = ChanBi(
-            k1.code, k1.direction, k1.start_index, k2.end_index, k2.start_value, k2.end_value
+            k1.code,
+            k1.direction,
+            k1.start_index,
+            k2.end_index,
+            k2.start_value,
+            k2.end_value,
         )
 
         new_bi.start_index = k2.start_index
