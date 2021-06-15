@@ -8,7 +8,7 @@
 # 传统的机器学习模型。特征两部分，第一部分，笔，段，中枢；第二部分，特征提取器。
 # 特征，笔的长度，variance。
 # 我的label是什么呢？近一周内的涨幅，五个等级，涨跌幅取LOG看一下分布。每周训练一次模型，预测下周的结果。
-from ChanUtils.ChanFeature import BasicFeatureGen
+from ChanUtils.ChanFeature import BasicFeatureGen, DeepFeatureGen
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 import sys
 import pandas as pd
@@ -44,6 +44,15 @@ if __name__ == "__main__":
 
     bfg = BasicFeatureGen(chan_data)
     print(bfg.get_feature())
+
+    dedp_fea_gen = DeepFeatureGen(chan_data)
+    res = dedp_fea_gen.get_sequence_feature()
+    print('bi feature length {}'.format(len(res[0])))
+    print(res[0])
+    print('xian duan feature length {}'.format(len(res[1])))
+    print(res[1])
+    print('zhong shu feature')
+    print(dedp_fea_gen.get_zhong_shu_feature_sequence())
 
     # dynamic = chan_data.histogram
     #

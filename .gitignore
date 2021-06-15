@@ -6,7 +6,8 @@ __pycache__/
 
 .idea/*
 data_dictionary.npy
-
+*.log
+*.model
 .vscode/*
 src/info/news*
 # C extensions

@@ -11,7 +11,9 @@ import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn import model_selection, metrics
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+import pickle
 
 class DataPreProcessing(object):
     def __init__(self, feature_size:int):
@@ -172,6 +174,9 @@ if __name__ == "__main__":
     )
     label_set=data_set["label"]
 
+    with open('train_data.dataframe', 'wb') as f_file:
+        pickle.dump(data_set, f_file)
+
     X_train, X_test, y_train, y_test = model_selection.train_test_split(data_set, label_set, test_size=0.33, random_state=42)
 
     f_names = []
@@ -192,8 +197,8 @@ if __name__ == "__main__":
         "tree_method": "gpu_hist",
     }
     num_round = 10
-    evallist = [(dtest, 'eval'), (dtrain, 'train')]
-    bst = xgb.train(param, dtrain, num_round, evallist)
+    
+    bst = xgb.train(param, dtrain, num_round)
 
     y_pred_train = bst.predict(dtrain)
     accuracy = accuracy_score(y_train, y_pred_train)
@@ -213,4 +218,10 @@ if __name__ == "__main__":
 
     print(bst.get_fscore())
     bst.save_model('0001.model')
+
+    # data_set, label_set
+    rf = RandomForestClassifier(n_estimators=200)
+    score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring='accuracy')
+    print(score)
+    print(score.mean())
     pass

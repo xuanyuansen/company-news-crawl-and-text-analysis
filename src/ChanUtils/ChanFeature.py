@@ -10,13 +10,77 @@ from ChanUtils.ShapeUtil import ChanSourceDataObject
 import numpy as np
 
 
-# 特征工程，然后用XGBOOST
-class BasicFeatureGen(object):
+class BaseFeatureGen(object):
     def __init__(self, chan_data: ChanSourceDataObject = None):
         self.data: ChanSourceDataObject = chan_data
-    
+        self.base_length = 500 # 交易日的长度。后续这里要改为自动获取数据的最大长度。
     def set_base_data(self, chan_data: ChanSourceDataObject):
         self.data = chan_data
+    pass
+
+
+# 生成序列特征
+class DeepFeatureGen(BaseFeatureGen):
+    def __init__(self, chan_data: ChanSourceDataObject = None):
+        super().__init__(chan_data=chan_data)
+    
+    # 笔 线段 前三个序列，顶底序列（0，1序列），长度序列，角度序列
+    # 后三个序列， volume ， hist， macd
+    def __get_feature(self, _data: list[ChanLine]):
+        ding_di_sequence = [1.0 if 'up' == element.direction  else 0.0  for element in _data]
+
+        length_sequence = [float(element.end_index-element.start_index)  for element in _data]
+        # length_sequence_sum = sum(length_sequence)
+        # 不能这么归一化，要看笔的强度，所以要在整个数据的区间上归一化
+        length_sequence = [element/self.base_length for element in length_sequence]
+
+        volume = [element.whole_volume for element in _data]
+        volume_sum= sum(volume)
+        volume_sequence = [element/volume_sum for element in volume]
+        
+        angle_sequence = [((1.0 if 'up' == element.direction else -1.0)*(np.arctan(element.get_max() - element.get_min())/(element.end_index-element.start_index))+1.5)/3.0  for element in _data]
+
+        sub_his  = [sum(self.data.histogram[element.start_index: element.end_index])  for element in _data]
+        sub_macd  = [sum(self.data.macd[element.start_index: element.end_index])  for element in _data]
+
+        max_sub_his = max(sub_his)
+        min_sub_his = min(sub_his)
+
+        max_sub_macd = max(sub_macd)
+        min_sub_macd = min(sub_macd)
+
+        sub_his_sequence = [ element/(max_sub_his-min_sub_his)-min_sub_his/(max_sub_his-min_sub_his) for element in sub_his]
+        sub_macd_sequence = [ element/(max_sub_macd-min_sub_macd)-min_sub_macd/(max_sub_macd-min_sub_macd) for element in sub_macd]
+
+        # print('sub_his_sequence', sub_his_sequence)
+        # print('sub_macd_sequence', sub_macd_sequence)
+
+
+        return list(zip(ding_di_sequence, length_sequence, angle_sequence, volume_sequence, sub_his_sequence, sub_macd_sequence))
+
+    def get_sequence_feature(self):
+        return self.__get_feature(self.data.get_bi_list()), self.__get_feature(self.data.merged_chan_line_list)
+
+    def get_zhong_shu_feature_sequence(self):
+        if len(self.data.zhong_shu_list) < 0:
+            return [(0.0, 0.0, 0.0)]
+        else:
+            # self.max_low_value = max_low_value  # low point
+            # self.min_max_value = min_max_value  # high point
+            max_min_sequence = [ (zs.min_max_value - zs.max_low_value)/zs.min_max_value  for zs in self.data.zhong_shu_list]
+
+            length_sequence = [len(zs.list_of_duan)/len(self.data.merged_chan_line_list) for zs in self.data.zhong_shu_list]
+
+            zhong_shu_strength_length_sequence = [zs.zhong_shu_time_strength_length/self.base_length for zs in self.data.zhong_shu_list]
+
+        return list(zip(max_min_sequence, length_sequence, zhong_shu_strength_length_sequence))
+    pass
+
+
+# 特征工程，然后用XGBOOST
+class BasicFeatureGen(BaseFeatureGen):
+    def __init__(self, chan_data: ChanSourceDataObject=None):
+        super().__init__(chan_data=chan_data)
 
     # 10
     @staticmethod
