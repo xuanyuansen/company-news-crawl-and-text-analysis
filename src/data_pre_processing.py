@@ -6,7 +6,7 @@ from datetime import datetime
 from Utils.utils import set_display
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject
-from ChanUtils.ChanFeature import BasicFeatureGen
+from ChanUtils.ChanFeature import BasicFeatureGen, DeepFeatureGen
 import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
@@ -15,11 +15,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 import pickle
 
+
 class DataPreProcessing(object):
     def __init__(self, feature_size:int):
         self.price_spider = StockInfoSpyder()
         self.db = self.price_spider.db_obj
         self.bfg = BasicFeatureGen()
+        self.deep_feature_gen = DeepFeatureGen()
         self.feature_size = feature_size
         pd.set_option("mode.use_inf_as_na", True)
         pass
@@ -53,7 +55,7 @@ class DataPreProcessing(object):
         return data
 
     # 加入end_date过滤数据，不能有未来数据！！！
-    def from_symbol_to_feature(self, _symbol, end_date):
+    def from_symbol_to_feature(self, _symbol, end_date, type: str= 'xgb'):
         res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(
             symbol=_symbol, market_type="cn", start_date="2020-01-01"
         )
@@ -74,10 +76,12 @@ class DataPreProcessing(object):
         chan_data.gen_data_frame()
         chan_data.get_plot_data_frame()
 
-        self.bfg.set_base_data(chan_data)
-
-        return self.bfg.get_feature()
-
+        if 'deep' == type:
+            self.deep_feature_gen.set_base_data(chan_data)
+            return self.deep_feature_gen.get_bi_sequence_feature()
+        else:
+            self.bfg.set_base_data(chan_data)
+            return self.bfg.get_feature()
    
     def get_label(
         self,
@@ -86,6 +90,7 @@ class DataPreProcessing(object):
         start_date: str = None,
         cnt_limit_start: int = None,
         cnt_limit_end: int = None,
+        feature_type:str = 'xgb'
     ):
         week_data = symbols[cnt_limit_start:cnt_limit_end]
         week_data["week"] = week_data.apply(
@@ -103,7 +108,7 @@ class DataPreProcessing(object):
 
         # 过滤没有标签的数据
         week_data = week_data[week_data["week_data_shape"] >= 1]
-        week_data['week_data_start_date'] = week_data.apply(lambda row:row['week'].index[-1], axis=1)
+        week_data['week_data_start_date'] = week_data.apply(lambda row: row['week'].index[-1], axis=1)
         # print(week_data)
 
         # week_data_start_date_cnt = week_data.groupby(['week_data_start_date']).size()
@@ -138,18 +143,18 @@ class DataPreProcessing(object):
             lambda row: _set_label(row["ratio"]), axis=1
         )
         week_data["features"] = week_data.apply(
-            lambda row: self.from_symbol_to_feature(row["symbol"], row['week_data_start_date']), axis=1
+            lambda row: self.from_symbol_to_feature(row["symbol"], row['week_data_start_date'], feature_type), axis=1
         )
 
         # week_data = week_data[week_data['features'] is not None]
 
         # 10 + 10 + 13
         #
-        for idx in range(0, self.feature_size):
-            week_data["feature_{}".format(idx)] = week_data.apply(
-                lambda row: row["features"][idx], axis=1
-            )
-
+        if 'xgb' == feature_type:
+            for idx in range(0, self.feature_size):
+                week_data["feature_{}".format(idx)] = week_data.apply(
+                    lambda row: row["features"][idx], axis=1
+                )
         # week_data.drop(['features'], axis=1, inplace=True)
 
         null_data = week_data[week_data.isnull().T.any()]

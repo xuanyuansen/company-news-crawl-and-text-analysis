@@ -55,11 +55,14 @@ class DeepFeatureGen(BaseFeatureGen):
         # print('sub_his_sequence', sub_his_sequence)
         # print('sub_macd_sequence', sub_macd_sequence)
 
-
-        return list(zip(ding_di_sequence, length_sequence, angle_sequence, volume_sequence, sub_his_sequence, sub_macd_sequence))
+        feature =list(zip(ding_di_sequence, length_sequence, angle_sequence, volume_sequence, sub_his_sequence, sub_macd_sequence))
+        return [list(ele) for ele in feature]
 
     def get_sequence_feature(self):
         return self.__get_feature(self.data.get_bi_list()), self.__get_feature(self.data.merged_chan_line_list)
+
+    def get_bi_sequence_feature(self):
+        return self.__get_feature(self.data.get_bi_list())
 
     def get_zhong_shu_feature_sequence(self):
         if len(self.data.zhong_shu_list) < 0:

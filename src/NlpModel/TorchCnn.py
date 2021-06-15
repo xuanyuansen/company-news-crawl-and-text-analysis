@@ -8,19 +8,16 @@ import sys
 from torchtext.experimental.datasets import text_classification
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
-from torchtext.data.utils import get_tokenizer
-from torchtext.data.utils import ngrams_iterator
-
 r"""
-The model is composed of the embeddingbag layer and the linear layer.
-nn.EmbeddingBag computes the mean of 'bags' of embeddings. The text
-entries here have different lengths. nn.EmbeddingBag requires no
+The model is composed of the embedding bag layer and the linear layer.
+nn.EmbeddingBag computes the mean of 'bags' of embeddings.
+
+The text entries here have different lengths. nn.EmbeddingBag requires no
 padding because the lengths of sentences are saved in offsets.
-Therefore, this method is much faster than the original one
-with TorchText Iterator and Batch.
+Therefore, this method is much faster than the original one with TorchText Iterator and Batch.
+
 Additionally, since it accumulates the average across the embeddings on the fly,
-nn.EmbeddingBag can enhance the performance and memory efficiency
-to process a sequence of tensors.
+nn.EmbeddingBag can enhance the performance and memory efficiency to process a sequence of tensors.
 """
 
 
@@ -47,46 +44,6 @@ class TextSentiment(nn.Module):
         return self.fc(self.embedding(text, offsets))
 
 
-def predict(text, model, dictionary, ngrams):
-    r"""
-    The predict() function here is used to test the model on a sample text.
-    The input text is numericalized with the vocab and then sent to
-    the model for inference.
-    Args:
-        text: a sample text string
-        model: the trained model
-        dictionary: a vocab object for the information of string-to-index
-        ngrams: the number of ngrams.
-    """
-    tokenizer = get_tokenizer("basic_english")
-    with torch.no_grad():
-        text = torch.tensor(
-            [dictionary[token] for token in ngrams_iterator(tokenizer(text), ngrams)]
-        )
-        output = model(text, torch.tensor([0]))
-        return output.argmax(1).item() + 1
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Predict text from stdin given model and dictionary"
-    )
-    parser.add_argument("model", help="the path for model")
-    parser.add_argument("dictionary", help="the path for dictionary")
-    parser.add_argument("--ngrams", type=int, default=2, help="ngrams (default=2)")
-    args = parser.parse_args()
-
-    model = torch.load(args.model)
-    dictionary = torch.load(args.dictionary)
-    for line in sys.stdin:
-        print(predict(line, model, dictionary, args.ngrams))
-
-
-r"""
-This file shows the training process of the text classification model.
-"""
-
-
 def generate_batch(batch):
     r"""
     Since the text entries have different lengths, a custom function
@@ -95,6 +52,7 @@ def generate_batch(batch):
     to 'collate_fn' in torch.utils.data.DataLoader. The input to
     'collate_fn' is a list of tensors with the size of batch_size,
     and the 'collate_fn' function packs them into a mini-batch.
+    #############################################################
     Pay attention here and make sure that 'collate_fn' is declared
     as a top level def. This ensures that the function is available
     in each worker.
@@ -154,9 +112,12 @@ def train_and_valid(lr_, sub_train_, sub_valid_):
             processed_lines = i + len(train_data) * epoch
             progress = processed_lines / float(num_lines)
             if processed_lines % 128 == 0:
+                print(type(text))
+                print(type(offsets))
+                print(type(cls))
                 sys.stderr.write(
-                    "\rProgress: {:3.0f}% lr: {:3.3f} loss: {:3.3f}".format(
-                        progress * 100, scheduler.get_lr()[0], loss
+                    "\rProgress: {:3.0f}% lr: {:3.3f} loss: {:3.3f}, latest lr {:3.3f}".format(
+                        progress * 100, scheduler.get_lr()[0], loss, scheduler.get_last_lr()[0]
                     )
                 )
         # Adjust the learning rate
@@ -216,7 +177,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--ngrams", type=int, default=2, help="ngrams (default=2)")
     parser.add_argument(
-        "--num-workers", type=int, default=1, help="num of workers (default=1)"
+        "--num-workers", type=int, default=0, help="num of workers (default=1)"
     )
     parser.add_argument("--device", default="cpu", help="device (default=cpu)")
     parser.add_argument(
@@ -248,7 +209,7 @@ if __name__ == "__main__":
     device = args.device
     data = args.data
     split_ratio = args.split_ratio
-    # two args for sentencepiece tokenizer
+    # two args for sentence piece tokenizer
     use_sp_tokenizer = args.use_sp_tokenizer
     sp_vocab_size = args.sp_vocab_size
 

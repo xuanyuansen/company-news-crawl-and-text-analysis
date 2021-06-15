@@ -16,6 +16,13 @@ from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
 from Surpriver import feature_generator
+import torch
+import numpy as np
+from NlpModel.ChanBasedCnn import RNN, train_rnn, random_training_example, category_from_output
+import time
+import math
+import random
+from data_pre_processing import DataPreProcessing
 
 
 if __name__ == "__main__":
@@ -23,7 +30,7 @@ if __name__ == "__main__":
     print(today_date)
     price_spider = StockInfoSpyder()
 
-    res, stock_data = price_spider.get_daily_price_data_of_specific_stock(symbol=sys.argv[1],
+    _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(symbol=sys.argv[1],
                                                                           market_type='cn',
                                                                           start_date=sys.argv[2])
     # print(stock_data[:10])
@@ -54,35 +61,79 @@ if __name__ == "__main__":
     print('zhong shu feature')
     print(dedp_fea_gen.get_zhong_shu_feature_sequence())
 
-    # dynamic = chan_data.histogram
-    #
-    # zhong_shu_list = chan_data.get_zhong_shu_list()
+    ##################
+    set_display()
+    data_prepare = DataPreProcessing(feature_size=38)
+    symbol_data = data_prepare.get_symbols("cn")
 
-    # if len(zhong_shu_list) > 0:
-    #     zhong_shu = zhong_shu_list[0]
-    #     print('start idx {} end idx {}'.format(zhong_shu.start_index, zhong_shu.end_index))
-    #     print('ratio {}, last day {}'.format(zhong_shu.zhong_shu_strength_ratio,
-    #                                          zhong_shu.zhong_shu_time_strength_length))
-    #
-    #     sub_dynamic = dynamic[zhong_shu.start_index: zhong_shu.end_index]
-    #     sub_macd = chan_data.macd[zhong_shu.start_index: zhong_shu.end_index]
-    #     print('zhong shu length is {}, variance is {}, macd var is {}'.format(sub_dynamic.shape[0],
-    #                                                                           sub_dynamic.var(),
-    #                                                                           sub_macd.var()))
-    # else:
-    #     xian_duan_list = chan_data.merged_chan_line_list if len(chan_data.merged_chan_line_list) > 0 \
-    #         else chan_data.origin_chan_line_list
-    #     if len(xian_duan_list) > 0:
-    #         start_index = xian_duan_list[0].get_start_index()
-    #         end_index = xian_duan_list[-1].get_end_index()
-    #         sub_dynamic = dynamic[start_index: end_index]
-    #         sub_macd = chan_data.macd[start_index: end_index]
-    #         print('xian duan length is {}, variance is {}, macd var is {}'.format(sub_dynamic.shape[0],
-    #                                                                               sub_dynamic.var(),
-    #                                                                               sub_macd.var()))
-    #
-    plot_with_mlf_v2(
-        chan_data, "{0},{1},{2}".format(sys.argv[1], sys.argv[1], "daily"), today_date
+    data_set, label_sum = data_prepare.get_label(
+        symbols=symbol_data, market_type="cn",
+        start_date="2021-06-01", cnt_limit_start=0, cnt_limit_end=5,
+        feature_type = 'deep'
     )
+    label_set = data_set["label"]
+
+    data_cnt = data_set.shape[0]
+
+    n_hidden = 128
+    n_categories = 4
+    bi_feature_list = res[0]
+    rnn = RNN(len(bi_feature_list[0]), n_hidden, n_categories)
+
+    _tensor = torch.zeros(1, len(bi_feature_list[0]))
+    _tensor[0] = torch.from_numpy(np.array(bi_feature_list[0]))
+    _input = _tensor
+    print(_input)
+    hidden = torch.zeros(1, n_hidden)
+
+    output, next_hidden = rnn(_input, hidden)
+    print('output', output)
+    print('next_hidden', next_hidden)
+
+    n_iters = 100000
+    print_every = 5000
+    plot_every = 1000
+
+    # Keep track of losses for plotting
+    current_loss = 0
+    all_losses = []
+    print(data_set)
+    def timeSince(since):
+        now = time.time()
+        s = now - since
+        m = math.floor(s / 60)
+        s -= m * 60
+        return '%dm %ds' % (m, s)
+
+    start = time.time()
+    for iter in range(1, n_iters + 1):
+        data_idx = random.randint(0, data_cnt-1)
+        _data = data_set.loc[data_idx, ['features']].values.tolist()[0]
+        # print(type(_data), _data)
+        _label = data_set.loc[data_idx, ['label']].values.tolist()[0]
+        # print(type(_label), _label)
+        category, category_tensor, line_tensor = random_training_example(_data, _label)
+
+        # print(line_tensor.size())
+        # print("category_tensor size {} ".format(category_tensor.size()))
+
+        output, loss = train_rnn(rnn, category_tensor, line_tensor)
+        current_loss += loss
+
+        # Print iter number, loss, name and guess
+        if iter % print_every == 0:
+            guess, guess_i = category_from_output(output)
+            correct = '✓' if guess == category else '✗ (%s)' % category
+            print('%d %d%% (%s) %.4f %s / %s %s' % (
+            iter, iter / n_iters * 100, timeSince(start), loss, 0, guess, correct))
+
+        # Add current loss avg to list of losses
+        if iter % plot_every == 0:
+            all_losses.append(current_loss / plot_every)
+            current_loss = 0
+
+    # plot_with_mlf_v2(
+    #     chan_data, "{0},{1},{2}".format(sys.argv[1], sys.argv[1], "daily"), today_date
+    # )
     print('print done!')
     pass
