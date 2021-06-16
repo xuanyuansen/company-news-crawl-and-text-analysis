@@ -55,8 +55,8 @@ if __name__ == "__main__":
         symbols=symbol_data,
         market_type="cn",
         start_date="2021-06-01",
-        cnt_limit_start=0,
-        cnt_limit_end=100,
+        cnt_limit_start=args.cnt_limit_start,
+        cnt_limit_end=args.cnt_limit_end,
         feature_type="deep",
     )
     label_set = data_set["label"]
