@@ -152,7 +152,7 @@ class DataPreProcessing(object):
         )
 
         # week_data = week_data[week_data["features"] is not None]
-
+        week_data.dropna(axis=0, how='any', inplace=True)
         # 10 + 10 + 13
         #
         if "xgb" == feature_type:

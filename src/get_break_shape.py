@@ -78,7 +78,7 @@ if __name__ == "__main__":
         symbols=symbol_data,
         market_type="cn",
         start_date="2021-06-01",
-        cnt_limit_start=0,
+        # cnt_limit_start=4100,
         # cnt_limit_end=10,
         feature_type="deep",
     )
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     n_iters = 100000
     print_every = 100
-    plot_every = 1000
+    plot_every = 2000
 
     # Keep track of losses for plotting
     current_loss = 0
@@ -116,11 +116,16 @@ if __name__ == "__main__":
         m = math.floor(s / 60)
         s -= m * 60
         return "%dm %ds" % (m, s)
-
+    _data_index =data_set.index
+    _data_index_min =  _data_index.min()
+    _data_index_max =  _data_index.max()
     start = time.time()
     for iter in range(1, n_iters + 1):
-        data_idx = random.randint(0, data_cnt - 1)
-        _data = data_set.loc[data_idx, ["features"]].values.tolist()[0]
+        data_idx = random.randint(_data_index_min, _data_index_max)
+        try:
+            _data = data_set.loc[data_idx, ["features"]].values.tolist()[0]
+        except:
+            continue
         # print(type(_data), _data)
         _label = data_set.loc[data_idx, ["label"]].values.tolist()[0]
 
@@ -148,7 +153,7 @@ if __name__ == "__main__":
                     iter / n_iters * 100,
                     timeSince(start),
                     loss,
-                    0,
+                    guess_i,
                     guess,
                     correct,
                 )

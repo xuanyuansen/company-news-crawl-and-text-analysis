@@ -30,7 +30,7 @@ class DeepFeatureGen(BaseFeatureGen):
     # 后三个序列， volume ， hist， macd
     def __get_feature(self, _data: list[ChanLine]):
         if len(_data) <= 1:
-            return None
+            return np.nan
         ding_di_sequence = [
             1.0 if "up" == element.direction else 0.0 for element in _data
         ]
