@@ -131,13 +131,13 @@ class TextCNN(nn.Module):
         # self.embed = nn.Embedding(vocab, dim)  # 词向量，这里直接随机
         # 这里改用 nn.EmbeddingBag 就不用padding
         # self.embedding = nn.EmbeddingBag(vocab, dim, sparse=True)
-        self.fc_base = nn.Linear(vocab, dim)
+        self.fc_base = nn.Linear(vocab, dim).to(device)
 
         self.convolutions = nn.ModuleList(
             [nn.Conv2d(channel, kernel_num, (K, dim)) for K in Ks]
-        )  # 卷积层
-        self.dropout = nn.Dropout(args.dropout)
-        self.fc = nn.Linear(len(Ks) * kernel_num, class_num)  # 全连接层
+        ).to(device)  # 卷积层
+        self.dropout = nn.Dropout(args.dropout).to(device)
+        self.fc = nn.Linear(len(Ks) * kernel_num, class_num).to(device)  # 全连接层
         self.init_weights()
 
     def init_weights(self):
@@ -203,6 +203,8 @@ def evaluate(data_iter: Dataset, model):
         try:
             # 获得下一个值:
             feature, target = next(it)
+            feature = feature.cuda()
+            target = target.cuda()
 
             # feature, target = batch.text, batch.label
             # feature.data.t_()
@@ -259,6 +261,8 @@ def train(train_data_set, eval_data_set, batch_size, model: TextCNN, args):
                 feature, target = next(it)  # (W,N) (N)
 
                 # feature.data.t_()
+                feature = feature.cuda()
+                target = target.cuda()
 
                 optimizer.zero_grad()
                 logit = model(feature)

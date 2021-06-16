@@ -69,5 +69,5 @@ if __name__ == "__main__":
     test_data_set = CustomChanDataset(X_test, y_test, max_feature_length)
 
     text_cnn = TextCNN(args=args, max_feature_length=max_feature_length)
-    train(train_data_set, test_data_set, batch_size=10, model=text_cnn, args=args)
+    train(train_data_set, test_data_set, batch_size=args.batch_size, model=text_cnn, args=args)
     pass
