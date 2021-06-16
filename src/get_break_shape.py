@@ -74,7 +74,7 @@ if __name__ == "__main__":
     data_prepare = DataPreProcessing(feature_size=38)
     symbol_data = data_prepare.get_symbols("cn")
 
-    data_set, label_sum = data_prepare.get_label(
+    data_set, label_sum, _ = data_prepare.get_label(
         symbols=symbol_data,
         market_type="cn",
         start_date="2021-06-01",
@@ -116,9 +116,10 @@ if __name__ == "__main__":
         m = math.floor(s / 60)
         s -= m * 60
         return "%dm %ds" % (m, s)
-    _data_index =data_set.index
-    _data_index_min =  _data_index.min()
-    _data_index_max =  _data_index.max()
+
+    _data_index = data_set.index
+    _data_index_min = _data_index.min()
+    _data_index_max = _data_index.max()
     start = time.time()
     for iter in range(1, n_iters + 1):
         data_idx = random.randint(_data_index_min, _data_index_max)
@@ -163,7 +164,6 @@ if __name__ == "__main__":
         if iter % plot_every == 0:
             all_losses.append(current_loss / plot_every)
             current_loss = 0
-
 
     print("print done!")
     pass

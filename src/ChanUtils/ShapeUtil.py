@@ -1634,7 +1634,7 @@ def plot_with_mlf_v2(
         ylabel_lower="Volume",
         xrotation=10,
         block=True,
-        savefig='pic.png'
+        savefig="pic.png",
     )
 
 

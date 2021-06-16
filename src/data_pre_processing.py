@@ -1,4 +1,6 @@
 # 用于数据预处理
+import os
+
 from Utils import config
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 import pandas as pd
@@ -91,7 +93,19 @@ class DataPreProcessing(object):
         cnt_limit_start: int = None,
         cnt_limit_end: int = None,
         feature_type: str = "xgb",
+        save_feature: bool = True,
     ):
+        file_path = os.getcwd()
+        file = "{}/{}".format(
+            file_path, "feature_file_{}.dataframe".format(feature_type)
+        )
+        if os.path.exists(file):
+            with open(file, "rb") as _file:
+                week_data = pickle.load(_file)
+                label_cnt = week_data.groupby(["label"]).size()
+                print(label_cnt)
+                return week_data, label_cnt, week_data["feature_length"].max()
+
         week_data = symbols[cnt_limit_start:cnt_limit_end]
         week_data["week"] = week_data.apply(
             lambda row: self.price_spider.get_week_data_stock(
@@ -150,9 +164,11 @@ class DataPreProcessing(object):
             ),
             axis=1,
         )
-
-        # week_data = week_data[week_data["features"] is not None]
-        week_data.dropna(axis=0, how='any', inplace=True)
+        week_data["feature_length"] = week_data.apply(
+            lambda row: len(row["features"]), axis=1
+        )
+        week_data = week_data[week_data["feature_length"] > 0]
+        week_data.dropna(axis=0, how="any", inplace=True)
         # 10 + 10 + 13
         #
         if "xgb" == feature_type:
@@ -171,7 +187,11 @@ class DataPreProcessing(object):
         label_cnt = week_data.groupby(["label"]).size()
         print(label_cnt)
 
-        return week_data, label_cnt
+        if save_feature:
+            with open("feature_file_{}.dataframe".format(feature_type), "wb") as _file:
+                pickle.dump(week_data, _file)
+
+        return week_data, label_cnt, week_data["feature_length"].max()
 
     pass
 
@@ -181,7 +201,7 @@ if __name__ == "__main__":
     dpp = DataPreProcessing(feature_size=38)
     symbol_data = dpp.get_symbols("cn")
 
-    data_set, label_sum = dpp.get_label(
+    data_set, label_sum, _ = dpp.get_label(
         symbols=symbol_data,
         market_type="cn",
         start_date="2021-06-01",
