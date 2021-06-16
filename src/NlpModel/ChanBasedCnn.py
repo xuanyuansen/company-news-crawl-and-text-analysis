@@ -57,19 +57,21 @@ def random_training_example(data: list[list], label):
 
 def category_from_output(output):
     top_n, top_i = output.topk(1)
+    print(top_n)
+    print(top_i)
     category_i = top_i[0].item()
     return category_i, category_i
 
 
 def train_rnn(rnn: RNN, category_tensor, line_tensor):
-    learning_rate = 0.005  # If you set this too high, it might explode. If too low, it might not learn
+    learning_rate = 0.001  # If you set this too high, it might explode. If too low, it might not learn
     hidden = rnn.initHidden()
 
     rnn.zero_grad()
 
     for i in range(line_tensor.size()[0]):
         output, hidden = rnn(line_tensor[i], hidden)
-
+    # print('output', output)
     criterion = nn.NLLLoss()
     loss = criterion(output, category_tensor)
     loss.backward()

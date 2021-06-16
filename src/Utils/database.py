@@ -145,8 +145,8 @@ class Database(object):
                 return None
             else:
                 logging.info(
-                    "query done! {0} data {1} data length is {2}".format(
-                        query, data, data_length
+                    "{0} query done! {1} data {2} data length is {3}".format(
+                        collection_name, query, data, data_length
                     )
                 )
             data_keys = list(

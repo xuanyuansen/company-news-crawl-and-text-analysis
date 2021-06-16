@@ -47,6 +47,10 @@ if __name__ == "__main__":
     chan_data = ChanSourceDataObject("daily", k_line_data)
     chan_data.gen_data_frame()
     _stock_data = chan_data.get_plot_data_frame()
+
+    plot_with_mlf_v2(
+        chan_data, "{0},{1},{2}".format(sys.argv[1], sys.argv[1], "daily"), today_date
+    )
     # print(_stock_data[:10])
     # fEngine = feature_generator.TAEngine(history_to_use=0)
     # feature_dict = fEngine.get_technical_indicators(_stock_data)
@@ -75,7 +79,7 @@ if __name__ == "__main__":
         market_type="cn",
         start_date="2021-06-01",
         cnt_limit_start=0,
-        cnt_limit_end=3000,
+        # cnt_limit_end=10,
         feature_type="deep",
     )
     label_set = data_set["label"]
@@ -98,7 +102,7 @@ if __name__ == "__main__":
     print("next_hidden", next_hidden)
 
     n_iters = 100000
-    print_every = 5000
+    print_every = 100
     plot_every = 1000
 
     # Keep track of losses for plotting
@@ -119,7 +123,7 @@ if __name__ == "__main__":
         _data = data_set.loc[data_idx, ["features"]].values.tolist()[0]
         # print(type(_data), _data)
         _label = data_set.loc[data_idx, ["label"]].values.tolist()[0]
-        # print(type(_label), _label)
+
         category, category_tensor, line_tensor = random_training_example(_data, _label)
 
         # print(line_tensor.size())
@@ -130,10 +134,15 @@ if __name__ == "__main__":
 
         # Print iter number, loss, name and guess
         if iter % print_every == 0:
+            print("output", output)
+            print("loss", loss)
+            # print("line_tensor", line_tensor)
+            print("label", type(_label), _label)
+            print("category_tensor", type(category_tensor), category_tensor)
             guess, guess_i = category_from_output(output)
             correct = "✓" if guess == category else "✗ (%s)" % category
             logging.info(
-                "%d %d%% (%s) %.4f %s / %s %s"
+                "%d %d %% (%s) %.4f %s / %s %s"
                 % (
                     iter,
                     iter / n_iters * 100,
@@ -150,8 +159,6 @@ if __name__ == "__main__":
             all_losses.append(current_loss / plot_every)
             current_loss = 0
 
-    # plot_with_mlf_v2(
-    #     chan_data, "{0},{1},{2}".format(sys.argv[1], sys.argv[1], "daily"), today_date
-    # )
+
     print("print done!")
     pass

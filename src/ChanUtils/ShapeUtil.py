@@ -1633,6 +1633,8 @@ def plot_with_mlf_v2(
         ylabel="Price",
         ylabel_lower="Volume",
         xrotation=10,
+        block=True,
+        savefig='pic.png'
     )
 
 
