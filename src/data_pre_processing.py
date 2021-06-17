@@ -11,6 +11,7 @@ from ChanUtils.ShapeUtil import ChanSourceDataObject
 from ChanUtils.ChanFeature import BasicFeatureGen, DeepFeatureGen
 import xgboost as xgb
 from xgboost import XGBClassifier
+import lightgbm as lgb
 from sklearn.metrics import accuracy_score
 from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestClassifier
@@ -34,7 +35,7 @@ class DataPreProcessing(object):
                 config.STOCK_DATABASE_NAME,
                 config.COLLECTION_NAME_STOCK_BASIC_INFO,
                 query={"end_date": {"$gt": datetime(2021, 1, 1, 0, 0, 0, 000000)}},
-                keys=["symbol", "name", "end_date"],
+                keys=["symbol", "name", "end_date", "concept", "industry"],
             )
         elif "hk" == market_type:
             data = self.db.get_data(
@@ -57,7 +58,7 @@ class DataPreProcessing(object):
         return data
 
     # 加入end_date过滤数据，不能有未来数据！！！
-    def from_symbol_to_feature(self, _symbol, end_date, type: str = "xgb"):
+    def from_symbol_to_feature(self, _symbol, end_date, industry, concepts, f_type: str = "xgb"):
         res, stock_data = self.price_spider.get_daily_price_data_of_specific_stock(
             symbol=_symbol, market_type="cn", start_date="2020-01-01"
         )
@@ -78,9 +79,9 @@ class DataPreProcessing(object):
         chan_data.gen_data_frame()
         chan_data.get_plot_data_frame()
 
-        if "deep" == type:
+        if "deep" == f_type:
             self.deep_feature_gen.set_base_data(chan_data)
-            return self.deep_feature_gen.get_bi_sequence_feature()
+            return self.deep_feature_gen.get_deep_sequence_feature(industry, concepts)
         else:
             self.bfg.set_base_data(chan_data)
             return self.bfg.get_feature()
@@ -94,17 +95,19 @@ class DataPreProcessing(object):
         cnt_limit_end: int = None,
         feature_type: str = "xgb",
         save_feature: bool = True,
+        force_update_feature: bool = False,
     ):
         file_path = os.getcwd()
         file = "{}/{}".format(
             file_path, "feature_file_{}.dataframe".format(feature_type)
         )
-        if os.path.exists(file):
-            with open(file, "rb") as _file:
-                week_data = pickle.load(_file)
-                label_cnt = week_data.groupby(["label"]).size()
-                print(label_cnt)
-                return week_data, label_cnt, week_data["feature_length"].max()
+        if not force_update_feature:
+            if os.path.exists(file):
+                with open(file, "rb") as _file:
+                    week_data = pickle.load(_file)
+                    label_cnt = week_data.groupby(["label"]).size()
+                    print(label_cnt)
+                    return week_data, label_cnt, week_data["feature_length"].max()
 
         week_data = symbols[cnt_limit_start:cnt_limit_end]
         week_data["week"] = week_data.apply(
@@ -160,12 +163,12 @@ class DataPreProcessing(object):
         )
         week_data["features"] = week_data.apply(
             lambda row: self.from_symbol_to_feature(
-                row["symbol"], row["week_data_start_date"], feature_type
+                row["symbol"], row["week_data_start_date"], row["industry"], row["concept"], feature_type
             ),
             axis=1,
         )
         week_data["feature_length"] = week_data.apply(
-            lambda row: len(row["features"]), axis=1
+            lambda row: len(row["features"][0]), axis=1
         )
         week_data = week_data[week_data["feature_length"] > 0]
         week_data.dropna(axis=0, how="any", inplace=True)
@@ -174,7 +177,7 @@ class DataPreProcessing(object):
         if "xgb" == feature_type:
             for idx in range(0, self.feature_size):
                 week_data["feature_{}".format(idx)] = week_data.apply(
-                    lambda row: row["features"][idx], axis=1
+                    lambda row: row["features"][0][idx], axis=1
                 )
         # week_data.drop(['features'], axis=1, inplace=True)
 
@@ -260,4 +263,18 @@ if __name__ == "__main__":
     score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring="accuracy")
     print(score)
     print(score.mean())
+    lgb_model = lgb.LGBMClassifier(
+        num_leaves=512,
+        n_estimators=800,
+        max_depth=12,
+        subsample=0.85,
+        colsample_bytree=0.85,
+        learning_rate=0.05,
+        # class_weight={0: 1, 1: 5},
+        n_jobs=20,
+        reg_alpha=0.1,
+        reg_lambda=0.1,
+        random_state=42)
+    lgb_model.fit(X_train, y_train)
+    predict_probability = lgb_model.predict_proba(X_test)
     pass

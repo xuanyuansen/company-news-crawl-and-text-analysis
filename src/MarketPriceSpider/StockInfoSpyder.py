@@ -50,10 +50,88 @@ class StockInfoSpyder(Spyder):
             self.database_name_us, self.collection_name_us_zh
         )
 
+        self.cn_industry_file = config.CN_STOCK_INDUSTRY_DICT_FILE
+        self.cn_concept_file = config.CN_STOCK_CONCEPT_DICT_FILE
+
         if joint_quant_on:
             self.joint_quant_tool = JointQuantTool()
         else:
             self.joint_quant_tool = None
+
+    def gen_cn_stock_embedding_file(self):
+        c_data = ak.stock_fund_flow_concept(symbol="3日排行")
+        with open(self.cn_concept_file, 'w') as concept_file:
+            content = []
+            for index, row in c_data.iterrows():
+                content.append(row['行业'])
+            concept_file.writelines('\n'.join(content))
+
+        i_data = ak.stock_fund_flow_industry(symbol="3日排行")
+        with open(self.cn_industry_file, 'w') as industry_file:
+            content = []
+            for index, row in i_data.iterrows():
+                content.append(row['行业'])
+            industry_file.writelines('\n'.join(content))
+        return True
+
+    # 获取股票所属的概念，可能有多个概念，所以用List存储
+    def update_stock_concept(self):
+        data = ak.stock_fund_flow_concept(symbol="3日排行")
+        print(data[:100])
+        for index, row in data.iterrows():
+            self.logger.info(index)
+            self.logger.info('\n {}'.format(row))
+            try:
+                detail = ak.stock_board_concept_cons_ths(symbol=row['行业'])  # 同花顺-成份股
+                for sub_index, sub_row in detail.iterrows():
+                    _data: dict = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
+                    if _data.get('concept') is None:
+                        insert = True
+                        new_concept = row['行业']
+                    else:
+                        _concept = _data['concept'].split(',')
+                        if row['行业'] in _concept:
+                            insert = False
+                            new_concept = _data['concept']
+                        else:
+                            insert = True
+                            _concept.append(row['行业'])
+                            new_concept = ','.join(_concept)
+
+                    if insert:       # _data['concept'] = ','.join(_concept)
+                        res = self.col_basic_info_cn.update_one(
+                            {"_id": _data['_id']}, {"$set": {"concept": new_concept}}
+                        )
+                        self.logger.info('modify count {}'.format(res.modified_count))
+                        new_data: dict = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
+                        self.logger.info(new_data)
+            except Exception as e:
+                self.logger.error(e)
+                continue
+
+        return True
+
+    def update_stock_industry(self):
+        data = ak.stock_fund_flow_industry(symbol="3日排行")
+        print(data[:100])
+
+        for index, row in data.iterrows():
+            self.logger.info(index)
+            self.logger.info(row)
+            detail = ak.stock_board_industry_cons_ths(symbol=row['行业'])
+            # print(detail)
+            for sub_index, sub_row in detail.iterrows():
+                res = self.db_obj.update_row(self.database_name_cn,
+                                             self.collection_name_cn,
+                                             query={'code': sub_row['代码']},
+                                             new_values={'industry': row['行业']})
+                self.logger.info('{} {}'.format(res.modified_count, res.upserted_id))
+                # find_res = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
+                # print(find_res)
+
+        self.logger.info('update industry done!')
+
+        return True
 
     def update_cn_stock_money_column_using_joint_quant(self):
         sd = today_date.split("-")
@@ -673,3 +751,10 @@ class StockInfoSpyder(Spyder):
                         symbol, time_now.split(" ")[0]
                     )
                 )
+
+
+if __name__ == "__main__":
+    spider = StockInfoSpyder(joint_quant_on=False)
+    # spider.update_stock_industry()
+    spider.update_stock_concept()
+    pass

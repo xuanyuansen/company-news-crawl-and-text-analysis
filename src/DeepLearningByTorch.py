@@ -38,7 +38,8 @@ def gen_parser():
     parser.add_argument("--early_stop", default=10000, help="early_stop")
     parser.add_argument("--batch_size", default=64, help="batch_size")
     parser.add_argument("--cnt_limit_start", default=0, help="cnt_limit_start")
-    parser.add_argument("--cnt_limit_end", default=None, help="cnt_limit_end")
+    parser.add_argument("--cnt_limit_end", default=20, help="cnt_limit_end")
+    parser.add_argument("--force_update_feature", default=False, help="force_update_feature")
 
     _args = parser.parse_args()
     return _args
@@ -58,9 +59,10 @@ if __name__ == "__main__":
         cnt_limit_start=args.cnt_limit_start,
         cnt_limit_end=args.cnt_limit_end,
         feature_type="deep",
+        force_update_feature=args.force_update_feature,
     )
     label_set = data_set["label"]
-
+    print('max_feature_length {}'.format(max_feature_length))
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         data_set, label_set, test_size=0.33, random_state=42
     )
@@ -68,6 +70,9 @@ if __name__ == "__main__":
     train_data_set = CustomChanDataset(X_train, y_train, max_feature_length)
     test_data_set = CustomChanDataset(X_test, y_test, max_feature_length)
 
-    text_cnn = TextCNN(args=args, max_feature_length=max_feature_length)
+    text_cnn = TextCNN(args=args,
+                       max_feature_length=max_feature_length,
+                       vocab_industry=dpp.deep_feature_gen.industry_vocab_dim,
+                       vocab_concept=dpp.deep_feature_gen.concept_vocab_dim)
     train(train_data_set, test_data_set, batch_size=args.batch_size, model=text_cnn, args=args)
     pass

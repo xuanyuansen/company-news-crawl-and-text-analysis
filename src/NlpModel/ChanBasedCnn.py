@@ -96,33 +96,46 @@ class CustomChanDataset(Dataset):
     def __len__(self):
         return self.feature_data.shape[0]
 
+    # 这个地方做了补零
     def __getitem__(self, idx):
         origin_idx = self.idx_list[idx]
         # img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        feature = self.feature_data.loc[origin_idx, ["features"]].values.tolist()[0]
+        raw_feature = self.feature_data.loc[origin_idx, ["features"]].values.tolist()[0]
+        # print(raw_feature)
+        feature = raw_feature[0]
+        # print("feature 0 {} ".format(feature))
+        industry_feature = raw_feature[1]
+        # print("industry_feature  {} ".format(industry_feature))
+        concept_feature = raw_feature[2]
+        # print("concept_feature {} ".format(concept_feature))
+
+        tensor_industry = torch.from_numpy(np.array(industry_feature)).to(device)
+        tensor_concept = torch.from_numpy(np.array(concept_feature)).to(device)
+
         # feature list[list]
         tensor_feature: torch.Tensor = torch.zeros(
-            self.max_feature_length, len(feature[0])
+             self.max_feature_length, len(feature[0])
         )
 
+        print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):
             gap = self.max_feature_length - len(feature)
-            tensor_feature[idx + gap] = torch.from_numpy(np.array(feature[idx])).to(
-                device
-            )
+            tensor_feature[idx+gap] = torch.from_numpy(np.array(feature[idx]))
 
+        print(tensor_feature.shape)
+        print(tensor_feature.t().shape)
         label = self.label.loc[origin_idx]
         label_tensor = torch.tensor(label, dtype=torch.long).to(device)
-        return tensor_feature.t(), label_tensor
+        return (tensor_feature.t().to(device), tensor_industry, tensor_concept), label_tensor
 
 
 class TextCNN(nn.Module):
-    def __init__(self, args, max_feature_length: int):
+    def __init__(self, args, max_feature_length: int, vocab_industry: int, vocab_concept: int):
         super(TextCNN, self).__init__()
         self.args = args
         # 对应vocab 就是sequence最大的长度 max_length
         # 输入就是 max_length*6
-        vocab = max_feature_length  # 已知词的数量
+        vocab = max_feature_length
         dim = args.embed_dim  # 每个词向量长度
         class_num = args.class_num  # 类别数
         channel = 1  # 输入的channel数
@@ -131,6 +144,8 @@ class TextCNN(nn.Module):
         # self.embed = nn.Embedding(vocab, dim)  # 词向量，这里直接随机
         # 这里改用 nn.EmbeddingBag 就不用padding
         # self.embedding = nn.EmbeddingBag(vocab, dim, sparse=True)
+        self.embedding_i = nn.Embedding(vocab_industry, dim, sparse=False).to(device)
+        self.embedding_c = nn.Embedding(vocab_concept, dim, sparse=False).to(device)
         self.fc_base = nn.Linear(vocab, dim).to(device)
 
         self.convolutions = nn.ModuleList(
@@ -142,16 +157,26 @@ class TextCNN(nn.Module):
 
     def init_weights(self):
         init_range = 0.5
-        # self.embedding.weight.data.uniform_(-init_range, init_range)
+        self.embedding_i.weight.data.uniform_(-init_range, init_range)
+        self.embedding_c.weight.data.uniform_(-init_range, init_range)
         self.fc.weight.data.uniform_(-init_range, init_range)
         self.fc.bias.data.zero_()
         self.fc_base.weight.data.uniform_(-init_range, init_range)
         self.fc_base.bias.data.zero_()
 
     # bi 对应的data是N*6的
-    def forward(self, x):
+    def forward(self, _input):
         # x = self.embed(x)  # (N,W,D)
-        x = self.fc_base(x)
+        # print("_input[0].shape {}".format(_input[0].shape))
+        # print("_input[1].shape {}".format(_input[1].shape))
+        # print("_input[2].shape {}".format(_input[2].shape))
+        x = self.fc_base(_input[0])
+        # print(x.shape)
+        em_industry = self.embedding_i(_input[1])
+        # print(em_industry.shape)
+        em_concept = self.embedding_c(_input[2])
+        # print(em_concept.shape)
+        x = torch.cat((x, em_industry, em_concept), dim=1)
         # Ex = self.embedding(x, offsets)
 
         x = x.unsqueeze(1)  # (N,Ci,W,D)
@@ -203,8 +228,9 @@ def evaluate(data_iter: Dataset, model):
         try:
             # 获得下一个值:
             feature, target = next(it)
-            feature = feature.cuda()
-            target = target.cuda()
+            if "cuda" == device:
+                feature = feature.cuda()
+                target = target.cuda()
 
             # feature, target = batch.text, batch.label
             # feature.data.t_()
@@ -259,10 +285,10 @@ def train(train_data_set, eval_data_set, batch_size, model: TextCNN, args):
             try:
                 # 获得下一个值:
                 feature, target = next(it)  # (W,N) (N)
-
                 # feature.data.t_()
-                feature = feature.cuda()
-                target = target.cuda()
+                if "cuda" == device:
+                    feature = feature.cuda()
+                    target = target.cuda()
 
                 optimizer.zero_grad()
                 logit = model(feature)

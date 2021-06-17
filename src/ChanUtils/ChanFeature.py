@@ -8,16 +8,46 @@ import numpy
 from ChanUtils.BasicUtil import ChanLine
 from ChanUtils.ShapeUtil import ChanSourceDataObject
 import numpy as np
+from Utils import config
 
 
 class BaseFeatureGen(object):
     def __init__(self, chan_data: ChanSourceDataObject = None):
         self.data: ChanSourceDataObject = chan_data
         self.base_length = 500  # 交易日的长度。后续这里要改为自动获取数据的最大长度。
+        self.code = None if chan_data is None else chan_data.k_line_list[0].code
+        self.concept_file = config.CN_STOCK_CONCEPT_DICT_FILE
+        self.industry_file = config.CN_STOCK_INDUSTRY_DICT_FILE
+        self.concept_list = self.__load_dict_file(self.concept_file)
+        self.industry_list = self.__load_dict_file(self.industry_file)
+        self.industry_to_index = {ch: i for i, ch in enumerate(self.industry_list)}
+        self.index_to_industry = {i: ch for i, ch in enumerate(self.industry_list)}
+        self.concept_to_index = {ch: i for i, ch in enumerate(self.concept_list)}
+        self.index_to_concept = {i: ch for i, ch in enumerate(self.concept_list)}
+        self.concept_vocab_dim = len(self.concept_list)
+        self.industry_vocab_dim = len(self.industry_list)
+
+    def from_industry_to_feature(self, industry: str):
+        a = [0 for _ in range(0, self.industry_vocab_dim)]
+        idx = self.industry_to_index[industry]
+        a[idx] = 1
+        return a
+
+    def from_concept_to_feature(self, concepts: str):
+        a = [0 for _ in range(0, self.concept_vocab_dim)]
+        for con in concepts.split(','):
+            idx = self.concept_to_index[con]
+            a[idx] = 1
+        return a
 
     def set_base_data(self, chan_data: ChanSourceDataObject):
         self.data = chan_data
+        self.code = self.data.k_line_list[0].code  # 获得代码用于获得行业和概念的embedding
 
+    @staticmethod
+    def __load_dict_file(file_name):
+        with open(file_name) as _file:
+            return [ele.strip() for ele in list(iter(_file.readlines()))]
     pass
 
 
@@ -109,8 +139,10 @@ class DeepFeatureGen(BaseFeatureGen):
             self.data.merged_chan_line_list
         )
 
-    def get_bi_sequence_feature(self):
-        return self.__get_feature(self.data.get_bi_list())
+    def get_deep_sequence_feature(self, industry, concepts):
+        return self.__get_feature(self.data.get_bi_list()), \
+               self.from_industry_to_feature(industry),\
+               self.from_concept_to_feature(concepts)
 
     def get_zhong_shu_feature_sequence(self):
         if len(self.data.zhong_shu_list) < 0:
@@ -217,7 +249,7 @@ class BasicFeatureGen(BaseFeatureGen):
                 direction_feature(self.data.get_bi_list()),
                 direction_feature(self.data.merged_chan_line_list),
             ]
-        )
+        ),[],[]
 
     # 13维
     @staticmethod
