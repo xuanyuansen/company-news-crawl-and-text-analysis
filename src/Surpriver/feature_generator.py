@@ -28,7 +28,7 @@ class TAEngine:
         )
         return slope, r_value, p_value
 
-    def get_technical_indicators(self, price_data):
+    def get_technical_indicators(self, price_data, upper_case: bool = True):
         """
         Given a pandas data frame with columns -> 'Open', 'High', 'Low', 'Close', 'Volume',
         extract different technical indicators and returns
@@ -40,7 +40,7 @@ class TAEngine:
         for history in rsi_history:
             rsi = (
                 ta.momentum.RSIIndicator(
-                    price_data["Close"], window=history, fillna=True
+                    price_data["Close" if upper_case else "close"], window=history, fillna=True
                 )
                 .rsi()
                 .values.tolist()
@@ -57,9 +57,9 @@ class TAEngine:
         for history in stochastic_history:
             stochastics = (
                 ta.momentum.StochasticOscillator(
-                    price_data["High"],
-                    price_data["Low"],
-                    price_data["Close"],
+                    price_data["High" if upper_case else "high"],
+                    price_data["Low" if upper_case else "low"],
+                    price_data["Close" if upper_case else "close"],
                     window=history,
                     smooth_window=int(history / 3),
                     fillna=True,
@@ -76,10 +76,10 @@ class TAEngine:
 
         # Accumulation Distribution
         acc_dist = ta.volume.acc_dist_index(
-            price_data["High"],
-            price_data["Low"],
-            price_data["Close"],
-            price_data["Volume"],
+            price_data["High" if upper_case else "high"],
+            price_data["Low" if upper_case else "low"],
+            price_data["Close" if upper_case else "close"],
+            price_data["Volume" if upper_case else "volume"],
             fillna=True,
         ).values.tolist()
         acc_dist = acc_dist[-self.HISTORY_TO_USE :]
@@ -98,9 +98,9 @@ class TAEngine:
         # low: pandas.core.series.Series, volume: pandas.core.series.Series, window: int = 14, fillna: bool = False)
         for history in eom_history:
             eom = ta.volume.ease_of_movement(
-                price_data["High"],
-                price_data["Low"],
-                price_data["Volume"],
+                price_data["High" if upper_case else "high"],
+                price_data["Low" if upper_case else "low"],
+                price_data["Volume" if upper_case else "volume"],
                 window=history,
                 fillna=True,
             ).values.tolist()
@@ -118,9 +118,9 @@ class TAEngine:
         # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#trend-indicators
         for history in cci_history:
             cci = ta.trend.cci(
-                price_data["High"],
-                price_data["Low"],
-                price_data["Close"],
+                price_data["High" if upper_case else "high"],
+                price_data["Low" if upper_case else "low"],
+                price_data["Close" if upper_case else "close"],
                 window=history,
                 constant=0.015,
                 fillna=True,
@@ -137,14 +137,14 @@ class TAEngine:
         #     price_data["Close"], fillna=True
         # ).values.tolist()
         daily_log_return = ta.others.daily_log_return(
-            price_data["Close"], fillna=True
+            price_data["Close" if upper_case else "close"], fillna=True
         ).values.tolist()
         technical_indicators_dictionary["daily_log_return"] = daily_log_return[
             -self.HISTORY_TO_USE :
         ]
 
         # Volume difference
-        volume_list = price_data["Volume"].values.tolist()
+        volume_list = price_data["Volume" if upper_case else "volume"].values.tolist()
         volume_list = [vol for vol in volume_list if vol != 0]
         volume_returns = [
             volume_list[x] / volume_list[x - 1] for x in range(1, len(volume_list))

@@ -6,6 +6,7 @@ import platform
 os_type = platform.system()
 print(os_type)
 
+GPU_MODE = False if os_type == "Darwin" else True
 # MONGO_HOST = "127.0.0.1"
 # 在mac上面开发时用远程的mongodb
 MONGODB_IP = (

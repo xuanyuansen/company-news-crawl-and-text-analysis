@@ -228,7 +228,7 @@ class BasicFeatureGen(BaseFeatureGen):
                 _feature[i] = 0.0
         return _feature
 
-    # 10 + 10 + 13 + 5
+    # 10 + 10 + 13 + 5 + 2
     def get_feature(self):
         bi_feature = self.__gen_feature(self.data.get_bi_list())
         if len(self.data.merged_chan_line_list) > 0:
@@ -257,7 +257,7 @@ class BasicFeatureGen(BaseFeatureGen):
                 direction_feature(self.data.get_bi_list()),
                 direction_feature(self.data.merged_chan_line_list),
             ]
-        ),[],[]
+        )
 
     # 13维
     @staticmethod

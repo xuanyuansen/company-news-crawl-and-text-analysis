@@ -47,18 +47,18 @@ def gen_parser():
 
 if __name__ == "__main__":
     args = gen_parser()
-
     set_display()
-    dpp = DataPreProcessing(feature_size=38)
+
+    dpp = DataPreProcessing(feature_size=40)
     symbol_data = dpp.get_symbols("cn")
 
-    data_set, label_sum, max_feature_length = dpp.get_label(
+    data_set, label_sum, _, max_feature_length, ta_max_feature_length = dpp.get_label(
         symbols=symbol_data,
-        market_type="cn",
-        start_date="2021-06-01",
+        # market_type="cn",
+        week_data_start_date="2021-06-01",
         cnt_limit_start=args.cnt_limit_start,
         cnt_limit_end=args.cnt_limit_end,
-        feature_type="deep",
+        # feature_type="deep",
         force_update_feature=args.force_update_feature,
     )
     label_set = data_set["label"]

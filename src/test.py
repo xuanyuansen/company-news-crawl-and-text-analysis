@@ -10,7 +10,10 @@ import sys
 import pandas as pd
 
 from NlpModel.ChanBasedCnn import CustomChanDataset, TextCNN
+from Utils.utils import set_display
 from data_pre_processing import DataPreProcessing
+
+set_display()
 
 param = {
     "max_depth": 5,
@@ -23,10 +26,19 @@ model = XGBClassifier(param, objective="multi:softmax")
 
 price_spider = StockInfoSpyder()
 
+data_processor = DataPreProcessing(feature_size=38, history_day_ta_feature_to_use=10)
+# data_processor.get_ta_feature()
+
 _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(
-    symbol='sz000930', market_type="cn", start_date='2020-01-01'
+    symbol='sz000001', market_type="cn", start_date='2020-06-01'
 )
 print(stock_data[:10])
+print('stock shape is {}'.format(stock_data.shape))
+feature_list = data_processor.get_ta_feature(stock_data, upper_case=False)
+print("feature list size {}".format(len(feature_list)))
+print("feature list {}".format(feature_list))
+
+
 stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
 stock_data.set_index("Date", inplace=True)
 
@@ -42,7 +54,7 @@ data = price_spider.col_basic_info_cn.find_one(
 print(data['concept'])
 print(data['industry'])
 deep_fea_gen = DeepFeatureGen(chan_data)
-res = deep_fea_gen.get_deep_sequence_feature()
+res = deep_fea_gen.get_deep_sequence_feature(data['industry'], data['concept'])
 print(res)
 print("bi feature length {}".format(len(res)))
 print(deep_fea_gen.concept_list)

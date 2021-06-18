@@ -100,7 +100,7 @@ class CustomChanDataset(Dataset):
     def __getitem__(self, idx):
         origin_idx = self.idx_list[idx]
         # img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        raw_feature = self.feature_data.loc[origin_idx, ["features"]].values.tolist()[0]
+        raw_feature = self.feature_data.loc[origin_idx, ["deep_features"]].values.tolist()[0]
         # print(raw_feature)
         feature = raw_feature[0]
         # print("feature 0 {} ".format(feature))
