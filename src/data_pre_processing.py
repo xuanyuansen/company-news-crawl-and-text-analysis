@@ -144,7 +144,7 @@ class DataPreProcessing(object):
             lambda row: row["week"].index[-1], axis=1
         )
          
-        print(week_data["week_data_start_date"])
+        # print(week_data["week_data_start_date"])
         week_data_start_date_cnt = week_data.groupby(["week_data_start_date"]).size()
         # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.idxmax.html
         label_date = week_data_start_date_cnt.idxmax().strftime("%Y-%m-%d")
@@ -175,8 +175,8 @@ class DataPreProcessing(object):
             / row["week"].iloc[-1, 0],
             axis=1,
         )
-        print(week_data["ratio"].max())
-        print(week_data["ratio"].min())
+        print("最大涨幅, {}".format(week_data["ratio"].max()))
+        print("最大跌幅, {}".format(week_data["ratio"].min()))
 
         def _set_label(_value: float):
             if _value <= -10.0:

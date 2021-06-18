@@ -86,11 +86,13 @@ class CustomChanDataset(Dataset):
         feature_data_frame: pd.DataFrame,
         label_data_frame: pd.DataFrame,
         max_feature_length: int,
+        ta_feature_length: int
     ):
         # assert feature_data_frame.shape[0] == label_data_frame.shape[0]
         self.feature_data: pd.DataFrame = feature_data_frame
         self.max_feature_length = max_feature_length
         self.label: pd.DataFrame = label_data_frame
+        self.ta_feature_length = ta_feature_length
         self.idx_list = list(self.feature_data.index)
 
     def __len__(self):
@@ -99,6 +101,9 @@ class CustomChanDataset(Dataset):
     # 这个地方做了补零
     def __getitem__(self, idx):
         origin_idx = self.idx_list[idx]
+        ta_features = self.feature_data.loc[origin_idx, ["ta_features"]].values.tolist()[0]
+        # ta_features = [float(ele) for ele in ta_features]
+        # print(ta_features)
         # img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
         raw_feature = self.feature_data.loc[origin_idx, ["deep_features"]].values.tolist()[0]
         # print(raw_feature)
@@ -112,30 +117,33 @@ class CustomChanDataset(Dataset):
         tensor_industry = torch.from_numpy(np.array(industry_feature)).to(device)
         tensor_concept = torch.from_numpy(np.array(concept_feature)).to(device)
 
+        tensor_ta = torch.from_numpy(np.array([ta_features])).to(device)
+
         # feature list[list]
         tensor_feature: torch.Tensor = torch.zeros(
              self.max_feature_length, len(feature[0])
         )
 
-        #print(tensor_feature.shape)
+        # print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):
             gap = self.max_feature_length - len(feature)
             tensor_feature[idx+gap] = torch.from_numpy(np.array(feature[idx]))
 
-        #print(tensor_feature.shape)
-        #print(tensor_feature.t().shape)
+        # print(tensor_feature.shape)
+        # print(tensor_feature.t().shape)
         label = self.label.loc[origin_idx]
         label_tensor = torch.tensor(label, dtype=torch.long).to(device)
-        return (tensor_feature.t().to(device), tensor_industry, tensor_concept), label_tensor
+        return (tensor_feature.t().to(device), tensor_industry, tensor_concept, tensor_ta.float()), label_tensor
 
 
 class TextCNN(nn.Module):
-    def __init__(self, args, max_feature_length: int, vocab_industry: int, vocab_concept: int):
+    def __init__(self, args, max_feature_length: int, ta_dim: int, vocab_industry: int, vocab_concept: int):
         super(TextCNN, self).__init__()
         self.args = args
         # 对应vocab 就是sequence最大的长度 max_length
         # 输入就是 max_length*6
         vocab = max_feature_length
+        vocab_ta = ta_dim
         dim = args.embed_dim  # 每个词向量长度
         class_num = args.class_num  # 类别数
         channel = 1  # 输入的channel数
@@ -147,6 +155,7 @@ class TextCNN(nn.Module):
         self.embedding_i = nn.Embedding(vocab_industry, dim, sparse=False).to(device)
         self.embedding_c = nn.Embedding(vocab_concept, dim, sparse=False).to(device)
         self.fc_base = nn.Linear(vocab, dim).to(device)
+        self.fc_ta = nn.Linear(vocab_ta, dim).to(device)
 
         self.convolutions = nn.ModuleList(
             [nn.Conv2d(channel, kernel_num, (K, dim)) for K in Ks]
@@ -163,6 +172,8 @@ class TextCNN(nn.Module):
         self.fc.bias.data.zero_()
         self.fc_base.weight.data.uniform_(-init_range, init_range)
         self.fc_base.bias.data.zero_()
+        self.fc_ta.weight.data.uniform_(-init_range, init_range)
+        self.fc_ta.bias.data.zero_()
 
     # bi 对应的data是N*6的
     def forward(self, _input):
@@ -176,7 +187,9 @@ class TextCNN(nn.Module):
         # print(em_industry.shape)
         em_concept = self.embedding_c(_input[2])
         # print(em_concept.shape)
-        x = torch.cat((x, em_industry, em_concept), dim=1)
+        ta_embedding = self.fc_ta(_input[3])
+        # print(ta_embedding.shape)
+        x = torch.cat((x, em_industry, em_concept, ta_embedding), dim=1)
         # Ex = self.embedding(x, offsets)
 
         x = x.unsqueeze(1)  # (N,Ci,W,D)

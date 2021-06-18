@@ -29,7 +29,7 @@ def gen_parser():
     )
     parser.add_argument("-r", "--lr", default=0.002, help="learning rate")
     parser.add_argument("-p", "--epochs", default=500, help="epochs", type=int)
-    parser.add_argument("-l", "--log_interval", default=500, help="log_interval", type=int)
+    parser.add_argument("-l", "--log_interval", default=100, help="log_interval", type=int)
     parser.add_argument("-a", "--save_interval", default=500, help="save_interval", type=int)
     parser.add_argument("--dev_interval", default=500, help="evaluation", type=int)
     parser.add_argument("--save_dir", default="./", help="save_dir", type=str)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     dpp = DataPreProcessing(feature_size=40)
     symbol_data = dpp.get_symbols("cn")
 
-    data_set, label_sum, _, max_feature_length, ta_max_feature_length = dpp.get_label(
+    data_set, label_sum, _, max_feature_length, ta_feature_length = dpp.get_label(
         symbols=symbol_data,
         # market_type="cn",
         week_data_start_date="2021-06-01",
@@ -67,11 +67,12 @@ if __name__ == "__main__":
         data_set, label_set, test_size=0.33, random_state=42
     )
 
-    train_data_set = CustomChanDataset(X_train, y_train, max_feature_length)
-    test_data_set = CustomChanDataset(X_test, y_test, max_feature_length)
+    train_data_set = CustomChanDataset(X_train, y_train, max_feature_length, int(ta_feature_length))
+    test_data_set = CustomChanDataset(X_test, y_test, max_feature_length, int(ta_feature_length))
 
     text_cnn = TextCNN(args=args,
                        max_feature_length=max_feature_length,
+                       ta_dim=int(ta_feature_length),
                        vocab_industry=dpp.deep_feature_gen.industry_vocab_dim,
                        vocab_concept=dpp.deep_feature_gen.concept_vocab_dim)
     train(train_data_set, test_data_set, batch_size=args.batch_size, model=text_cnn, args=args)
