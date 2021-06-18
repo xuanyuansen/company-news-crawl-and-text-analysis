@@ -92,7 +92,7 @@ class DataPreProcessing(object):
         # print(stock_data[-40:])
 
         stock_data.set_index("Date", inplace=True)
-        return
+        return stock_data
 
     # 加入end_date过滤数据，不能有未来数据！！！
     def from_symbol_to_feature(self, _symbol, stock_data, industry, concepts):
@@ -143,8 +143,8 @@ class DataPreProcessing(object):
         week_data["week_data_start_date"] = week_data.apply(
             lambda row: row["week"].index[-1], axis=1
         )
-
-        # print(week_data)
+         
+        print(week_data["week_data_start_date"])
         week_data_start_date_cnt = week_data.groupby(["week_data_start_date"]).size()
         # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.idxmax.html
         label_date = week_data_start_date_cnt.idxmax().strftime("%Y-%m-%d")
@@ -167,7 +167,7 @@ class DataPreProcessing(object):
                     week_data = pickle.load(_file)
                     label_cnt = week_data.groupby(["label"]).size()
                     print(label_cnt)
-                    return week_data, label_cnt, week_data["feature_length"].max()
+                    return week_data, label_cnt, week_data["feature_length"].max(),week_data["deep_feature_length"].max(),week_data["ta_features_length"].max()
 
         week_data["ratio"] = week_data.apply(
             lambda row: 100
@@ -205,7 +205,7 @@ class DataPreProcessing(object):
                 row["symbol"],
                 _market_type=self.market_type,
                 _start_date=self.daily_stock_data_start_date,
-                _end_date=row["week_data_start_date"],
+                _end_date=row["week_data_start_date"]
             ),
             axis=1,
         )
@@ -213,8 +213,8 @@ class DataPreProcessing(object):
         # {'deep_feature': deep_feature, 'xgb_feature': xgb_feature}
         week_data["features"] = week_data.apply(
             lambda row: self.from_symbol_to_feature(
-                row["sub_level_stock_data"],
                 row["symbol"],
+                row["sub_level_stock_data"],
                 row["industry"],
                 row["concept"],  # feature_type
             ),
@@ -224,7 +224,7 @@ class DataPreProcessing(object):
             lambda row: row["features"].get("xgb_feature"), axis=1
         )
 
-        week_data["deep_feature"] = week_data.apply(
+        week_data["deep_features"] = week_data.apply(
             lambda row: row["features"].get("deep_feature"), axis=1
         )
 
@@ -304,11 +304,6 @@ if __name__ == "__main__":
             lambda row: 0 if row["label"] <= 1 else 1, axis=1
         )
     label_set = data_set["label"]
-
-    for idx in range(0, dpp.feature_size):
-        data_set["feature_{}".format(idx)] = data_set.apply(
-            lambda row: row["features"][0][idx], axis=1
-        )
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         data_set, label_set, test_size=0.33, random_state=42
