@@ -120,9 +120,15 @@ class CustomChanDataset(Dataset):
         tensor_ta = torch.from_numpy(np.array([ta_features])).to(device)
 
         # feature list[list]
-        tensor_feature: torch.Tensor = torch.zeros(
+        try:
+            tensor_feature: torch.Tensor = torch.zeros(
              self.max_feature_length, len(feature[0])
-        )
+            )
+        except:
+            tensor_feature: torch.Tensor = torch.zeros(
+             self.max_feature_length, 6
+            )
+        
 
         # print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):

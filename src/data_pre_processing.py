@@ -1,6 +1,6 @@
 # 用于数据预处理
 import os
-
+import sys
 from Surpriver.feature_generator import TAEngine
 from Utils import config
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
@@ -299,7 +299,7 @@ if __name__ == "__main__":
         cnt_limit_start=0,
         # cnt_limit_end=20,
     )
-    if dpp.binary_mode:
+    if sys.argv[1]=='binary':
         data_set["label"] = data_set.apply(
             lambda row: 0 if row["label"] <= 1 else 1, axis=1
         )
@@ -323,10 +323,10 @@ if __name__ == "__main__":
     dtrain = xgb.DMatrix(X_train[f_names], label=y_train)
     dtest = xgb.DMatrix(X_test[f_names])
     param = {
-        "max_depth": 12,
+        "max_depth": 2,
         "eta": 1,
         "objective": "multi:softmax",
-        "num_class": 4,
+        "num_class": 2 if sys.argv[1]=='binary' else  4,
         "tree_method": "gpu_hist" if config.GPU_MODE else "hist",
     }
     num_round = 10
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     bst.save_model("0001.model")
 
     # data_set, label_set
-    rf = RandomForestClassifier(n_estimators=200)
+    rf = RandomForestClassifier(n_estimators=800)
     score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring="accuracy")
     print(score)
     print(score.mean())
