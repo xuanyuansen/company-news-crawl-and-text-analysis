@@ -29,15 +29,23 @@ class BaseFeatureGen(object):
 
     def from_industry_to_feature(self, industry: str):
         a = [0 for _ in range(0, self.industry_vocab_dim)]
+        if industry is None or 'null'== industry:
+            return a
         idx = self.industry_to_index[industry]
         a[idx] = 1
         return a
 
     def from_concept_to_feature(self, concepts: str):
         a = [0 for _ in range(0, self.concept_vocab_dim)]
-        for con in concepts.split(','):
-            idx = self.concept_to_index[con]
-            a[idx] = 1
+        if concepts is None or 'null' == concepts:
+            return a
+        try:
+            for con in concepts.split(','):
+                idx = self.concept_to_index[con]
+                a[idx] = 1
+        except Exception as e:
+            print(concepts)
+            return a
         return a
 
     def set_base_data(self, chan_data: ChanSourceDataObject):

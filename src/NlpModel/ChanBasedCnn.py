@@ -117,13 +117,13 @@ class CustomChanDataset(Dataset):
              self.max_feature_length, len(feature[0])
         )
 
-        print(tensor_feature.shape)
+        #print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):
             gap = self.max_feature_length - len(feature)
             tensor_feature[idx+gap] = torch.from_numpy(np.array(feature[idx]))
 
-        print(tensor_feature.shape)
-        print(tensor_feature.t().shape)
+        #print(tensor_feature.shape)
+        #print(tensor_feature.t().shape)
         label = self.label.loc[origin_idx]
         label_tensor = torch.tensor(label, dtype=torch.long).to(device)
         return (tensor_feature.t().to(device), tensor_industry, tensor_concept), label_tensor
