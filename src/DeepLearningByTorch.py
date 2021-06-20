@@ -9,7 +9,7 @@ from sklearn import model_selection
 
 from NlpModel.ChanBasedCnn import TextCNN, CustomChanDataset, train
 from Utils.utils import set_display
-from data_pre_processing import DataPreProcessing
+from NlpModel.DataPreProcessing import DataPreProcessing
 
 
 # args.lr

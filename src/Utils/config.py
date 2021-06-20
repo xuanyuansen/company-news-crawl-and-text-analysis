@@ -25,23 +25,6 @@ cipher_key = b"C8_ACDILYdQubRfNB7oUPWvFR1G1U7uhQRBVH_NGne8="
 
 STOCK_PRICE_REQUEST_DEFAULT_DATE = "20180101"
 
-TOPIC_NUMBER = 200
-SVM_TUNED_PARAMTERS = {
-    "kernel": ["rbf"],
-    "gamma": [10, 20, 50, 100, 150, 200],
-    "C": [10, 15, 20, 30, 50, 100],
-}
-RDFOREST_TUNED_PARAMTERS = {
-    "n_estimators": [1, 2, 3, 4, 5, 10],
-    "criterion": ["gini", "entropy"],
-    "max_features": ["auto", "sqrt"],
-}
-CLASSIFIER_SCORE_LIST = ["f1_weighted"]
-
-CACHE_NEWS_REDIS_DB_ID = 0
-CACHE_NEWS_LIST_NAME = "cache_news_waiting_for_classification"
-MINIMUM_STOCK_NEWS_NUM_FOR_ML = 1000
-
 # 机器学习
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
 USER_DEFINED_WEIGHT_DICT_PATH = "./info/finance_dict_weight.txt"

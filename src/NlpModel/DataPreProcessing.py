@@ -1,26 +1,16 @@
+# -*- coding: UTF-8 -*-
 # 用于数据预处理
 import os
-import sys
+
 from Surpriver.feature_generator import TAEngine
 from Utils import config
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 import pandas as pd
 from datetime import datetime
-from Utils.utils import set_display
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject
 from ChanUtils.ChanFeature import BasicFeatureGen, DeepFeatureGen
-import xgboost as xgb
-import lightgbm as lgb
-from sklearn.metrics import (
-    accuracy_score,
-    mean_squared_error,
-    confusion_matrix,
-    precision_score,
-)
-from sklearn import model_selection
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+
 import pickle
 
 
@@ -112,16 +102,26 @@ class DataPreProcessing(object):
         xgb_feature = self.bfg.get_feature()
         return {"deep_feature": deep_feature, "xgb_feature": xgb_feature}
 
+    @staticmethod
+    def direct_load_feature_file(file_data_name):
+        if os.path.exists(file_data_name):
+            with open(file_data_name, "rb") as _file:
+                week_data = pickle.load(_file)
+                label_cnt = week_data.groupby(["label"]).size()
+                print(label_cnt)
+                return week_data, label_cnt, week_data["feature_length"].max(), week_data[
+                    "deep_feature_length"].max(), week_data["ta_features_length"].max()
+
     def get_label(
-        self,
-        symbols: pd.DataFrame,
-        # market_type: str,
-        week_data_start_date: str = None,
-        cnt_limit_start: int = None,
-        cnt_limit_end: int = None,
-        # feature_type: str = "xgb",
-        save_feature: bool = True,
-        force_update_feature: bool = False,
+            self,
+            symbols: pd.DataFrame,
+            # market_type: str,
+            week_data_start_date: str = None,
+            cnt_limit_start: int = None,
+            cnt_limit_end: int = None,
+            # feature_type: str = "xgb",
+            save_feature: bool = True,
+            force_update_feature: bool = False,
     ):
         assert week_data_start_date is not None
         week_data = symbols[cnt_limit_start:cnt_limit_end]
@@ -143,7 +143,7 @@ class DataPreProcessing(object):
         week_data["week_data_start_date"] = week_data.apply(
             lambda row: row["week"].index[-1], axis=1
         )
-         
+
         # print(week_data["week_data_start_date"])
         week_data_start_date_cnt = week_data.groupby(["week_data_start_date"]).size()
         # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.idxmax.html
@@ -162,17 +162,12 @@ class DataPreProcessing(object):
             ),
         )
         if not force_update_feature:
-            if os.path.exists(file_data_name):
-                with open(file_data_name, "rb") as _file:
-                    week_data = pickle.load(_file)
-                    label_cnt = week_data.groupby(["label"]).size()
-                    print(label_cnt)
-                    return week_data, label_cnt, week_data["feature_length"].max(),week_data["deep_feature_length"].max(),week_data["ta_features_length"].max()
+            self.direct_load_feature_file(file_data_name)
 
         week_data["ratio"] = week_data.apply(
             lambda row: 100
-            * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
-            / row["week"].iloc[-1, 0],
+                        * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
+                        / row["week"].iloc[-1, 0],
             axis=1,
         )
         print("最大涨幅, {}".format(week_data["ratio"].max()))
@@ -284,100 +279,4 @@ class DataPreProcessing(object):
             max_ta_length,
         )
 
-    pass
-
-
-if __name__ == "__main__":
-    set_display()
-    dpp = DataPreProcessing(feature_size=40)
-    symbol_data = dpp.get_symbols("cn")
-
-    data_set, label_sum, _, _, _max_ta_length = dpp.get_label(
-        symbols=symbol_data,
-        # market_type="cn",
-        week_data_start_date="2021-06-01",
-        cnt_limit_start=0,
-        # cnt_limit_end=20,
-    )
-    if sys.argv[1]=='binary':
-        data_set["label"] = data_set.apply(
-            lambda row: 0 if row["label"] <= 1 else 1, axis=1
-        )
-    label_set = data_set["label"]
-
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(
-        data_set, label_set, test_size=0.33, random_state=42
-    )
-
-    f_names = []
-    for idx in range(0, dpp.feature_size):
-        f_names.append("feature_{}".format(idx))
-
-    for _idx in range(0, _max_ta_length):
-        f_names.append("ta_feature_{}".format(_idx))
-
-    # https://xgboost.readthedocs.io/en/latest/python/python_intro.html#setting-parameters
-    # data = pandas.DataFrame(np.arange(12).reshape((4,3)), columns=['a', 'b', 'c'])
-    # label = pandas.DataFrame(np.random.randint(2, size=4))
-    # dtrain = xgb.DMatrix(data, label=label)
-    dtrain = xgb.DMatrix(X_train[f_names], label=y_train)
-    dtest = xgb.DMatrix(X_test[f_names])
-    param = {
-        "max_depth": 2,
-        "eta": 1,
-        "objective": "multi:softmax",
-        "num_class": 2 if sys.argv[1]=='binary' else  4,
-        "tree_method": "gpu_hist" if config.GPU_MODE else "hist",
-    }
-    num_round = 10
-
-    bst = xgb.train(param, dtrain, num_round)
-
-    y_pred_train = bst.predict(dtrain)
-    accuracy = accuracy_score(y_train, y_pred_train)
-    # roc_auc = metrics.roc_auc_score(y_train, y_pred_train)
-    print("train accuarcy: %.2f%%" % (accuracy * 100.0))
-    # print(roc_auc)
-
-    # 计算准确率
-    y_pred = bst.predict(dtest)
-    print(y_pred)
-    accuracy = accuracy_score(y_test, y_pred)
-    # roc_auc = metrics.roc_auc_score(y_test, y_pred)
-    print("test accuarcy: %.2f%%" % (accuracy * 100.0))
-    # print(roc_auc)
-
-    print(bst.get_fscore())
-    bst.save_model("0001.model")
-
-    # data_set, label_set
-    rf = RandomForestClassifier(n_estimators=800)
-    score = cross_val_score(rf, data_set[f_names], label_set, cv=5, scoring="accuracy")
-    print(score)
-    print(score.mean())
-    lgb_model = lgb.LGBMClassifier(
-        num_leaves=512,
-        n_estimators=800,
-        max_depth=12,
-        subsample=0.85,
-        colsample_bytree=0.85,
-        learning_rate=0.05,
-        # class_weight={0: 1, 1: 5},
-        n_jobs=20,
-        reg_alpha=0.1,
-        reg_lambda=0.1,
-        random_state=42,
-    )
-    lgb_model.fit(X_train[f_names], y_train)
-    y_prediction = lgb_model.predict(X_test[f_names])
-    # eval
-    print("The rmse of prediction is:", mean_squared_error(y_test, y_prediction) ** 0.5)
-    cm = confusion_matrix(y_test, y_prediction, labels=[0, 1, 2, 3])
-    print(cm)
-    accuracy_lgb = accuracy_score(y_test, y_prediction)
-    precision_lgb = precision_score(y_test, y_prediction, average="micro")
-    print("accuracy_lgb {}".format(accuracy_lgb))
-    print("precision_lgb {}".format(precision_lgb))
-    # feature importance
-    print("Feature importance:", list(lgb_model.feature_importances_))
     pass
