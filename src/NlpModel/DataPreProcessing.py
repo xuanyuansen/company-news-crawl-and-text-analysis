@@ -117,6 +117,7 @@ class DataPreProcessing(object):
             symbols: pd.DataFrame,
             # market_type: str,
             week_data_start_date: str = None,
+            week_data_end_date: str = None,
             cnt_limit_start: int = None,
             cnt_limit_end: int = None,
             # feature_type: str = "xgb",
@@ -130,6 +131,7 @@ class DataPreProcessing(object):
                 row["symbol"],
                 market_type=self.market_type,
                 start_date=week_data_start_date,
+                end_date=week_data_end_date
             )[1],
             axis=1,
         )

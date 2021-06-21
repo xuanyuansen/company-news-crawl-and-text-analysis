@@ -205,7 +205,7 @@ class StockInfoSpyder(Spyder):
         return True
 
     def get_daily_price_data_of_specific_stock(
-        self, symbol, market_type: str, start_date: str = None, _keys: list = None
+        self, symbol, market_type: str, start_date: str = None, end_date: str = None, _keys: list = None
     ):
         if market_type == "cn":
             db_name = self.database_name_cn
@@ -220,18 +220,28 @@ class StockInfoSpyder(Spyder):
             stock_data = self.db_obj.get_data(db_name, symbol)
         else:
             sd = start_date.split("-")
+            _query = {
+                "date": {
+                    "$gte": datetime.datetime(
+                        int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                    )
+                }
+            } if market_type == "cn" else {"date": {"$gte": start_date}}
+            if end_date is not None and market_type == "cn":
+                e_d = end_date.split("-")
+                _query = {"date": {
+                    "$gte": datetime.datetime(
+                        int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                    ),
+                    "$lte": datetime.datetime(
+                        int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
+                    )
+                }}
+
             stock_data = self.db_obj.get_data(
                 db_name,
                 symbol,
-                query={
-                    "date": {
-                        "$gt": datetime.datetime(
-                            int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                        )
-                    }
-                }
-                if market_type == "cn"
-                else {"date": {"$gt": start_date}},
+                query=_query,
                 keys=_keys,
             )
         if stock_data is None:
@@ -253,10 +263,10 @@ class StockInfoSpyder(Spyder):
         return True, stock_data
 
     def get_week_data_stock(
-        self, symbol, market_type: str, start_date: str = None, _keys: list = None
+        self, symbol, market_type: str, start_date: str = None, end_date=None, _keys: list = None
     ):
         res, stock_data = self.get_daily_price_data_of_specific_stock(
-            symbol, market_type, start_date, _keys
+            symbol, market_type, start_date, end_date, _keys
         )
         if not res:
             return False, DataFrame()
