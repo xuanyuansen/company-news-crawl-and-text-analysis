@@ -11,7 +11,7 @@ import pandas as pd
 
 from NlpModel.ChanBasedCnn import CustomChanDataset, TextCNN
 from Utils.utils import set_display
-from data_pre_processing import DataPreProcessing
+from NlpModel.DataPreProcessing import DataPreProcessing
 
 set_display()
 
@@ -25,8 +25,15 @@ param = {
 model = XGBClassifier(param, objective="multi:softmax")
 
 price_spider = StockInfoSpyder()
+res, df = price_spider.get_week_data_stock(symbol='sz000001',
+                                           market_type='cn',
+                                           start_date='2021-06-04',
+                                           end_date='2021-06-20')
+if res:
+    print(df)
+exit(0)
 
-data_processor = DataPreProcessing(feature_size=38, history_day_ta_feature_to_use=10)
+data_processor = DataPreProcessing(feature_size=40, history_day_ta_feature_to_use=10)
 # data_processor.get_ta_feature()
 
 _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(

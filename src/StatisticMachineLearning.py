@@ -17,8 +17,9 @@ from NlpModel.DataPreProcessing import DataPreProcessing
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--classify_mode", default='binary', help="类别数", type=str)
-parser.add_argument("-f", "--feature_file", default='', help="指定特征文件", type=str)
-parser.add_argument("-w", "--week_data_start_date", default='2021-06-01', help="提取标签的开始周日期", type=str)
+parser.add_argument("-f", "--feature_file", help="指定特征文件", type=str)
+parser.add_argument("--week_data_start_date", default='2021-06-07', help="提取标签的开始周日期", type=str)
+parser.add_argument("--week_data_end_date", default='2021-06-19', help="提取标签的开始周日期", type=str)
 parser.add_argument('-m', "--market_type", default='cn', type=str)
 parser.add_argument('-g', "--gpu_mode", default=False, type=bool)
 
@@ -36,7 +37,8 @@ if __name__ == "__main__":
         data_set, label_sum, _, _, _max_ta_length = dpp.get_label(
             symbols=symbol_data,
             # market_type="cn",
-            week_data_start_date="2021-06-01",
+            week_data_start_date=_args.week_data_start_date,
+            week_data_end_date=_args.week_data_end_date,
             cnt_limit_start=0,
             # cnt_limit_end=20,
         )
