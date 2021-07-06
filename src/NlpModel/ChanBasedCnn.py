@@ -167,17 +167,17 @@ class TextCNN(nn.Module):
         self.fc_chan = nn.Linear(vocab, dim).to(device)
         self.fc_ta = nn.Linear(vocab_ta, dim).to(device)
 
-        self.convolutions_chan = nn.ModuleList(
+        self.convolutions_chan_ta = nn.ModuleList(
             [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
         ).to(device)  # 卷积层
         self.convolutions_embedding = nn.ModuleList(
-            [nn.Conv2d(2, kernel_num, (K, dim)) for K in Ks]
-        ).to(device)  # 卷积层
-        self.convolutions_ta = nn.ModuleList(
             [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
         ).to(device)  # 卷积层
+        # self.convolutions_ta = nn.ModuleList(
+        #     [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
+        # ).to(device)  # 卷积层
         self.dropout = nn.Dropout(args.dropout).to(device)
-        self.fc = nn.Linear(len(Ks) * kernel_num, class_num).to(device)  # 全连接层
+        self.fc = nn.Linear(2 * len(Ks) * kernel_num, class_num).to(device)  # 全连接层
         self.init_weights()
 
     def init_weights(self):
@@ -197,23 +197,26 @@ class TextCNN(nn.Module):
         # print("_input[0].shape {}".format(_input[0].shape))
         # print("_input[1].shape {}".format(_input[1].shape))
         # print("_input[2].shape {}".format(_input[2].shape))
-        x_chan = self.fc_base(_input[0])
-        # print(x.shape)
+        # print('_input[0] {}'.format(_input[0].shape))
+        x_chan = self.fc_chan(_input[0])
+        #print('x_chan {}'.format(x_chan.shape))
         em_industry = self.embedding_i(_input[1])
         # print(em_industry.shape)
         em_concept = self.embedding_c(_input[2])
         # print(em_concept.shape)
+        # print('_input[3] shape {}'.format(_input[3].shape))
         ta = self.fc_ta(_input[3])
-        # print(ta_embedding.shape)
+        # print('ta shape {}'.format(ta.shape))
         industry_concept = torch.cat((em_industry, em_concept), dim=1)
         # Ex = self.embedding(x, offsets)
+        chan_ta = torch.cat((x_chan, ta), dim=1)
 
-        x_chan = x_chan.unsqueeze(1)  # (N,Ci,W,D)
-        x_chan = [
-            F.relu(conv(x_chan)).squeeze(3) for conv in self.convolutions_chan
+        chan_ta = chan_ta.unsqueeze(1)  # (N,Ci,W,D)
+        chan_ta = [
+            F.relu(conv(chan_ta)).squeeze(3) for conv in self.convolutions_chan_ta
         ]  # len(Ks)*(N, K_num,W)
-        x_chan = [
-            F.max_pool1d(line, line.size(2)).squeeze(2) for line in x_chan
+        chan_ta = [
+            F.max_pool1d(line, line.size(2)).squeeze(2) for line in chan_ta
         ]  # len(Ks)*(N, K_num)
 
         industry_concept = industry_concept.unsqueeze(1)  # (N,Ci,W,D)
@@ -224,21 +227,14 @@ class TextCNN(nn.Module):
             F.max_pool1d(line, line.size(2)).squeeze(2) for line in industry_concept
         ]  # len(Ks)*(N, K_num)
 
-        ta = ta.unsqueeze(1)  #
-        ta = [
-            F.relu(conv(ta)).squeeze(3) for conv in self.convolutions_ta
-        ]  # len(Ks)*(N, K_num,W)
-        ta = [
-            F.max_pool1d(line, line.size(2)).squeeze(2) for line in ta
-        ]  # len(Ks)*(N, K_num)
-
-        x_chan = torch.cat(x_chan, 1)  # (N, K_num*len(Ks))
-        # print(em_text.shape)
+        # x_chan = torch.cat(x_chan, 1)  # (N, K_num*len(Ks))
+        # print('industry_concept {}'.format(industry_concept.shape))
         industry_concept = torch.cat(industry_concept, 1)  # (N, K_num*len(Ks))
+        # print('after cat industry_concept {}'.format(industry_concept.shape))
         # print(em_url.shape)
-        ta = torch.cat(ta, 1)  # (N, K_num*len(Ks))
+        chan_ta = torch.cat(chan_ta, 1)  # (N, K_num*len(Ks))
 
-        x = torch.cat((x_chan, industry_concept, ta), 1)  # (N, K_num*len(Ks))
+        x = torch.cat((industry_concept, chan_ta), 1)  # (N, K_num*len(Ks))
 
         x = self.dropout(x)
         logit = self.fc(x)
