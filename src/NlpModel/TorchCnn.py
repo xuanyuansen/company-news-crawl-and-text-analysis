@@ -113,6 +113,8 @@ def train_and_valid(lr_, sub_train_, sub_valid_):
             processed_lines = i + len(train_data) * epoch
             progress = processed_lines / float(num_lines)
             if processed_lines % 128 == 0:
+                print(text.shape)
+                print(output.shape)
                 print(type(text))
                 print(type(offsets))
                 print(type(cls))
@@ -293,4 +295,9 @@ class TextSentiment(nn.Module):
             offsets: a list of offsets to delimit the 1-D text tensor
                 into the individual sequences.
         """
-        return self.fc(self.embedding(text, offsets))
+        print(text.shape)
+        x_in = self.embedding(text, offsets)
+        print(x_in.shape)
+        x_out = self.fc(x_in)
+        print(x_out.shape)
+        return x_out

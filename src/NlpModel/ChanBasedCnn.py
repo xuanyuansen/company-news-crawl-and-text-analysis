@@ -128,7 +128,6 @@ class CustomChanDataset(Dataset):
             tensor_feature: torch.Tensor = torch.zeros(
              self.max_feature_length, 6
             )
-        
 
         # print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):
@@ -142,6 +141,10 @@ class CustomChanDataset(Dataset):
         return (tensor_feature.t().to(device), tensor_industry, tensor_concept, tensor_ta.float()), label_tensor
 
 
+# 模型的架构不对，不能把多个不同类别的数据放到一起来卷积，channel指的是同一个特征的不同embedding
+# chan feature, ta feature 单独处理
+# tensor_industry, tensor_concept 组合处理
+# 2021.07.06
 class TextCNN(nn.Module):
     def __init__(self, args, max_feature_length: int, ta_dim: int, vocab_industry: int, vocab_concept: int):
         super(TextCNN, self).__init__()
@@ -160,11 +163,18 @@ class TextCNN(nn.Module):
         # self.embedding = nn.EmbeddingBag(vocab, dim, sparse=True)
         self.embedding_i = nn.Embedding(vocab_industry, dim, sparse=False).to(device)
         self.embedding_c = nn.Embedding(vocab_concept, dim, sparse=False).to(device)
-        self.fc_base = nn.Linear(vocab, dim).to(device)
+
+        self.fc_chan = nn.Linear(vocab, dim).to(device)
         self.fc_ta = nn.Linear(vocab_ta, dim).to(device)
 
-        self.convolutions = nn.ModuleList(
-            [nn.Conv2d(channel, kernel_num, (K, dim)) for K in Ks]
+        self.convolutions_chan = nn.ModuleList(
+            [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
+        ).to(device)  # 卷积层
+        self.convolutions_embedding = nn.ModuleList(
+            [nn.Conv2d(2, kernel_num, (K, dim)) for K in Ks]
+        ).to(device)  # 卷积层
+        self.convolutions_ta = nn.ModuleList(
+            [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
         ).to(device)  # 卷积层
         self.dropout = nn.Dropout(args.dropout).to(device)
         self.fc = nn.Linear(len(Ks) * kernel_num, class_num).to(device)  # 全连接层
@@ -176,8 +186,8 @@ class TextCNN(nn.Module):
         self.embedding_c.weight.data.uniform_(-init_range, init_range)
         self.fc.weight.data.uniform_(-init_range, init_range)
         self.fc.bias.data.zero_()
-        self.fc_base.weight.data.uniform_(-init_range, init_range)
-        self.fc_base.bias.data.zero_()
+        self.fc_chan.weight.data.uniform_(-init_range, init_range)
+        self.fc_chan.bias.data.zero_()
         self.fc_ta.weight.data.uniform_(-init_range, init_range)
         self.fc_ta.bias.data.zero_()
 
@@ -187,26 +197,48 @@ class TextCNN(nn.Module):
         # print("_input[0].shape {}".format(_input[0].shape))
         # print("_input[1].shape {}".format(_input[1].shape))
         # print("_input[2].shape {}".format(_input[2].shape))
-        x = self.fc_base(_input[0])
+        x_chan = self.fc_base(_input[0])
         # print(x.shape)
         em_industry = self.embedding_i(_input[1])
         # print(em_industry.shape)
         em_concept = self.embedding_c(_input[2])
         # print(em_concept.shape)
-        ta_embedding = self.fc_ta(_input[3])
+        ta = self.fc_ta(_input[3])
         # print(ta_embedding.shape)
-        x = torch.cat((x, em_industry, em_concept, ta_embedding), dim=1)
+        industry_concept = torch.cat((em_industry, em_concept), dim=1)
         # Ex = self.embedding(x, offsets)
 
-        x = x.unsqueeze(1)  # (N,Ci,W,D)
-        x = [
-            F.relu(conv(x)).squeeze(3) for conv in self.convolutions
+        x_chan = x_chan.unsqueeze(1)  # (N,Ci,W,D)
+        x_chan = [
+            F.relu(conv(x_chan)).squeeze(3) for conv in self.convolutions_chan
         ]  # len(Ks)*(N, K_num,W)
-        x = [
-            F.max_pool1d(line, line.size(2)).squeeze(2) for line in x
+        x_chan = [
+            F.max_pool1d(line, line.size(2)).squeeze(2) for line in x_chan
         ]  # len(Ks)*(N, K_num)
 
-        x = torch.cat(x, 1)  # (N, K_num*len(Ks))
+        industry_concept = industry_concept.unsqueeze(1)  # (N,Ci,W,D)
+        industry_concept = [
+            F.relu(conv(industry_concept)).squeeze(3) for conv in self.convolutions_embedding
+        ]  # len(Ks)*(N, K_num,W)
+        industry_concept = [
+            F.max_pool1d(line, line.size(2)).squeeze(2) for line in industry_concept
+        ]  # len(Ks)*(N, K_num)
+
+        ta = ta.unsqueeze(1)  #
+        ta = [
+            F.relu(conv(ta)).squeeze(3) for conv in self.convolutions_ta
+        ]  # len(Ks)*(N, K_num,W)
+        ta = [
+            F.max_pool1d(line, line.size(2)).squeeze(2) for line in ta
+        ]  # len(Ks)*(N, K_num)
+
+        x_chan = torch.cat(x_chan, 1)  # (N, K_num*len(Ks))
+        # print(em_text.shape)
+        industry_concept = torch.cat(industry_concept, 1)  # (N, K_num*len(Ks))
+        # print(em_url.shape)
+        ta = torch.cat(ta, 1)  # (N, K_num*len(Ks))
+
+        x = torch.cat((x_chan, industry_concept, ta), 1)  # (N, K_num*len(Ks))
 
         x = self.dropout(x)
         logit = self.fc(x)

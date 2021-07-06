@@ -10,7 +10,7 @@ GPU_MODE = False if os_type == "Darwin" else True
 # MONGO_HOST = "127.0.0.1"
 # 在mac上面开发时用远程的mongodb
 MONGODB_IP = (
-    "[2409:8a28:e65:f930:fca9:58c3:b672:96ab]" if os_type == "Darwin" else "localhost"
+    "[2409:8a28:e6d:9940:a925:2282:fd4f:f00f]" if os_type == "Darwin" else "localhost"
 )
 MONGODB_PORT = 27017
 

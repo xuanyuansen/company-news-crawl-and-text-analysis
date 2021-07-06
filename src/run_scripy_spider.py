@@ -114,6 +114,8 @@ def add_zhong_jin_stock_spider(process: CrawlerProcess):
 if __name__ == "__main__":
     os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
     settings = get_project_settings()
+    for k, v in settings.copy_to_dict().items():
+        print(k, v)
     _process = CrawlerProcess(settings)
 
     add_stcn_spider(_process)
