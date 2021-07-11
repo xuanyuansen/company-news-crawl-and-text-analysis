@@ -1,5 +1,8 @@
 import sys
 
+from sklearn import model_selection
+from sklearn.metrics import confusion_matrix, accuracy_score
+
 from NlpModel.DataPreProcessing import DataPreProcessing
 from Utils.utils import set_display
 import lightgbm as lgb
@@ -35,7 +38,17 @@ if __name__ == "__main__":
         reg_lambda=0.1,
         random_state=2021,
     )
-    lgb_model.fit(data_set[f_names], label_set)
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        data_set, label_set, test_size=0.3, random_state=2021
+    )
+
+    lgb_model.fit(X_train[f_names], y_train)
+    y_prediction = lgb_model.predict(X_test[f_names])
+    cm = confusion_matrix(y_test, y_prediction, labels=[0, 1])
+    print(cm)
+    accuracy_lgb = accuracy_score(y_test, y_prediction)
+    print('accuracy_lgb {}'.format(accuracy_lgb))
 
     data_set_predict, label_sum, _, _, _max_ta_length = dpp.direct_load_feature_file(sys.argv[2])
 

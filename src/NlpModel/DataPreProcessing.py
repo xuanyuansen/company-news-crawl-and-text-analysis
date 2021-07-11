@@ -123,7 +123,16 @@ class DataPreProcessing(object):
             # feature_type: str = "xgb",
             save_feature: bool = True,
             force_update_feature: bool = False,
+            direct_load_file: bool = False
     ):
+        # direct load from file
+        if direct_load_file:
+            file_name = "feature_file_{}_{}.dataframe".format(
+                week_data_start_date, week_data_end_date
+            )
+            return self.direct_load_feature_file(file_name)
+
+        # else 判断最新的标签数据
         assert week_data_start_date is not None
         week_data = symbols[cnt_limit_start:cnt_limit_end]
         week_data["week"] = week_data.apply(
@@ -164,7 +173,7 @@ class DataPreProcessing(object):
             ),
         )
         if not force_update_feature:
-            self.direct_load_feature_file(file_data_name)
+            return self.direct_load_feature_file(file_data_name)
 
         week_data["ratio"] = week_data.apply(
             lambda row: 100
