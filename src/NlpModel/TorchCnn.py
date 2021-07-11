@@ -36,6 +36,8 @@ class TextSentiment(nn.Module):
         self.fc.bias.data.zero_()
 
     def forward(self, text, offsets):
+        print(text.shape)
+        print(offsets.shape)
         r"""
         Args:
             text: 1-D tensor representing a bag of text tensors
@@ -69,6 +71,8 @@ def generate_batch(batch):
     offsets = [0] + [len(entry) for entry in text]
     offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
     text = torch.cat(text)
+    print('batch text {} {}'.format(text.shape, text))
+    print('batch offsets {} {}'.format(offsets.shape, offsets))
     return text, offsets, label
 
 
