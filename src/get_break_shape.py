@@ -27,7 +27,7 @@ from NlpModel.ChanBasedCnn import (
 import time
 import math
 import random
-from data_pre_processing import DataPreProcessing
+from NlpModel.DataPreProcessing import DataPreProcessing
 import logging
 
 
