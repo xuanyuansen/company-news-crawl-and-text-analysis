@@ -1,15 +1,21 @@
+# -*- coding:utf-8 -*-
 import sys
 
 from sklearn import model_selection
 from sklearn.metrics import confusion_matrix, accuracy_score
-
-from NlpModel.DataPreProcessing import DataPreProcessing
-from Utils.utils import set_display
+from DataPreProcessing import DataPreProcessing
+# from Utils.utils import set_display
 import lightgbm as lgb
+import pandas as pd
+# 显示所有列
+pd.set_option("display.max_columns", None)
+# 显示所有行
+pd.set_option("display.max_rows", None)
+pd.set_option("max_colwidth", 500)
 
 
 if __name__ == "__main__":
-    set_display()
+    # set_display()
     dpp = DataPreProcessing(feature_size=40)
     data_set, label_sum, _, _, _max_ta_length = dpp.direct_load_feature_file(sys.argv[1])
 

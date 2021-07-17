@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 # 涨停板行情
 # "stock_em_zt_pool"  # 涨停板行情-涨停股池
 # "stock_em_zt_pool_previous"  # 涨停板行情-昨日涨停股池
@@ -25,11 +26,16 @@
 # 业绩快报
 # "stock_em_yjkb"  # 业绩快报
 import akshare as ak
-from Utils import utils
+import pandas as pd
+# 显示所有列
+pd.set_option("display.max_columns", None)
+# 显示所有行
+pd.set_option("display.max_rows", None)
+pd.set_option("max_colwidth", 500)
 
 
 if __name__ == "__main__":
-    utils.set_display()
+    # utils.set_display()
     # 涨停板行情-涨停股池
     zhangting = ak.stock_em_zt_pool(date="20210610")
     print(zhangting)

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
-from Utils.utils import set_display
-from Utils import config
+# from Utils.utils import set_display
+import platform
 import argparse
 import xgboost as xgb
 import lightgbm as lgb
@@ -11,9 +11,16 @@ from sklearn.metrics import (
     precision_score,
 )
 from sklearn import model_selection
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+# from sklearn.ensemble import RandomForestClassifier
+# from sklearn.model_selection import cross_val_score
 from NlpModel.DataPreProcessing import DataPreProcessing
+import pandas as pd
+# 显示所有列
+pd.set_option("display.max_columns", None)
+# 显示所有行
+pd.set_option("display.max_rows", None)
+pd.set_option("max_colwidth", 500)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--classify_mode", default='binary', help="类别数", type=str)
@@ -27,7 +34,7 @@ parser.add_argument('-g', "--gpu_mode", default=False, type=bool)
 if __name__ == "__main__":
     _args = parser.parse_args()
 
-    set_display()
+    # set_display()
     dpp = DataPreProcessing(feature_size=40)
     symbol_data = dpp.get_symbols(_args.market_type)
 
@@ -70,7 +77,7 @@ if __name__ == "__main__":
         "eta": 1,
         "objective": "multi:softmax",
         "num_class": 2 if _args.classify_mode and _args.classify_mode == 'binary' else 4,
-        "tree_method": "gpu_hist" if config.GPU_MODE else "hist",
+        "tree_method": "gpu_hist" if platform.system() == 'Linux' else "hist",
     }
     num_round = 10
 

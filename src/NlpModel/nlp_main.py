@@ -1,13 +1,20 @@
+# -*- coding:utf-8 -*-
 import logging
 import sys
 
 # from sklearn.feature_extraction.text import CountVectorizer
-from NlpModel.information_extract import InformationExtract
-from NlpModel.tokenization import Tokenization
-from Utils.utils import set_display
+from information_extract import InformationExtract
+from tokenization import Tokenization
+import pandas as pd
+# 显示所有列
+pd.set_option("display.max_columns", None)
+# 显示所有行
+pd.set_option("display.max_rows", None)
+pd.set_option("max_colwidth", 500)
+# from Utils.utils import set_display
 
 if __name__ == "__main__":
-    set_display()
+    # set_display()
     token_niz = Tokenization()
     info_extract = InformationExtract()
     if sys.argv[1] == "get_words":
