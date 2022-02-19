@@ -4,22 +4,33 @@
 from jqdatasdk import *
 import akshare as ak
 from Utils.utils import set_display, today_date
+from tqdm import tqdm, trange
+import pandas as pd
+
+tqdm.pandas(desc='progress status')
 
 
 class GlobalStockInfo(object):
     def __init__(self):
         self.today_date = today_date
         self.current_stock_price_info = ak.stock_zh_a_spot_em()
+        print('base data shape is {}'.format(self.current_stock_price_info.shape))
+        if self.current_stock_price_info.shape[0] > 10:
+            print(self.current_stock_price_info[:10])
 
     def get_stock_pe_pb(self, stock_code):
         target_stock_data = self.current_stock_price_info.loc[
             self.current_stock_price_info["代码"] == stock_code
-        ]
+            ]
         # _index = target_stock_data.index
-        return (
-            target_stock_data.loc[:, "市盈率-动态"].values[0],
-            target_stock_data.loc[:, "市净率"].values[0],
-        )
+        try:
+            return (
+                target_stock_data.loc[:, "市盈率-动态"].values[0],
+                target_stock_data.loc[:, "市净率"].values[0],
+            )
+        except Exception as e:
+            print(e)
+            return 0.0, 0.0
 
     @staticmethod
     def get_financial_info_by_stock(stock_code: str):
@@ -46,39 +57,75 @@ class GlobalStockInfo(object):
     # 净利润-同比增长
     # 营业收入-同比增长
     # 净资产收益率 ROE
-    @staticmethod
-    def get_financial_info_by_date_with_condition(
-        t_date: str,
-        gross_profit_margin=30,
-        net_profit_margin=15,
-        inc_net_profit_year_on_year=5,
-        inc_operation_profit_year_on_year=20,
-        roe=3,
-    ):
+    def get_financial_info_by_date_with_condition(self,
+                                                  t_date: str,
+                                                  gross_profit_margin=30,
+                                                  net_profit_margin=15,
+                                                  inc_net_profit_year_on_year=5,
+                                                  inc_operation_profit_year_on_year=20,
+                                                  roe=5,
+                                                  ):
         stock_em_yjbb_df = ak.stock_em_yjbb(date=t_date)
-        stock_em_yjbb_df = stock_em_yjbb_df.loc[
-            :,
+        stock_em_yjbb_df = stock_em_yjbb_df[
             [
                 "股票代码",
                 "股票简称",
+                "营业收入-营业收入",
                 "营业收入-同比增长",
+                "净利润-净利润",
                 "净利润-同比增长",
                 "净资产收益率",
                 "每股经营现金流量",
                 "销售毛利率",
                 "所处行业",
                 "最新公告日期",
-            ],
+            ]
         ]
+        stock_em_yjbb_df['代码'] = stock_em_yjbb_df.progress_apply(lambda row: row["股票代码"],
+                                                                 axis=1)
 
-        stock_em_yjbb_df_sub = stock_em_yjbb_df[
-            (stock_em_yjbb_df["销售毛利率"] >= gross_profit_margin)
-            & (stock_em_yjbb_df["净利润-同比增长"] >= inc_net_profit_year_on_year)
-            & (stock_em_yjbb_df["营业收入-同比增长"] >= inc_operation_profit_year_on_year)
-            & (stock_em_yjbb_df["净资产收益率"] >= roe)
-        ]
-        print(stock_em_yjbb_df_sub)
-        return stock_em_yjbb_df_sub
+        stock_em_yjbb_df['净利润率'] = stock_em_yjbb_df.progress_apply(lambda row: (100*row["净利润-净利润"])/row["营业收入-营业收入"] if row["营业收入-营业收入"]>0 else 0.0,
+                                                                 axis=1)
+
+        print(stock_em_yjbb_df[:10])
+        print(stock_em_yjbb_df.dtypes)
+
+        stock_em_yjbb_df_all = pd.merge(stock_em_yjbb_df, self.current_stock_price_info, how='left', on='代码')
+        print('stock_em_yjbb_df_all shape {}'.format(stock_em_yjbb_df_all.shape))
+
+        stock_em_yjbb_df_sub = stock_em_yjbb_df_all[
+            (stock_em_yjbb_df_all["销售毛利率"] >= gross_profit_margin)
+            & (stock_em_yjbb_df_all["净利润率"] >= net_profit_margin)
+            & (stock_em_yjbb_df_all["净利润-同比增长"] >= inc_net_profit_year_on_year)
+            & (stock_em_yjbb_df_all["营业收入-同比增长"] >= inc_operation_profit_year_on_year)
+            & (stock_em_yjbb_df_all["净资产收益率"] >= roe)
+            & (stock_em_yjbb_df_all["市盈率-动态"] <= 100)
+            & (stock_em_yjbb_df_all["市盈率-动态"] > 0)
+            & (stock_em_yjbb_df_all["市净率"] <= 10)
+            ]
+        print('stock_em_yjbb_df_sub type {} , shape {}'.format(type(stock_em_yjbb_df_sub), stock_em_yjbb_df_sub.shape))
+        print(stock_em_yjbb_df_sub[:10])
+
+        stock_em_yjbb_df_sub['basic_info'] = stock_em_yjbb_df_sub.progress_apply(lambda row: get_stock_basic_info_ak(str(row["代码"])),
+                                                                 axis=1)
+
+        stock_em_yjbb_df_sub.dropna(axis=0, inplace=True)
+        print('stock_em_yjbb_df_sub type {} , shape {}'.format(type(stock_em_yjbb_df_sub), stock_em_yjbb_df_sub.shape))
+
+        stock_em_yjbb_df_sub['总股本'] = stock_em_yjbb_df_sub.progress_apply(lambda row: row["basic_info"][4],
+                                                                 axis=1)
+        stock_em_yjbb_df_sub['经营现金流量'] = stock_em_yjbb_df_sub.progress_apply(lambda row: row["总股本"]*row["每股经营现金流量"],
+                                                                          axis=1)
+
+        stock_em_yjbb_df_sub_sub = stock_em_yjbb_df_sub[
+            (stock_em_yjbb_df_sub["总股本"] <= 4.0)
+            & (stock_em_yjbb_df_sub["经营现金流量"] >= 1.0)
+            ]
+
+        print('stock_em_yjbb_df_sub_sub final shape {}'.format(stock_em_yjbb_df_sub_sub.shape))
+        print(stock_em_yjbb_df_sub_sub)
+
+        return stock_em_yjbb_df_sub_sub
 
 
 # 基于永续年金的估值
@@ -105,7 +152,7 @@ def get_stock_basic_price(cash: float, capitalization: float, debug_flag: bool =
         current_cash, cash_increase_ratio, zhe_xian_r_ratio, 10
     )
     yong_xu = (
-        cash_year[-1] * (1 + yong_xu_g_ratio) / (zhe_xian_r_ratio - yong_xu_g_ratio)
+            cash_year[-1] * (1 + yong_xu_g_ratio) / (zhe_xian_r_ratio - yong_xu_g_ratio)
     )
     yong_xu_zhe_xian = yong_xu / pow(1 + zhe_xian_r_ratio, 10)
     gu_zhi = yong_xu_zhe_xian + sum(zhe_xian_year)
@@ -125,8 +172,8 @@ def get_stock_basic_price(cash: float, capitalization: float, debug_flag: bool =
 def get_city_info(stock_code):
     q = (
         query(finance.STK_COMPANY_INFO)
-        .filter(finance.STK_COMPANY_INFO.code == stock_code)
-        .limit(10)
+            .filter(finance.STK_COMPANY_INFO.code == stock_code)
+            .limit(10)
     )
     data = finance.run_query(q)
     return data["city"], data["industry_1"], data["industry_2"], data["full_name"]
@@ -232,22 +279,25 @@ def get_basic_stock(s_date: str, price_date: str):
 
 
 def get_stock_basic_info_ak(stock_code: str):
-    stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
-    print(stock_individual_info_em_df)
-    market_value = stock_individual_info_em_df.loc[0, "value"] / 100000000
-    flow_market_value = stock_individual_info_em_df.loc[1, "value"] / 100000000
-    capitalization = stock_individual_info_em_df.loc[6, "value"] / 100000000
-    flow_capitalization = stock_individual_info_em_df.loc[7, "value"] / 100000000
-    stock_name = stock_individual_info_em_df.loc[5, "value"]
-    current_price = market_value / capitalization
-    return (
-        stock_name,
-        current_price,
-        market_value,
-        flow_market_value,
-        capitalization,
-        flow_capitalization,
-    )
+    try:
+        stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
+        # print(stock_individual_info_em_df)
+        market_value = 0.0 if isinstance(stock_individual_info_em_df.loc[0, "value"], str) else stock_individual_info_em_df.loc[0, "value"] / 100000000
+        flow_market_value = 0.0 if isinstance(stock_individual_info_em_df.loc[1, "value"], str) else stock_individual_info_em_df.loc[1, "value"] / 100000000
+        capitalization = 0.0 if isinstance(stock_individual_info_em_df.loc[6, "value"], str) else stock_individual_info_em_df.loc[6, "value"] / 100000000
+        flow_capitalization = 0.0 if isinstance(stock_individual_info_em_df.loc[7, "value"], str) else stock_individual_info_em_df.loc[7, "value"] / 100000000
+        stock_name = stock_individual_info_em_df.loc[5, "value"]
+        current_price = market_value / capitalization
+        return (
+            stock_name,
+            current_price,
+            market_value,
+            flow_market_value,
+            capitalization,
+            flow_capitalization,
+        )
+    except Exception as e:
+        return None
 
 
 def get_stock_latest_pe_pb_ak(stock_code: str):
@@ -262,5 +312,7 @@ if __name__ == "__main__":
     test_code = "000001"
     print(get_stock_basic_info_ak(test_code))
     print(price_db.get_stock_pe_pb(test_code))
-    print(GlobalStockInfo.get_financial_info_by_date_with_condition("20210930"))
+    final_res = price_db.get_financial_info_by_date_with_condition("20210930")
+
+    final_res.to_csv("价值选股_{0}_{1}.csv".format('2021q3', today_date))
     pass
