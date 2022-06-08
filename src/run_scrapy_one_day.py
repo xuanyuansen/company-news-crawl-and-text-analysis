@@ -203,6 +203,7 @@ if __name__ == "__main__":
         report_list_of_dict = gdb.get_report_raw_version()
 
         file_name = "./info/news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
+        mail_file_name = "news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
 
         ordered_list = [
             "Code",
@@ -255,6 +256,7 @@ if __name__ == "__main__":
         utils.send_mail(
             topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),
             content=str(title_dict_sort),
+            attach_name = mail_file_name,
             _file_name=file_name,
         )
 

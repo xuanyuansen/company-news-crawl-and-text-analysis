@@ -27,10 +27,10 @@ def get_logger():
     return logger
 
 
-def send_mail(topic, content, _file_name=None):
+def send_mail(topic, content, attach_name=None, _file_name=None):
     from_address = "327778924@qq.com"
-    password = "scaimxedcfevbhga"
-    toaddrs = "wangliaofan1988@163.com"
+    password = "vnhkufweunbkbjjf"
+    toaddrs = ["wangliaofan1988@163.com", "marketanalysis@qq.com"]
 
     text_part = MIMEText(content, "plain", "utf-8")
     m = MIMEMultipart()
@@ -38,12 +38,12 @@ def send_mail(topic, content, _file_name=None):
 
     if _file_name is not None:
         csv_part = MIMEApplication(open(_file_name, "rb").read())
-        csv_part.add_header("Content-Disposition", "attachment", filename=_file_name)
+        csv_part.add_header("Content-Disposition", "attachment", filename=attach_name)
         m.attach(csv_part)
 
     # 邮件头信息
     m["From"] = Header(from_address)
-    m["To"] = Header(toaddrs)
+    m["To"] = Header(",".join(toaddrs))
     m["Subject"] = Header(topic)
 
     try:
