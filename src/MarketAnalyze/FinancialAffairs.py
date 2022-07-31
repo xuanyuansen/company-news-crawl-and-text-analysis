@@ -65,7 +65,10 @@ class GlobalStockInfo(object):
                                                   inc_operation_profit_year_on_year=20,
                                                   roe=5,
                                                   ):
-        stock_em_yjbb_df = ak.stock_em_yjbb(date=t_date)
+        # stock_em_yjbb_df = ak.stock_em_yjbb(date=t_date)
+        # update akshare function
+        print(t_date)
+        stock_em_yjbb_df = ak.stock_yjbb_em(date=t_date)
         stock_em_yjbb_df = stock_em_yjbb_df[
             [
                 "股票代码",
@@ -312,7 +315,7 @@ if __name__ == "__main__":
     test_code = "000001"
     print(get_stock_basic_info_ak(test_code))
     print(price_db.get_stock_pe_pb(test_code))
-    final_res = price_db.get_financial_info_by_date_with_condition("20210930")
+    final_res = price_db.get_financial_info_by_date_with_condition("20220331")
 
-    final_res.to_csv("价值选股_{0}_{1}.csv".format('2021q3', today_date))
+    final_res.to_csv("价值选股_{0}_{1}.csv".format('2022q1', today_date))
     pass
