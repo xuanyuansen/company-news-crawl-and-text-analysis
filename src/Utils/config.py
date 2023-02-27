@@ -36,7 +36,7 @@ SVM_MODEL_FILE = "./info/svm_model.pkl"
 COUNT_VECTOR_FILE = "./info/count_vector_rizer.pkl"
 
 STOCK_DATABASE_NAME = "stock"
-COLLECTION_NAME_STOCK_BASIC_INFO = "basic_info"
+COLLECTION_NAME_STOCK_BASIC_INFO = "cn_basic_info"
 ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE = "stock_specific_news"
 
 HK_STOCK_DATABASE_NAME = "stock_hk"

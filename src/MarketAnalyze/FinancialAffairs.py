@@ -6,6 +6,7 @@ import akshare as ak
 from Utils.utils import set_display, today_date
 from tqdm import tqdm, trange
 import pandas as pd
+import copy
 
 tqdm.pandas(desc='progress status')
 
@@ -13,10 +14,18 @@ tqdm.pandas(desc='progress status')
 class GlobalStockInfo(object):
     def __init__(self):
         self.today_date = today_date
+        self.all_codes = []
         self.current_stock_price_info = ak.stock_zh_a_spot_em()
         print('base data shape is {}'.format(self.current_stock_price_info.shape))
         if self.current_stock_price_info.shape[0] > 10:
             print(self.current_stock_price_info[:10])
+
+    def get_all_stock_code_list(self):
+        all_codes = copy.deepcopy(self.current_stock_price_info)
+        all_codes['name'] = all_codes['名称']
+        print("{} length is {}, sample {}".format(type(all_codes), len(all_codes), all_codes[:10]))
+
+        return all_codes
 
     def get_stock_pe_pb(self, stock_code):
         target_stock_data = self.current_stock_price_info.loc[
@@ -311,7 +320,7 @@ def get_stock_latest_pe_pb_ak(stock_code: str):
 if __name__ == "__main__":
     set_display()
     price_db = GlobalStockInfo()
-
+    price_db.get_all_stock_code_list()
     test_code = "000001"
     print(get_stock_basic_info_ak(test_code))
     print(price_db.get_stock_pe_pb(test_code))

@@ -50,9 +50,9 @@ class Database(object):
         mc = MongoClient(
             self.ip,
             self.port,
-            username=_uname,
-            password=_password,
-            authMechanism="SCRAM-SHA-1",
+            #username=_uname,
+            #password=_password,
+            #authMechanism="SCRAM-SHA-1",
             serverSelectionTimeoutMS="5000",
             maxPoolSize=200,
         )

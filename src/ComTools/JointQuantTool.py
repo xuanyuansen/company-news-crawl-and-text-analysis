@@ -45,4 +45,6 @@ if __name__ == "__main__":
     # encrypted_text = _cipher.encrypt(b'Fighton.jukuan999')
     # print(encrypted_text)
     tool = JointQuantTool()
+    info = tool.get_all_stock()
+    print(info)
     pass

@@ -12,6 +12,8 @@ import pymongo
 from pandas import DataFrame
 from ComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price, get_query_count
+
+from MarketAnalyze.FinancialAffairs import GlobalStockInfo
 from MarketPriceSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
@@ -621,19 +623,25 @@ class StockInfoSpyder(Spyder):
         return True
 
     # 获取CN股票信息数据
+    # if database is empty, then get all code info first through ak share
     def get_all_stock_code_info_of_cn(self):
-        data = self.joint_quant_tool.get_all_stock()
+        try:
+            data = self.joint_quant_tool.get_all_stock()
+        except Exception as e:
+            print(e)
+            price_db = GlobalStockInfo()
+            data = price_db.get_all_stock_code_list()
 
         for index, row in data.iterrows():
             str_md5 = hashlib.md5(
-                ("{0} {1}".format(row["name"], index)).encode(encoding="utf-8")
+                ("{0} {1}".format(row["名称"], row["代码"])).encode(encoding="utf-8")
             ).hexdigest()
 
             if self.col_basic_info_cn.find_one({"_id": str_md5}) is not None:
                 self.logger.info("id already exist {0} {1}".format(str_md5, index))
                 continue
 
-            stock_code = str(index).split(".")[0]
+            stock_code = row["代码"]
             symbol = (
                 "sh{0}".format(stock_code)
                 if int(stock_code) >= 600000
@@ -642,10 +650,10 @@ class StockInfoSpyder(Spyder):
             _data = {
                 "_id": str_md5,
                 "symbol": symbol,
-                "name": row["display_name"],
+                "name": row["名称"],
                 "code": stock_code,
-                "start_date": row["start_date"],
-                "end_date": row["end_date"],
+                "start_date": "",
+                "end_date": "",
                 "name_suo_xie": row["name"],
                 "joint_quant_code": index,
             }
@@ -654,15 +662,18 @@ class StockInfoSpyder(Spyder):
         return True
 
     # 获取A股历史行情
+    # need to rewrite, get all data from ak share, 2023/02/26
     def get_historical_cn_stock_daily_price(
         self, start_date=None, end_date=None, freq="day"
     ):
         if end_date is None:
             end_date = datetime.datetime.now().strftime("%Y%m%d")
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
-        if len(stock_symbol_list) == 0:
-            self.get_all_stock_code_info_of_cn()
-            stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
+
+        # if len(stock_symbol_list) == 0:
+        self.get_all_stock_code_info_of_cn()
+        stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
+        print(stock_symbol_list)
         if freq == "day":
             for symbol in stock_symbol_list:
                 time.sleep(1)
