@@ -12,8 +12,7 @@ import pymongo
 from pandas import DataFrame
 from ComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price, get_query_count
-
-from MarketAnalyze.FinancialAffairs import GlobalStockInfo
+from MarketPriceSpider import StockInfoUtils
 from MarketPriceSpider.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
@@ -62,18 +61,18 @@ class StockInfoSpyder(Spyder):
 
     def gen_cn_stock_embedding_file(self):
         c_data = ak.stock_fund_flow_concept(symbol="3日排行")
-        with open(self.cn_concept_file, 'w') as concept_file:
+        with open(self.cn_concept_file, "w") as concept_file:
             content = []
             for index, row in c_data.iterrows():
-                content.append(row['行业'])
-            concept_file.writelines('\n'.join(content))
+                content.append(row["行业"])
+            concept_file.writelines("\n".join(content))
 
         i_data = ak.stock_fund_flow_industry(symbol="3日排行")
-        with open(self.cn_industry_file, 'w') as industry_file:
+        with open(self.cn_industry_file, "w") as industry_file:
             content = []
             for index, row in i_data.iterrows():
-                content.append(row['行业'])
-            industry_file.writelines('\n'.join(content))
+                content.append(row["行业"])
+            industry_file.writelines("\n".join(content))
         return True
 
     # 获取股票所属的概念，可能有多个概念，所以用List存储
@@ -82,30 +81,34 @@ class StockInfoSpyder(Spyder):
         print(data[:100])
         for index, row in data.iterrows():
             self.logger.info(index)
-            self.logger.info('\n {}'.format(row))
+            self.logger.info("\n {}".format(row))
             try:
-                detail = ak.stock_board_concept_cons_ths(symbol=row['行业'])  # 同花顺-成份股
+                detail = ak.stock_board_concept_cons_ths(symbol=row["行业"])  # 同花顺-成份股
                 for sub_index, sub_row in detail.iterrows():
-                    _data: dict = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
-                    if _data.get('concept') is None:
+                    _data: dict = self.col_basic_info_cn.find_one(
+                        {"code": sub_row["代码"]}
+                    )
+                    if _data.get("concept") is None:
                         insert = True
-                        new_concept = row['行业']
+                        new_concept = row["行业"]
                     else:
-                        _concept = _data['concept'].split(',')
-                        if row['行业'] in _concept:
+                        _concept = _data["concept"].split(",")
+                        if row["行业"] in _concept:
                             insert = False
-                            new_concept = _data['concept']
+                            new_concept = _data["concept"]
                         else:
                             insert = True
-                            _concept.append(row['行业'])
-                            new_concept = ','.join(_concept)
+                            _concept.append(row["行业"])
+                            new_concept = ",".join(_concept)
 
-                    if insert:       # _data['concept'] = ','.join(_concept)
+                    if insert:  # _data['concept'] = ','.join(_concept)
                         res = self.col_basic_info_cn.update_one(
-                            {"_id": _data['_id']}, {"$set": {"concept": new_concept}}
+                            {"_id": _data["_id"]}, {"$set": {"concept": new_concept}}
                         )
-                        self.logger.info('modify count {}'.format(res.modified_count))
-                        new_data: dict = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
+                        self.logger.info("modify count {}".format(res.modified_count))
+                        new_data: dict = self.col_basic_info_cn.find_one(
+                            {"code": sub_row["代码"]}
+                        )
                         self.logger.info(new_data)
             except Exception as e:
                 self.logger.error(e)
@@ -120,18 +123,20 @@ class StockInfoSpyder(Spyder):
         for index, row in data.iterrows():
             self.logger.info(index)
             self.logger.info(row)
-            detail = ak.stock_board_industry_cons_ths(symbol=row['行业'])
+            detail = ak.stock_board_industry_cons_ths(symbol=row["行业"])
             # print(detail)
             for sub_index, sub_row in detail.iterrows():
-                res = self.db_obj.update_row(self.database_name_cn,
-                                             self.collection_name_cn,
-                                             query={'code': sub_row['代码']},
-                                             new_values={'industry': row['行业']})
-                self.logger.info('{} {}'.format(res.modified_count, res.upserted_id))
+                res = self.db_obj.update_row(
+                    self.database_name_cn,
+                    self.collection_name_cn,
+                    query={"code": sub_row["代码"]},
+                    new_values={"industry": row["行业"]},
+                )
+                self.logger.info("{} {}".format(res.modified_count, res.upserted_id))
                 # find_res = self.col_basic_info_cn.find_one({'code': sub_row['代码']})
                 # print(find_res)
 
-        self.logger.info('update industry done!')
+        self.logger.info("update industry done!")
 
         return True
 
@@ -207,7 +212,12 @@ class StockInfoSpyder(Spyder):
         return True
 
     def get_daily_price_data_of_specific_stock(
-        self, symbol, market_type: str, start_date: str = None, end_date: str = None, _keys: list = None
+        self,
+        symbol,
+        market_type: str,
+        start_date: str = None,
+        end_date: str = None,
+        _keys: list = None,
     ):
         if market_type == "cn":
             db_name = self.database_name_cn
@@ -222,23 +232,29 @@ class StockInfoSpyder(Spyder):
             stock_data = self.db_obj.get_data(db_name, symbol)
         else:
             sd = start_date.split("-")
-            _query = {
-                "date": {
-                    "$gte": datetime.datetime(
-                        int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                    )
+            _query = (
+                {
+                    "date": {
+                        "$gte": datetime.datetime(
+                            int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                        )
+                    }
                 }
-            } if market_type == "cn" else {"date": {"$gte": start_date}}
+                if market_type == "cn"
+                else {"date": {"$gte": start_date}}
+            )
             if end_date is not None and market_type == "cn":
                 e_d = end_date.split("-")
-                _query = {"date": {
-                    "$gte": datetime.datetime(
-                        int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                    ),
-                    "$lte": datetime.datetime(
-                        int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
-                    )
-                }}
+                _query = {
+                    "date": {
+                        "$gte": datetime.datetime(
+                            int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                        ),
+                        "$lte": datetime.datetime(
+                            int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
+                        ),
+                    }
+                }
 
             stock_data = self.db_obj.get_data(
                 db_name,
@@ -265,7 +281,12 @@ class StockInfoSpyder(Spyder):
         return True, stock_data
 
     def get_week_data_stock(
-        self, symbol, market_type: str, start_date: str = None, end_date=None, _keys: list = None
+        self,
+        symbol,
+        market_type: str,
+        start_date: str = None,
+        end_date=None,
+        _keys: list = None,
     ):
         res, stock_data = self.get_daily_price_data_of_specific_stock(
             symbol, market_type, start_date, end_date, _keys
@@ -625,36 +646,20 @@ class StockInfoSpyder(Spyder):
     # 获取CN股票信息数据
     # if database is empty, then get all code info first through ak share
     def get_all_stock_code_info_of_cn(self):
-        try:
-            data = self.joint_quant_tool.get_all_stock()
-        except Exception as e:
-            print(e)
-            price_db = GlobalStockInfo()
-            data = price_db.get_all_stock_code_list()
-
+        data = StockInfoUtils.get_all_stock_code_info_of_cn()
         for index, row in data.iterrows():
-            str_md5 = hashlib.md5(
-                ("{0} {1}".format(row["名称"], row["代码"])).encode(encoding="utf-8")
-            ).hexdigest()
-
-            if self.col_basic_info_cn.find_one({"_id": str_md5}) is not None:
-                self.logger.info("id already exist {0} {1}".format(str_md5, index))
+            if self.col_basic_info_cn.find_one({"_id": row["_id"]}) is not None:
+                self.logger.info("id already exist {0} {1}".format(row["_id"], index))
                 continue
 
-            stock_code = row["代码"]
-            symbol = (
-                "sh{0}".format(stock_code)
-                if int(stock_code) >= 600000
-                else "sz{0}".format(stock_code)
-            )
             _data = {
-                "_id": str_md5,
-                "symbol": symbol,
+                "_id": row["_id"],
+                "symbol": row["joint_quant_code"],
                 "name": row["名称"],
-                "code": stock_code,
+                "code": row["代码"],
                 "start_date": "",
                 "end_date": "",
-                "name_suo_xie": row["name"],
+                "name_suo_xie": row["名称"],
                 "joint_quant_code": index,
             }
 
@@ -670,8 +675,8 @@ class StockInfoSpyder(Spyder):
             end_date = datetime.datetime.now().strftime("%Y%m%d")
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
 
-        # if len(stock_symbol_list) == 0:
-        self.get_all_stock_code_info_of_cn()
+        if len(stock_symbol_list) == 0:
+            self.get_all_stock_code_info_of_cn()
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
         print(stock_symbol_list)
         if freq == "day":
