@@ -50,9 +50,9 @@ class Database(object):
         mc = MongoClient(
             self.ip,
             self.port,
-            #username=_uname,
-            #password=_password,
-            #authMechanism="SCRAM-SHA-1",
+            # username=_uname,
+            # password=_password,
+            # authMechanism="SCRAM-SHA-1",
             serverSelectionTimeoutMS="5000",
             maxPoolSize=200,
         )
@@ -99,6 +99,8 @@ class Database(object):
         max_data_request=None,
         query=None,
         keys=None,
+        sort=False,
+        sort_key: list = None,
     ):
         database = self.conn[database_name]
         collection = database.get_collection(collection_name)
@@ -161,7 +163,13 @@ class Database(object):
                 else:
                     break
             logging.info("find done, data cnt is {0}".format(data_length))
-        return pd.DataFrame(_dict)
+        res_df = pd.DataFrame(_dict)
+        print(res_df.dtypes)
+        if sort:
+            res_df.sort_values(
+                by=sort_key, ascending=True, inplace=True, ignore_index=True
+            )
+        return res_df
 
     def drop_db(self, database):
         self.conn.drop_database(database)

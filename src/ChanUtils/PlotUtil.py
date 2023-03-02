@@ -126,8 +126,18 @@ class PlotUtil(object):
 
 if __name__ == "__main__":
     db = Database()
-    df = db.get_data(database_name="stock", collection_name="sz000995")
-    # print(df[:100])
+    df = db.get_data(
+        database_name="stock",
+        collection_name="sz000995",
+        max_data_request=None,
+        query=None,
+        keys=None,
+        sort=True,
+        sort_key=["date"],
+    )
+    print(df.shape)
+    print(df[:10])
+    print(df[-10:])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")

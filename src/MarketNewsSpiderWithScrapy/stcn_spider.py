@@ -8,7 +8,7 @@ Created Time: 2021/05/25
 """
 from bs4 import BeautifulSoup
 from scrapy.http import Request
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 
 
 class StcnSpider(BaseSpider):

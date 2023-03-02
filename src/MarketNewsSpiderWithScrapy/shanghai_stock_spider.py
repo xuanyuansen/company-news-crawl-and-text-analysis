@@ -2,7 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 from bs4 import BeautifulSoup
 from scrapy import Request
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from selenium import webdriver
 import time
 import random

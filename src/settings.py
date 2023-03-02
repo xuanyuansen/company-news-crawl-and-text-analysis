@@ -5,8 +5,8 @@ BOT_NAME = "spider"
 
 PYTHONHASHSEED = 10
 
-SPIDER_MODULES = ["SpiderWithScrapy"]
-NEWSPIDER_MODULE = "SpiderWithScrapy"
+SPIDER_MODULES = ["MarketNewsSpiderWithScrapy"]
+NEWSPIDER_MODULE = "MarketNewsSpiderWithScrapy"
 
 ROBOTSTXT_OBEY = False
 

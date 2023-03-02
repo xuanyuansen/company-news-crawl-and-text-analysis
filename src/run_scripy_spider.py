@@ -2,13 +2,13 @@ import os
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-from SpiderWithScrapy.east_money_spider import EastMoneySpider
-from SpiderWithScrapy.net_ease_spider import NetEaseSpider
-from SpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
-from SpiderWithScrapy.stcn_spider import StcnSpider
-from SpiderWithScrapy.jrj_spider import JrjSpider
-from SpiderWithScrapy.nbd_spider import NBDSpider
-from SpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
+from MarketNewsSpiderWithScrapy.east_money_spider import EastMoneySpider
+from MarketNewsSpiderWithScrapy.net_ease_spider import NetEaseSpider
+from MarketNewsSpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
+from MarketNewsSpiderWithScrapy.stcn_spider import StcnSpider
+from MarketNewsSpiderWithScrapy.jrj_spider import JrjSpider
+from MarketNewsSpiderWithScrapy.nbd_spider import NBDSpider
+from MarketNewsSpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
 from Utils import config
 
 

@@ -76,7 +76,6 @@ def train():
 
     # training loop
     for i_epoch in range(1, epochs + 1):
-
         # random starting point (1st 100 chars) from data to begin
         data_ptr = np.random.randint(100)
         n = 0

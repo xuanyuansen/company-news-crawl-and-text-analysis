@@ -1,6 +1,6 @@
 import logging
 
-from ComTools.BuildStockNewsDb import GenStockNewsDB
+from MongoDbComTools.BuildStockNewsDb import GenStockNewsDB
 from Utils import config
 
 logger = logging.getLogger()

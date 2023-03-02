@@ -12,7 +12,7 @@ import pandas as pd
 import argparse
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject
-from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
+from MarketPriceSpiderWithScrapy.StockInfoSpyder import StockInfoSpyder
 from Utils.utils import set_display, today_date
 from Utils import config
 from Utils.database import Database

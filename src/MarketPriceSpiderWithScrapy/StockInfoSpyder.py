@@ -10,10 +10,10 @@ import logging
 import time
 import pymongo
 from pandas import DataFrame
-from ComTools.JointQuantTool import JointQuantTool
+from MongoDbComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price, get_query_count
-from MarketPriceSpider import StockInfoUtils
-from MarketPriceSpider.BasicSpyder import Spyder
+from MarketPriceSpiderWithScrapy import StockInfoUtils
+from MarketPriceSpiderWithScrapy.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
 from Utils.database import Database

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from bs4 import BeautifulSoup
 from scrapy.http import Request
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 
 
 class EastMoneySpider(BaseSpider):

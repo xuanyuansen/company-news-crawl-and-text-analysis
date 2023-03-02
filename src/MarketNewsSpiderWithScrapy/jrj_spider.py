@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # remind install clang on mac with cmd, xcode-select --install
 from bs4 import BeautifulSoup
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from scrapy.http import Request
 
 

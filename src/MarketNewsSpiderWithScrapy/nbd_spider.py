@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from scrapy.http import Request
 
 

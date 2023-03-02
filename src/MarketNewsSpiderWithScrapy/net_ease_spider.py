@@ -2,7 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 # http://money.163.com/special/00251LR5/gptj.html
 from bs4 import BeautifulSoup
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from scrapy.http import Request
 
 

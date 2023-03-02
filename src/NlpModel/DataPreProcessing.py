@@ -2,9 +2,9 @@
 # 用于数据预处理
 import os
 
-from Surpriver.feature_generator import TAEngine
+from ThirdPartyToolSurpriver.feature_generator import TAEngine
 from Utils import config
-from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
+from MarketPriceSpiderWithScrapy.StockInfoSpyder import StockInfoSpyder
 import pandas as pd
 from datetime import datetime
 from ChanUtils.BasicUtil import KiLineObject
@@ -109,21 +109,26 @@ class DataPreProcessing(object):
                 week_data = pickle.load(_file)
                 label_cnt = week_data.groupby(["label"]).size()
                 print(label_cnt)
-                return week_data, label_cnt, week_data["feature_length"].max(), week_data[
-                    "deep_feature_length"].max(), week_data["ta_features_length"].max()
+                return (
+                    week_data,
+                    label_cnt,
+                    week_data["feature_length"].max(),
+                    week_data["deep_feature_length"].max(),
+                    week_data["ta_features_length"].max(),
+                )
 
     def get_label(
-            self,
-            symbols: pd.DataFrame,
-            # market_type: str,
-            week_data_start_date: str = None,
-            week_data_end_date: str = None,
-            cnt_limit_start: int = None,
-            cnt_limit_end: int = None,
-            # feature_type: str = "xgb",
-            save_feature: bool = True,
-            force_update_feature: bool = False,
-            direct_load_file: bool = False
+        self,
+        symbols: pd.DataFrame,
+        # market_type: str,
+        week_data_start_date: str = None,
+        week_data_end_date: str = None,
+        cnt_limit_start: int = None,
+        cnt_limit_end: int = None,
+        # feature_type: str = "xgb",
+        save_feature: bool = True,
+        force_update_feature: bool = False,
+        direct_load_file: bool = False,
     ):
         # direct load from file
         if direct_load_file:
@@ -140,7 +145,7 @@ class DataPreProcessing(object):
                 row["symbol"],
                 market_type=self.market_type,
                 start_date=week_data_start_date,
-                end_date=week_data_end_date
+                end_date=week_data_end_date,
             )[1],
             axis=1,
         )
@@ -177,8 +182,8 @@ class DataPreProcessing(object):
 
         week_data["ratio"] = week_data.apply(
             lambda row: 100
-                        * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
-                        / row["week"].iloc[-1, 0],
+            * (row["week"].iloc[-1, 1] - row["week"].iloc[-1, 0])
+            / row["week"].iloc[-1, 0],
             axis=1,
         )
         print("最大涨幅, {}".format(week_data["ratio"].max()))
@@ -211,7 +216,7 @@ class DataPreProcessing(object):
                 row["symbol"],
                 _market_type=self.market_type,
                 _start_date=self.daily_stock_data_start_date,
-                _end_date=row["week_data_start_date"]
+                _end_date=row["week_data_start_date"],
             ),
             axis=1,
         )

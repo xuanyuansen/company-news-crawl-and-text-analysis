@@ -40,7 +40,9 @@ class TAEngine:
         for history in rsi_history:
             rsi = (
                 ta.momentum.RSIIndicator(
-                    price_data["Close" if upper_case else "close"], window=history, fillna=True
+                    price_data["Close" if upper_case else "close"],
+                    window=history,
+                    fillna=True,
                 )
                 .rsi()
                 .values.tolist()
@@ -170,7 +172,6 @@ class TAEngine:
         all_keys = list(sorted(features_dictionary.keys()))
         feature_list = []
         for key in all_keys:
-
             # Check if key is present
             key_in_keys_to_use = [k in key for k in keys_to_use]
             if key_in_keys_to_use.count(True) > 0:

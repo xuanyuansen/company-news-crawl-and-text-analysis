@@ -157,7 +157,7 @@ class ArgChecker:
 
 class Surpriver:
     def __init__(self):
-        print("Surpriver has been initialized...")
+        print("ThirdPartyToolSurpriver has been initialized...")
         self.TOP_PREDICTIONS_TO_PRINT = top_n
         self.HISTORY_TO_USE = history_to_use
         self.MINIMUM_VOLUME = min_volume
@@ -591,7 +591,7 @@ class Surpriver:
 # Check arguments
 argumentChecker = ArgChecker()
 
-# Create Surpriver instance
+# Create ThirdPartyToolSurpriver instance
 supriver = Surpriver()
 
 # Generate predictions

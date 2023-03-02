@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from scrapy import Request
-from SpiderWithScrapy.BaseSpider import BaseSpider
+from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from Utils import config
 import time
 import random

@@ -71,8 +71,8 @@ def generate_batch(batch):
     offsets = [0] + [len(entry) for entry in text]
     offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
     text = torch.cat(text)
-    print('batch text {} {}'.format(text.shape, text))
-    print('batch offsets {} {}'.format(offsets.shape, offsets))
+    print("batch text {} {}".format(text.shape, text))
+    print("batch offsets {} {}".format(offsets.shape, offsets))
     return text, offsets, label
 
 
@@ -105,7 +105,6 @@ def train_and_valid(lr_, sub_train_, sub_valid_):
     num_lines = num_epochs * len(train_data)
 
     for epoch in range(num_epochs):
-
         # Train the model
         for i, (text, offsets, cls) in enumerate(train_data):
             optimizer.zero_grad()

@@ -2,7 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 from datetime import datetime
 
-from ComTools.BuildStockNewsDb import GenStockNewsDB
+from MongoDbComTools.BuildStockNewsDb import GenStockNewsDB
 from scrapy import Spider
 from Utils.items import TweetItem
 import hashlib

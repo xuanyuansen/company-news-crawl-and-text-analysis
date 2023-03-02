@@ -9,13 +9,13 @@
 # 特征，笔的长度，variance。
 # 我的label是什么呢？近一周内的涨幅，五个等级，涨跌幅取LOG看一下分布。每周训练一次模型，预测下周的结果。
 from ChanUtils.ChanFeature import BasicFeatureGen, DeepFeatureGen
-from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
+from MarketPriceSpiderWithScrapy.StockInfoSpyder import StockInfoSpyder
 import sys
 import pandas as pd
 from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
-from Surpriver import feature_generator
+from ThirdPartyToolSurpriver import feature_generator
 import torch
 import numpy as np
 from NlpModel.ChanBasedCnn import (

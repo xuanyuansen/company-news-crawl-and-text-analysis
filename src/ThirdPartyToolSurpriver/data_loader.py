@@ -137,7 +137,6 @@ class DataEngine:
             return history_data, [], False
 
     def calculate_volatility(self, stock_price_data):
-
         stock_price_data_list = stock_price_data.values.tolist()
         close_prices = [
             float(item[self.CLOSE_PRICE_INDEX]) for item in stock_price_data_list

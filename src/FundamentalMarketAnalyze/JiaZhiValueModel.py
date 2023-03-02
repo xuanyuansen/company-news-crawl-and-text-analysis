@@ -1,14 +1,15 @@
 # -*- coding:utf-8 -*-
 # 基础的价值投资模型，利用基本面来打分
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import akshare as ak
 from FinancialAffairs import get_basic_stock
-from ComTools import JointQuantTool
+from MongoDbComTools import JointQuantTool
 from Utils.utils import set_display, today_date
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # tool = JointQuantTool.JointQuantTool()
     set_display()
 

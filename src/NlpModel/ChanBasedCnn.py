@@ -86,7 +86,7 @@ class CustomChanDataset(Dataset):
         feature_data_frame: pd.DataFrame,
         label_data_frame: pd.DataFrame,
         max_feature_length: int,
-        ta_feature_length: int
+        ta_feature_length: int,
     ):
         # assert feature_data_frame.shape[0] == label_data_frame.shape[0]
         self.feature_data: pd.DataFrame = feature_data_frame
@@ -101,11 +101,15 @@ class CustomChanDataset(Dataset):
     # 这个地方做了补零
     def __getitem__(self, idx):
         origin_idx = self.idx_list[idx]
-        ta_features = self.feature_data.loc[origin_idx, ["ta_features"]].values.tolist()[0]
+        ta_features = self.feature_data.loc[
+            origin_idx, ["ta_features"]
+        ].values.tolist()[0]
         # ta_features = [float(ele) for ele in ta_features]
         # print(ta_features)
         # img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        raw_feature = self.feature_data.loc[origin_idx, ["deep_features"]].values.tolist()[0]
+        raw_feature = self.feature_data.loc[
+            origin_idx, ["deep_features"]
+        ].values.tolist()[0]
         # print(raw_feature)
         feature = raw_feature[0]
         # print("feature 0 {} ".format(feature))
@@ -122,23 +126,26 @@ class CustomChanDataset(Dataset):
         # feature list[list]
         try:
             tensor_feature: torch.Tensor = torch.zeros(
-             self.max_feature_length, len(feature[0])
+                self.max_feature_length, len(feature[0])
             )
         except:
-            tensor_feature: torch.Tensor = torch.zeros(
-             self.max_feature_length, 6
-            )
+            tensor_feature: torch.Tensor = torch.zeros(self.max_feature_length, 6)
 
         # print(tensor_feature.shape)
         for idx in range(0, len(feature) - 1):
             gap = self.max_feature_length - len(feature)
-            tensor_feature[idx+gap] = torch.from_numpy(np.array(feature[idx]))
+            tensor_feature[idx + gap] = torch.from_numpy(np.array(feature[idx]))
 
         # print(tensor_feature.shape)
         # print(tensor_feature.t().shape)
         label = self.label.loc[origin_idx]
         label_tensor = torch.tensor(label, dtype=torch.long).to(device)
-        return (tensor_feature.t().to(device), tensor_industry, tensor_concept, tensor_ta.float()), label_tensor
+        return (
+            tensor_feature.t().to(device),
+            tensor_industry,
+            tensor_concept,
+            tensor_ta.float(),
+        ), label_tensor
 
 
 # 模型的架构不对，不能把多个不同类别的数据放到一起来卷积，channel指的是同一个特征的不同embedding
@@ -146,7 +153,14 @@ class CustomChanDataset(Dataset):
 # tensor_industry, tensor_concept 组合处理
 # 2021.07.06
 class TextCNN(nn.Module):
-    def __init__(self, args, max_feature_length: int, ta_dim: int, vocab_industry: int, vocab_concept: int):
+    def __init__(
+        self,
+        args,
+        max_feature_length: int,
+        ta_dim: int,
+        vocab_industry: int,
+        vocab_concept: int,
+    ):
         super(TextCNN, self).__init__()
         self.args = args
         # 对应vocab 就是sequence最大的长度 max_length
@@ -169,10 +183,14 @@ class TextCNN(nn.Module):
 
         self.convolutions_chan_ta = nn.ModuleList(
             [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
-        ).to(device)  # 卷积层
+        ).to(
+            device
+        )  # 卷积层
         self.convolutions_embedding = nn.ModuleList(
             [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
-        ).to(device)  # 卷积层
+        ).to(
+            device
+        )  # 卷积层
         # self.convolutions_ta = nn.ModuleList(
         #     [nn.Conv2d(1, kernel_num, (K, dim)) for K in Ks]
         # ).to(device)  # 卷积层
@@ -199,7 +217,7 @@ class TextCNN(nn.Module):
         # print("_input[2].shape {}".format(_input[2].shape))
         # print('_input[0] {}'.format(_input[0].shape))
         x_chan = self.fc_chan(_input[0])
-        #print('x_chan {}'.format(x_chan.shape))
+        # print('x_chan {}'.format(x_chan.shape))
         em_industry = self.embedding_i(_input[1])
         # print(em_industry.shape)
         em_concept = self.embedding_c(_input[2])
@@ -221,7 +239,8 @@ class TextCNN(nn.Module):
 
         industry_concept = industry_concept.unsqueeze(1)  # (N,Ci,W,D)
         industry_concept = [
-            F.relu(conv(industry_concept)).squeeze(3) for conv in self.convolutions_embedding
+            F.relu(conv(industry_concept)).squeeze(3)
+            for conv in self.convolutions_embedding
         ]  # len(Ks)*(N, K_num,W)
         industry_concept = [
             F.max_pool1d(line, line.size(2)).squeeze(2) for line in industry_concept

@@ -5,7 +5,7 @@ import sys
 
 # https://www.zhiu.cn/46287.html
 import pandas as pd
-from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
+from MongoDbComTools.LocalDbTool import LocalDbTool
 from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     t_stock = None
 
-    stock_info_spyder = StockInfoSpyder()
+    local_db = LocalDbTool()
 
     if args.code:
         print("code is {}".format(args.code))
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         print("should input code or symbol(code with markey type)!!!")
         sys.exit(-2)
 
-    info_frame = stock_info_spyder.get_target_stock_info_by_code(stock_code=_stock_code)
+    info_frame = local_db.get_target_stock_info_by_code(stock_code=_stock_code)
 
     print(info_frame)
 
@@ -95,9 +95,9 @@ if __name__ == "__main__":
     print("name is {}, symbol is {}".format(name, t_stock))
 
     data_res, df = (
-        stock_info_spyder.get_week_data_stock(symbol=t_stock, market_type="cn")
+        local_db.get_week_data_stock(symbol=t_stock, market_type="cn")
         if "week" == k_level
-        else stock_info_spyder.get_daily_price_data_of_specific_stock(
+        else local_db.get_daily_price_data_of_specific_stock(
             symbol=t_stock, market_type="cn", start_date=args.start
         )
     )

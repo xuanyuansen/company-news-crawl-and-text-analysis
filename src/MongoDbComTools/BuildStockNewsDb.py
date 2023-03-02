@@ -27,7 +27,9 @@ class GenStockNewsDB(object):
         self.information_extractor.build_2_class_classify_model()
         self.database = self.information_extractor.db_obj
         self.name_code_df = self.database.get_data(
-            config.STOCK_DATABASE_NAME, config.COLLECTION_NAME_STOCK_BASIC_INFO, keys=['name', 'code']
+            config.STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO,
+            keys=["name", "code"],
         )
         self.force_update_score_using_model = force_update_score_using_model
         self.col_names = []
