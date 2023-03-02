@@ -3,27 +3,107 @@
 # import sys
 import sys
 
+# https://www.zhiu.cn/46287.html
 import pandas as pd
 from MarketPriceSpider.StockInfoSpyder import StockInfoSpyder
 from Utils.utils import set_display, today_date
 from ChanUtils.BasicUtil import KiLineObject
 from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
+import argparse
+import logging
+import matplotlib
+
+matplotlib.rcParams["font.sans-serif"] = ["WenQuanYi Micro Hei"]
+matplotlib.rcParams["axes.unicode_minus"] = False
+print(matplotlib.matplotlib_fname())
 
 
 if __name__ == "__main__":
     set_display()
     print(today_date)
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-m",
+        "--market",
+        help="which market",
+        required=True,
+        default="cn",
+        choices=["cn", "hk", "us", "uszh"],
+    )
+
+    parser.add_argument(
+        "-s",
+        "--symbol",
+        help="stock code with market type, like sz301419",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--code",
+        help="only stock code",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--start",
+        help="start date",
+    )
+
+    parser.add_argument(
+        "-l",
+        "--level",
+        help="k line level",
+        default="week",
+        choices=["daily", "week"],
+    )
+
+    args = parser.parse_args()
+    if args.market:
+        logging.info("market type is {}".format(args.market))
+        market_type = args.market
+    else:
+        logging.error("market type unknown!")
+        raise Exception("market type unknown!")
+
+    if args.level:
+        k_level = args.level
+    else:
+        k_level = "week"
+
+    t_stock = None
+
     stock_info_spyder = StockInfoSpyder()
 
-    t_stock = sys.argv[1]
-    k_level = "week"
-    name = sys.argv[1]
-    data_res, df = stock_info_spyder.get_week_data_stock(
-        symbol=t_stock, market_type="cn"
+    if args.code:
+        print("code is {}".format(args.code))
+        _stock_code = args.code
+    elif args.symbol:
+        t_stock = args.symbol
+        _stock_code = t_stock[-5]
+        print("symbol is {}, code is {}".format(args.symbol, _stock_code))
+    else:
+        print("should input code or symbol(code with markey type)!!!")
+        sys.exit(-2)
+
+    info_frame = stock_info_spyder.get_target_stock_info_by_code(stock_code=_stock_code)
+
+    print(info_frame)
+
+    name = str(info_frame["name"].values[0])
+    t_stock = str(info_frame["symbol"].values[0])
+    print("name is {}, symbol is {}".format(name, t_stock))
+
+    data_res, df = (
+        stock_info_spyder.get_week_data_stock(symbol=t_stock, market_type="cn")
+        if "week" == k_level
+        else stock_info_spyder.get_daily_price_data_of_specific_stock(
+            symbol=t_stock, market_type="cn", start_date=args.start
+        )
     )
     if not data_res:
         sys.exit(-1)
+
     print(df.shape)
     # db = Database()
     # df = db.get_data(database_name='stock', collection_name='000001.XSHE_week')

@@ -232,16 +232,19 @@ class ChanBi(KiLineObject):
         return t
 
     def __str__(self):
-        return "date index is: {0}, direction: {1}, start idx: {2}, end idx: {3}, start value is: {4}," " end value is: {5}, high: {6}, low: {7}, whole volume {8}".format(
-            ",".join([str(ele) for ele in self.date]),
-            self.direction,
-            self.start_index,
-            self.end_index,
-            self.start_value,
-            self.end_value,
-            self.high,
-            self.low,
-            self.whole_volume,
+        return (
+            "date index is: {0}, direction: {1}, start idx: {2}, end idx: {3}, start value is: {4},"
+            " end value is: {5}, high: {6}, low: {7}, whole volume {8}".format(
+                ",".join([str(ele) for ele in self.date]),
+                self.direction,
+                self.start_index,
+                self.end_index,
+                self.start_value,
+                self.end_value,
+                self.high,
+                self.low,
+                self.whole_volume,
+            )
         )
 
     pass
@@ -261,7 +264,6 @@ def merge(k1: ChanBi, k2: ChanBi, merge_direction: str, domain_ele: str):
         high = min(k1.high, k2.high)
 
     if "k1" == domain_ele:
-
         new_bi = ChanBi(
             k1.code,
             k1.direction,
@@ -348,7 +350,6 @@ class ChanLine(ChanBi):
             return self.start_value
 
     def __str__(self):
-
         return "direction {0}, start_index {1}, end_index {2}, start_value {3}, end_value {4}, values: {5}, volume {6}".format(
             self.direction,
             self.start_index,

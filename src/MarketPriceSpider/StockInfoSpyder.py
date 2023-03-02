@@ -32,6 +32,15 @@ class StockInfoSpyder(Spyder):
         self.col_basic_info_cn = self.db_obj.get_collection(
             self.database_name_cn, self.collection_name_cn
         )
+
+        self.base_stock_info_df = self.db_obj.get_data(
+            self.database_name_cn, self.collection_name_cn
+        )
+        # self.base_stock_info_df["code"] = self.base_stock_info_df.progress_apply(
+        #    lambda row: "{0}".format(row["code"]),
+        #    axis=1,
+        # )
+
         # hk stock market
         self.database_name_hk = config.HK_STOCK_DATABASE_NAME
         self.collection_name_hk = config.COLLECTION_NAME_STOCK_BASIC_INFO_HK
@@ -58,6 +67,19 @@ class StockInfoSpyder(Spyder):
             self.joint_quant_tool = JointQuantTool()
         else:
             self.joint_quant_tool = None
+
+    def get_target_stock_info_by_code(self, stock_code):
+        print(
+            "shape is {}, sample is {}".format(
+                self.base_stock_info_df.shape, self.base_stock_info_df[:10]
+            )
+        )
+        print("data type is {}".format(self.base_stock_info_df.dtypes))
+
+        query_res = self.base_stock_info_df[
+            self.base_stock_info_df["code"] == stock_code
+        ]
+        return query_res
 
     def gen_cn_stock_embedding_file(self):
         c_data = ak.stock_fund_flow_concept(symbol="3日排行")
@@ -782,5 +804,6 @@ class StockInfoSpyder(Spyder):
 if __name__ == "__main__":
     spider = StockInfoSpyder(joint_quant_on=False)
     # spider.update_stock_industry()
-    spider.update_stock_concept()
+    res = spider.get_target_stock_info_by_code(stock_code="301419")
+    print(res)
     pass

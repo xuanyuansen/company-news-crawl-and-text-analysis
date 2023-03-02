@@ -29,7 +29,7 @@ class BaseFeatureGen(object):
 
     def from_industry_to_feature(self, industry: str):
         a = [0 for _ in range(0, self.industry_vocab_dim)]
-        if industry is None or 'null'== industry:
+        if industry is None or "null" == industry:
             return a
         idx = self.industry_to_index[industry]
         a[idx] = 1
@@ -37,10 +37,10 @@ class BaseFeatureGen(object):
 
     def from_concept_to_feature(self, concepts: str):
         a = [0 for _ in range(0, self.concept_vocab_dim)]
-        if concepts is None or 'null' == concepts:
+        if concepts is None or "null" == concepts:
             return a
         try:
-            for con in concepts.split(','):
+            for con in concepts.split(","):
                 idx = self.concept_to_index[con]
                 a[idx] = 1
         except Exception as e:
@@ -56,6 +56,7 @@ class BaseFeatureGen(object):
     def __load_dict_file(file_name):
         with open(file_name) as _file:
             return [ele.strip() for ele in list(iter(_file.readlines()))]
+
     pass
 
 
@@ -148,9 +149,11 @@ class DeepFeatureGen(BaseFeatureGen):
         )
 
     def get_deep_sequence_feature(self, industry, concepts):
-        return self.__get_feature(self.data.get_bi_list()), \
-               self.from_industry_to_feature(industry),\
-               self.from_concept_to_feature(concepts)
+        return (
+            self.__get_feature(self.data.get_bi_list()),
+            self.from_industry_to_feature(industry),
+            self.from_concept_to_feature(concepts),
+        )
 
     def get_zhong_shu_feature_sequence(self):
         if len(self.data.zhong_shu_list) < 0:

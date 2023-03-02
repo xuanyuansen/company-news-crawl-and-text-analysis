@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import ta
 import mplfinance as mpf
-import logging
 
 
 # 2020.10.26 将原始数据和画图的数据剥离开来
@@ -1634,7 +1633,7 @@ def plot_with_mlf_v2(
         ylabel_lower="Volume",
         xrotation=10,
         block=True,
-        savefig="pic.png",
+        savefig="{}_pic.png".format(stock_name),
     )
 
 

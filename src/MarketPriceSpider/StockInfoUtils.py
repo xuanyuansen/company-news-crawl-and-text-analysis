@@ -100,7 +100,7 @@ def get_all_stock_code_info_of_cn():
 
     data_merge = pd.concat([data_sh, data_sz, data_bj], ignore_index=True)
 
-    data_merge["_id"] = data.progress_apply(
+    data_merge["_id"] = data_merge.progress_apply(
         lambda row: hashlib.md5(
             ("{0}".format(row["代码"])).encode(encoding="utf-8")
         ).hexdigest(),

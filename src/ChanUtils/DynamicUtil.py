@@ -14,6 +14,7 @@ def inner_get_average_volume(
     close_col_name: str = "Close",
     v_ratio: float = 3.0,
 ):
+    print("level is {}".format(level))
     if "daily" == level:
         range_of_days = 7
     elif "30m" == level:
