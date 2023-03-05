@@ -8,7 +8,7 @@ plot util
 import mplfinance as mpf
 import pandas as pd
 import ta
-
+import sys
 from Utils.database import Database
 
 

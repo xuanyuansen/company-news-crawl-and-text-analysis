@@ -2,7 +2,7 @@
 # remind install clang on mac with cmd, xcode-select --install
 # import sys
 import sys
-
+from ChanUtils import PlotUtil
 # https://www.zhiu.cn/46287.html
 import pandas as pd
 from MongoDbComTools.LocalDbTool import LocalDbTool
@@ -86,19 +86,30 @@ if __name__ == "__main__":
         print("should input code or symbol(code with markey type)!!!")
         sys.exit(-2)
 
-    info_frame = local_db.get_target_stock_info_by_code(stock_code=_stock_code)
+    if "cn" == args.market:
+        info_frame = local_db.get_target_stock_info_by_code(stock_code=_stock_code)
 
-    print(info_frame)
+        print(info_frame)
 
-    name = str(info_frame["name"].values[0])
-    t_stock = str(info_frame["symbol"].values[0])
-    print("name is {}, symbol is {}".format(name, t_stock))
+        name = str(info_frame["name"].values[0])
+        t_stock = str(info_frame["symbol"].values[0])
+        print("name is {}, symbol is {}".format(name, t_stock))
+    elif "hk" == args.market:
+        if args.code:
+            t_stock = args.code
+        else:
+            t_stock = args.symbol
+        info_frame = local_db.get_target_stock_info_by_code_of_hk(t_stock)
+        name = str(info_frame["name"].values[0])
+    else:
+        sys.exit(0)
+        pass
 
     data_res, df = (
-        local_db.get_week_data_stock(symbol=t_stock, market_type="cn")
+        local_db.get_week_data_stock(symbol=t_stock, market_type=args.market)
         if "week" == k_level
         else local_db.get_daily_price_data_of_specific_stock(
-            symbol=t_stock, market_type="cn", start_date=args.start
+            symbol=t_stock, market_type=args.market, start_date=args.start
         )
     )
     if not data_res:
@@ -143,5 +154,11 @@ if __name__ == "__main__":
     plot_with_mlf_v2(
         chan_data, "{0},{1},{2}".format(t_stock, name, k_level), today_date
     )
+
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df.set_index("date", inplace=True)
+    # print(df[:100])
+    _plot = PlotUtil.PlotUtil(df)
+    _plot.plot(t_stock, name)
 
     pass

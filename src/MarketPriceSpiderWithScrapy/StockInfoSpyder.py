@@ -494,6 +494,12 @@ class StockInfoSpyder(Spyder):
     ):
         if symbols is None:
             stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
+            print('stock_symbol_list is {}, type is {}'.format(stock_symbol_list, type(stock_symbol_list)))
+            if 0 == len(stock_symbol_list):
+                print("empty hk stock symbols, should get symbols first!")
+                self.get_all_stock_code_info_of_hk()
+                stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
+                print("stock_symbol_list has {} stock symbols".format(len(stock_symbol_list)))
             if start_symbol is not None:
                 new_list = []
                 for element in stock_symbol_list:
@@ -572,6 +578,7 @@ class StockInfoSpyder(Spyder):
     # 获取HK股票信息数据
     def get_all_stock_code_info_of_hk(self):
         current_data_df = ak.stock_hk_spot()
+        print(current_data_df.shape)
         print(current_data_df[:10])
         for index, row in current_data_df.iterrows():
             str_md5 = hashlib.md5(

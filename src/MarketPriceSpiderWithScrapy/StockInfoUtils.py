@@ -112,6 +112,12 @@ def get_all_stock_code_info_of_cn():
     return data_merge
 
 
+def get_all_stock_code_info_of_hk():
+    stock_hk_spot_em_df = ak.stock_hk_spot_em()
+    print(stock_hk_spot_em_df)
+    return stock_hk_spot_em_df
+
+
 if __name__ == "__main__":
     info = get_all_stock_code_info_of_cn()
     print("top")

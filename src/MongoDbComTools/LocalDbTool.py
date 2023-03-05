@@ -24,6 +24,9 @@ class LocalDbTool(object):
         self.col_basic_info_hk = self.db_obj.get_collection(
             self.database_name_hk, self.collection_name_hk
         )
+        self.col_basic_info_hk_df = self.db_obj.get_data(
+            self.database_name_hk, self.collection_name_hk
+        )
         # us stock market
         self.database_name_us = config.US_STOCK_DATABASE_NAME
         self.collection_name_us = config.COLLECTION_NAME_STOCK_BASIC_INFO_US
@@ -51,6 +54,13 @@ class LocalDbTool(object):
         query_res = self.base_stock_info_df[
             self.base_stock_info_df["code"] == stock_code
         ]
+        return query_res
+
+    def get_target_stock_info_by_code_of_hk(self, stock_code):
+        query_res = self.col_basic_info_hk_df[
+            self.col_basic_info_hk_df["symbol"] == stock_code
+        ]
+        print(query_res)
         return query_res
 
     def get_week_data_stock(
