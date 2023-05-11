@@ -44,7 +44,6 @@ class DataPreProcessing(object):
             data = self.db.get_data(
                 config.STOCK_DATABASE_NAME,
                 config.COLLECTION_NAME_STOCK_BASIC_INFO,
-                query={"end_date": {"$gt": datetime(2021, 1, 1, 0, 0, 0, 000000)}},
                 keys=["symbol", "name", "end_date", "concept", "industry"],
             )
         elif "hk" == market_type:
@@ -140,6 +139,7 @@ class DataPreProcessing(object):
         # else 判断最新的标签数据
         assert week_data_start_date is not None
         week_data = symbols[cnt_limit_start:cnt_limit_end]
+        print(week_data)
         week_data["week"] = week_data.apply(
             lambda row: self.price_spider.get_week_data_stock(
                 row["symbol"],
@@ -149,6 +149,7 @@ class DataPreProcessing(object):
             )[1],
             axis=1,
         )
+        # 这里需要判断week data是否获取成功，过滤掉有问题的数据
 
         week_data["week_data_shape"] = week_data.apply(
             lambda row: row["week"].shape[0], axis=1
@@ -169,16 +170,20 @@ class DataPreProcessing(object):
         # print(week_data_start_date_cnt.index)
         # week_data_start_date_cnt.index is
         # DatetimeIndex(['2021-06-07'], dtype='datetime64[ns]', name='week_data_start_date', freq=None)
-
+        print(week_data)
         file_path = os.getcwd()
+        print(file_path)
         file_data_name = "{}/{}".format(
             file_path,
             "feature_file_{}_{}.dataframe".format(
                 self.daily_stock_data_start_date, label_date
             ),
         )
-        if not force_update_feature:
-            return self.direct_load_feature_file(file_data_name)
+        print("file_data_name is {}".format(file_data_name))
+        # if not force_update_feature:
+        #    return self.direct_load_feature_file(file_data_name)
+
+        print("hahaha")
 
         week_data["ratio"] = week_data.apply(
             lambda row: 100

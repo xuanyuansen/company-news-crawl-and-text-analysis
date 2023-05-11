@@ -1,8 +1,10 @@
 from pandas import DataFrame
-
+import akshare as ak
 from Utils.database import Database
 from Utils import config, utils
 import datetime
+
+from Utils.utils import set_display
 
 
 class LocalDbTool(object):
@@ -44,17 +46,45 @@ class LocalDbTool(object):
         self.cn_concept_file = config.CN_STOCK_CONCEPT_DICT_FILE
 
     def get_target_stock_info_by_code(self, stock_code):
-        print(
-            "shape is {}, sample is {}".format(
-                self.base_stock_info_df.shape, self.base_stock_info_df[:10]
-            )
-        )
-        print("data type is {}".format(self.base_stock_info_df.dtypes))
+        # print(
+        #     "shape is {}, sample is {}".format(
+        #         self.base_stock_info_df.shape, self.base_stock_info_df[:10]
+        #     )
+        # )
+        # print("data type is {}".format(self.base_stock_info_df.dtypes))
 
         query_res = self.base_stock_info_df[
             self.base_stock_info_df["code"] == stock_code
         ]
         return query_res
+
+    # 获取总的股本数
+    def get_stock_all_capital_num(self, stock_code):
+        stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
+        # print(stock_individual_info_em_df)
+        res = stock_individual_info_em_df[stock_individual_info_em_df["item"]=="总股本"]
+        return res.values[0][1]
+
+    # symbol is code plus market type
+    def get_symbol_from_code(self, target_code):
+        info = self.get_target_stock_info_by_code(stock_code=target_code)
+        res = list(info["symbol"])
+        if len(res) > 0:
+            return res[0]
+        else:
+            return 0
+
+    def get_price_list_by_range(self, symbol, m_type, start, end):
+        success_or_not, a_stock_price = self.get_daily_price_data_of_specific_stock(
+            symbol=symbol,
+            market_type=m_type,
+            start_date=start,
+            end_date=end,
+        )
+        if success_or_not:
+            return list(a_stock_price["close"])
+        else:
+            return 0
 
     def get_target_stock_info_by_code_of_hk(self, stock_code):
         query_res = self.col_basic_info_hk_df[
@@ -162,4 +192,12 @@ class LocalDbTool(object):
         return True, stock_data
 
 
-pass
+if __name__ == "__main__":
+    set_display()
+    local_db_tool = LocalDbTool()
+    res = local_db_tool.get_target_stock_info_by_code(stock_code='000001')
+    print(res)
+
+    capital_res = local_db_tool.get_stock_all_capital_num(stock_code='000001')
+    print(capital_res)
+    pass

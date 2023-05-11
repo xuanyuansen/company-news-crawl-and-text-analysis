@@ -48,8 +48,8 @@ COLLECTION_NAME_STOCK_BASIC_INFO_US = "us_stock_basic_info"
 COLLECTION_NAME_STOCK_BASIC_INFO_US_ZH = "us_zh_stock_basic_info"
 
 # DEEP LEARNING PYTORCH
-CN_STOCK_INDUSTRY_DICT_FILE = "./info/cn_stock_industry_dict_file.txt"
-CN_STOCK_CONCEPT_DICT_FILE = "./info/cn_stock_concept_dict_file.txt"
+CN_STOCK_INDUSTRY_DICT_FILE = "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/cn_stock_industry_dict_file.txt"
+CN_STOCK_CONCEPT_DICT_FILE = "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/cn_stock_concept_dict_file.txt"
 
 STCN_NEWS_DB = "stcn"
 STCN_DJSJ = dict(

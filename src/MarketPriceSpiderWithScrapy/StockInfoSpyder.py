@@ -310,10 +310,12 @@ class StockInfoSpyder(Spyder):
         end_date=None,
         _keys: list = None,
     ):
+        print("symbol is {}, market type is {}".format(symbol, market_type))
         res, stock_data = self.get_daily_price_data_of_specific_stock(
             symbol, market_type, start_date, end_date, _keys
         )
         if not res:
+            print("get data fail!")
             return False, DataFrame()
         df2 = stock_data.resample("W").agg(
             {
@@ -494,12 +496,20 @@ class StockInfoSpyder(Spyder):
     ):
         if symbols is None:
             stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
-            print('stock_symbol_list is {}, type is {}'.format(stock_symbol_list, type(stock_symbol_list)))
+            print(
+                "stock_symbol_list is {}, type is {}".format(
+                    stock_symbol_list, type(stock_symbol_list)
+                )
+            )
             if 0 == len(stock_symbol_list):
                 print("empty hk stock symbols, should get symbols first!")
                 self.get_all_stock_code_info_of_hk()
                 stock_symbol_list = self.col_basic_info_hk.distinct("symbol")
-                print("stock_symbol_list has {} stock symbols".format(len(stock_symbol_list)))
+                print(
+                    "stock_symbol_list has {} stock symbols".format(
+                        len(stock_symbol_list)
+                    )
+                )
             if start_symbol is not None:
                 new_list = []
                 for element in stock_symbol_list:
@@ -813,4 +823,5 @@ if __name__ == "__main__":
     # spider.update_stock_industry()
     res = spider.get_target_stock_info_by_code(stock_code="301419")
     print(res)
+
     pass

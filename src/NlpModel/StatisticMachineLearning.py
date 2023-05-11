@@ -2,6 +2,8 @@
 # from Utils.utils import set_display
 import platform
 import argparse
+import sys
+
 import xgboost as xgb
 import lightgbm as lgb
 from sklearn.metrics import (
@@ -28,10 +30,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--classify_mode", default="binary", help="类别数", type=str)
 parser.add_argument("-f", "--feature_file", help="指定特征文件", type=str)
 parser.add_argument(
-    "--week_data_start_date", default="2021-06-07", help="提取标签的开始周日期", type=str
+    "--week_data_start_date", default="2022-06-07", help="提取标签的开始周日期", type=str
 )
 parser.add_argument(
-    "--week_data_end_date", default="2021-06-19", help="提取标签的开始周日期", type=str
+    "--week_data_end_date", default="2022-06-19", help="提取标签的开始周日期", type=str
 )
 parser.add_argument("-m", "--market_type", default="cn", type=str)
 parser.add_argument("-g", "--gpu_mode", default=False, type=bool)
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     # set_display()
     dpp = DataPreProcessing(feature_size=40)
     symbol_data = dpp.get_symbols(_args.market_type)
-
+    print("symbol_data is {}".format(symbol_data))
     if _args.feature_file:
         data_set, label_sum, _, _, _max_ta_length = dpp.direct_load_feature_file(
             _args.feature_file
@@ -55,12 +57,16 @@ if __name__ == "__main__":
             week_data_start_date=_args.week_data_start_date,
             week_data_end_date=_args.week_data_end_date,
             cnt_limit_start=0,
-            # cnt_limit_end=20,
+            cnt_limit_end=10,
         )
     if _args.classify_mode and _args.classify_mode == "binary":
         data_set["label"] = data_set.apply(
             lambda row: 0 if row["label"] <= 1 else 1, axis=1
         )
+    print("data_set type is {}".format(data_set))
+    print(data_set)
+    sys.exit(0)
+
     label_set = data_set["label"]
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(

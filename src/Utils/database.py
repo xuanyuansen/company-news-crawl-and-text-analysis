@@ -132,7 +132,7 @@ class Database(object):
                             _dict[_key].append("null")
                 else:
                     break
-            logging.info("fine done, data cnt is {}".format(_data_cnt))
+            # logging.info("fine done, data cnt is {}".format(_data_cnt))
         else:
             # data = collection.find()
             data = collection.find(query) if len(query) != 0 else collection.find()
@@ -145,12 +145,12 @@ class Database(object):
                     )
                 )
                 return None
-            else:
-                logging.info(
-                    "{0} query done! {1} data {2} data length is {3}".format(
-                        collection_name, query, data, data_length
-                    )
-                )
+            # else:
+            #    logging.info(
+            #        "{0} query done! {1} data {2} data length is {3}".format(
+            #            collection_name, query, data, data_length
+            #        )
+            #    )
             data_keys = list(
                 data_list[0].keys()
             )  # ['_id', 'Date', 'PageId', 'Url', 'Title', 'Article', 'RelevantStockCodes']
@@ -162,9 +162,9 @@ class Database(object):
                         _dict[_key].append(row[_key])
                 else:
                     break
-            logging.info("find done, data cnt is {0}".format(data_length))
+            # logging.info("find done, data cnt is {0}".format(data_length))
         res_df = pd.DataFrame(_dict)
-        print(res_df.dtypes)
+        # print(res_df.dtypes)
         if sort:
             res_df.sort_values(
                 by=sort_key, ascending=True, inplace=True, ignore_index=True
