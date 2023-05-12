@@ -38,6 +38,7 @@ if __name__ == "__main__":
     print("target date is {}".format(target_date))
 
     stock_yjbb_em_df = ak.stock_yjbb_em(date=target_date)
+    print("stock_yjbb_em_df shape is {}".format(stock_yjbb_em_df.shape))
     print(stock_yjbb_em_df[:5])
     # 每股收益, 营业收入-营业收入,营业收入-同比增长,营业收入-季度环比增长,净利润-净利润,净利润-同比增长,净利润-季度环比增长
     # 每股净资产, 净资产收益率, 每股经营现金流量, 销售毛利率
@@ -61,9 +62,10 @@ if __name__ == "__main__":
     print(stock_yjbb_em_df_feature[:5])
     print("stock_yjbb_em_df_feature shape is {}".format(stock_yjbb_em_df_feature.shape))
 
-    stock_lrb_em_df = ak.stock_lrb_em(date="20220331")
+    stock_lrb_em_df = ak.stock_lrb_em(date=target_date)
     # 净利润, 净利润同比, 营业总收入, 营业总收入同比, 营业总支出-营业支出	, 营业总支出-销售费用,
     # 营业总支出-管理费用, 营业总支出-财务费用, 营业总支出-营业总支出, 营业利润, 利润总额
+    print("stock_lrb_em_df shape is {}".format(stock_lrb_em_df.shape))
     print(stock_lrb_em_df[:5])
     stock_lrb_em_df_feature = stock_lrb_em_df[
         [
@@ -80,9 +82,9 @@ if __name__ == "__main__":
     print(stock_lrb_em_df_feature[:5])
     print("stock_lrb_em_df_feature shape is {}".format(stock_lrb_em_df_feature.shape))
     feature_data_merge = pd.merge(
-        stock_yjbb_em_df_feature, stock_lrb_em_df_feature, how="left", on="股票代码"
+        stock_lrb_em_df_feature, stock_yjbb_em_df_feature, how="left", on="股票代码"
     )
-
+    print("feature_data_merge shape is {}".format(feature_data_merge.shape))
     start_day, end_day = get_start_and_end_date(target_date, 7, 21)
 
     # 过滤掉新股
