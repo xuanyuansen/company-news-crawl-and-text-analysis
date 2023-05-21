@@ -1,4 +1,6 @@
 import os
+import sys
+
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
@@ -34,6 +36,7 @@ def add_stcn_spider(process: CrawlerProcess):
     process.crawl(StcnSpider, **config.STCN_DJJD)
 
     # https://finance.stcn.com/index_2.html 机构
+    # 2023 05 21 目前已经无法打开，所以去掉
     process.crawl(StcnSpider, **config.STCN_JIGOU)
     pass
 
@@ -118,13 +121,24 @@ if __name__ == "__main__":
         print(k, v)
     _process = CrawlerProcess(settings)
 
-    add_stcn_spider(_process)
-    add_jrj_spider(_process)
-    add_nbd_spider(_process)
-    add_net_ease_spider(_process)
-    add_east_money_spider(_process)
-    add_shang_hai_stock_spider(_process)
-    add_zhong_jin_stock_spider(_process)
+    if sys.argv[1] == "all":
+        add_stcn_spider(_process)
+        add_jrj_spider(_process)
+        add_nbd_spider(_process)
+        add_net_ease_spider(_process)
+        add_east_money_spider(_process)
+        add_shang_hai_stock_spider(_process)
+        add_zhong_jin_stock_spider(_process)
+    elif sys.argv[1] == "nbd":
+        add_nbd_spider(_process)
+    elif sys.argv[1] == "east_money":
+        add_east_money_spider(_process)
+    elif sys.argv[1] == "zhongjin":
+        add_zhong_jin_stock_spider(_process)
+    elif sys.argv[1] == "shanghai":
+        add_shang_hai_stock_spider(_process)
+    else:
+        sys.exit(-1)
     _process.start()
 
     pass

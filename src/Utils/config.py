@@ -18,7 +18,7 @@ REDIS_IP = "localhost"
 REDIS_PORT = 6379
 
 CHROME_DRIVER = (
-    "./info/chromedriver_mac" if os_type == "Darwin" else "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/chromedriver"
+    "./info/chromedriver_mac" if os_type == "Darwin" else "./info/chromedriver"
 )
 # joint quant
 cipher_key = b"C8_ACDILYdQubRfNB7oUPWvFR1G1U7uhQRBVH_NGne8="
@@ -48,8 +48,8 @@ COLLECTION_NAME_STOCK_BASIC_INFO_US = "us_stock_basic_info"
 COLLECTION_NAME_STOCK_BASIC_INFO_US_ZH = "us_zh_stock_basic_info"
 
 # DEEP LEARNING PYTORCH
-CN_STOCK_INDUSTRY_DICT_FILE = "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/cn_stock_industry_dict_file.txt"
-CN_STOCK_CONCEPT_DICT_FILE = "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/cn_stock_concept_dict_file.txt"
+CN_STOCK_INDUSTRY_DICT_FILE = "./info/cn_stock_industry_dict_file.txt"
+CN_STOCK_CONCEPT_DICT_FILE = "./info/cn_stock_concept_dict_file.txt"
 
 STCN_NEWS_DB = "stcn"
 STCN_DJSJ = dict(
@@ -216,40 +216,40 @@ NBD_STOCK_NEWS_DB = "nbd_news"
 NBD_STOCK_IMPORTANT_NEWS = dict(
     {
         "name": "nbd_stock_important_news_spider",
-        "start_url": "http://stocks.nbd.com.cn/columns/318",
+        "start_url": "https://stocks.nbd.com.cn/columns/318",
         "key_word": "stock_important_news",
         "key_word_chn": "重磅推荐",
-        "base_url": "http://stocks.nbd.com.cn/",
+        "base_url": "https://stocks.nbd.com.cn/",
         "end_page": 20,
     }
 )
 NBD_STOCK_TREND_A = dict(
     {
         "name": "nbd_stock_trend_a_spider",
-        "start_url": "http://stocks.nbd.com.cn/columns/275",
+        "start_url": "https://stocks.nbd.com.cn/columns/275",
         "key_word": "stock_trend_a",
         "key_word_chn": "A股动态",
-        "base_url": "http://stocks.nbd.com.cn/",
+        "base_url": "https://stocks.nbd.com.cn/",
         "end_page": 20,
     }
 )
 NBD_DAO_DA_INVEST_LOG = dict(
     {
         "name": "nbd_stock_dao_da_invest_log_spider",
-        "start_url": "http://stocks.nbd.com.cn/columns/476",
+        "start_url": "https://stocks.nbd.com.cn/columns/476",
         "key_word": "stock_dao_da_invest",
         "key_word_chn": "道达投资手记",
-        "base_url": "http://stocks.nbd.com.cn/",
+        "base_url": "https://stocks.nbd.com.cn/",
         "end_page": 20,
     }
 )
 NBD_VOLCANO_FORTUNE_NEWS = dict(
     {
         "name": "nbd_stock_volcano_fortune_news_spider",
-        "start_url": "http://stocks.nbd.com.cn/columns/800",
+        "start_url": "https://stocks.nbd.com.cn/columns/800",
         "key_word": "stock_volcano_fortune",
         "key_word_chn": "火山财富",
-        "base_url": "http://stocks.nbd.com.cn/",
+        "base_url": "https://stocks.nbd.com.cn/",
         "end_page": 20,
     }
 )
@@ -284,66 +284,66 @@ NET_EASE_MARKET_NEWS = dict(
 )
 NET_EASE_SPIDER_LIST = [NET_EASE_STOCK_NEWS, NET_EASE_MARKET_NEWS]
 
-
+# 2023 05 21 http 升级为 https 加密连接
 EAST_MONEY_NEWS_DB = "east_money_news"
 EAST_MONEY_A_STOCK_NEWS = dict(
     {
         "name": "east_money_cn_stock_company_news_spider",
-        "start_url": "http://finance.eastmoney.com/a/cssgs.html",
+        "start_url": "https://finance.eastmoney.com/a/cssgs.html",
         "key_word": "stock_cn_company_news",
         "key_word_chn": "A股公司",
-        "base_url": "http://finance.eastmoney.com/",
+        "base_url": "https://finance.eastmoney.com/",
         "end_page": 26,
     }
 )
 EAST_MONEY_A_MARKET_NEWS = dict(
     {
         "name": "east_money_cn_market_data_news_spider",
-        "start_url": "http://stock.eastmoney.com/a/cscsj.html",
+        "start_url": "https://stock.eastmoney.com/a/cscsj.html",
         "key_word": "cn_market_data_news",
         "key_word_chn": "市场数据",
-        "base_url": "http://finance.eastmoney.com/",
+        "base_url": "https://finance.eastmoney.com/",
         "end_page": 26,
     }
 )
 EAST_MONEY_DEEP_INVESTIGATE_NEWS = dict(
     {
         "name": "east_money_cn_deep_investigate_news_spider",
-        "start_url": "http://finance.eastmoney.com/a/czsdc.html",
+        "start_url": "https://finance.eastmoney.com/a/czsdc.html",
         "key_word": "cn_stock_deep_investigate_news",
         "key_word_chn": "纵深调查",
-        "base_url": "http://finance.eastmoney.com/",
-        "end_page": 26,
+        "base_url": "https://finance.eastmoney.com/",
+        "end_page": 10,
     }
 )
 EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS = dict(
     {
         "name": "east_money_cn_industry_deep_review_news_spider",
-        "start_url": "http://finance.eastmoney.com/a/ccyts.html",
+        "start_url": "https://finance.eastmoney.com/a/ccyts.html",
         "key_word": "cn_industry_deep_review_news",
         "key_word_chn": "产业透视",
-        "base_url": "http://finance.eastmoney.com/",
+        "base_url": "https://finance.eastmoney.com/",
         "end_page": 26,
     }
 )
 EAST_MONEY_STOCK_OPINION_NEWS = dict(
     {
         "name": "east_money_cn_stock_opinion_news_spider",
-        "start_url": "http://finance.eastmoney.com/a/cgspl.html",
+        "start_url": "https://finance.eastmoney.com/a/cgspl.html",
         "key_word": "cn_stock_opinion_news",
         "key_word_chn": "股市评论",
-        "base_url": "http://finance.eastmoney.com/",
+        "base_url": "https://finance.eastmoney.com/",
         "end_page": 26,
     }
 )
 EAST_MONEY_BUSINESS_NEWS = dict(
     {
         "name": "east_money_cn_business_news_spider",
-        "start_url": "http://biz.eastmoney.com/a/csyzx.html",
+        "start_url": "https://biz.eastmoney.com/a/csyzx.html",
         "key_word": "cn_business_news",
         "key_word_chn": "商业资讯",
-        "base_url": "http://finance.eastmoney.com/",
-        "end_page": 26,
+        "base_url": "https://finance.eastmoney.com/",
+        "end_page": 30,
     }
 )
 EAST_MONEY_SPIDER_LIST = [

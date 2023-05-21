@@ -62,7 +62,7 @@ class LocalDbTool(object):
     def get_stock_all_capital_num(self, stock_code):
         stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
         # print(stock_individual_info_em_df)
-        res = stock_individual_info_em_df[stock_individual_info_em_df["item"]=="总股本"]
+        res = stock_individual_info_em_df[stock_individual_info_em_df["item"] == "总股本"]
         return res.values[0][1]
 
     # symbol is code plus market type
@@ -195,9 +195,9 @@ class LocalDbTool(object):
 if __name__ == "__main__":
     set_display()
     local_db_tool = LocalDbTool()
-    res = local_db_tool.get_target_stock_info_by_code(stock_code='000001')
+    res = local_db_tool.get_target_stock_info_by_code(stock_code="000001")
     print(res)
 
-    capital_res = local_db_tool.get_stock_all_capital_num(stock_code='000001')
+    capital_res = local_db_tool.get_stock_all_capital_num(stock_code="000001")
     print(capital_res)
     pass

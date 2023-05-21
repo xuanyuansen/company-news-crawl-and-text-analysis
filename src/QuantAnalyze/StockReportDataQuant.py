@@ -13,6 +13,7 @@ import pandas as pd
 from TestUtil import get_start_and_end_date
 from sklearn import tree
 from matplotlib import pyplot as plt
+
 tqdm.pandas(desc="progress status")
 
 
@@ -120,7 +121,7 @@ if __name__ == "__main__":
 
     # 增加净利润率
     feature_data_merge["PE"] = feature_data_merge.progress_apply(
-        lambda row: row["price_list"][0]/row["每股收益"] if row["每股收益"]>0 else -1,
+        lambda row: row["price_list"][0] / row["每股收益"] if row["每股收益"] > 0 else -1,
         axis=1,
     )
 
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     )
 
     feature_data_merge["PEG"] = feature_data_merge.progress_apply(
-        lambda row: row["PE"] / (100*row["营业收入-同比增长"]) if row["PE"] > 0 else -1,
+        lambda row: row["PE"] / (100 * row["营业收入-同比增长"]) if row["PE"] > 0 else -1,
         axis=1,
     )
 
@@ -174,7 +175,11 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         feature_df, label_set, test_size=0.3, random_state=2022
     )
-    print("train data shape is {}, test data shape is {}".format(X_train.shape, X_test.shape))
+    print(
+        "train data shape is {}, test data shape is {}".format(
+            X_train.shape, X_test.shape
+        )
+    )
 
     clf = DecisionTreeClassifier(max_leaf_nodes=5, random_state=0)
     clf.fit(X_train, y_train)

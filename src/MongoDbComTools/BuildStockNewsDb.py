@@ -117,6 +117,28 @@ class GenStockNewsDB(object):
             _collection.insert_one(_data)
             return True, 0, _data
 
+    def get_all_news_of_one_stock(self, stock_code, start_date=None):
+        symbol = (
+            "sh{0}".format(stock_code)
+            if int(stock_code) >= 600000
+            else "sz{0}".format(stock_code)
+        )
+        _collection = self.database.get_collection(
+            config.ALL_NEWS_OF_SPECIFIC_STOCK_DATABASE, symbol
+        )
+        if start_date:
+            data_to_process = _collection.find({"Date": {"$gt": start_date}})
+        else:
+            data_to_process = _collection.find()
+
+        article_list = []
+        for row in data_to_process:
+            article_list.append(row["Article"])
+        self.logger.info(
+            "code {}, news cnt is {}".format(stock_code, len(article_list))
+        )
+        return article_list
+
     def get_all_news_about_specific_stock(
         self, database_name, collection_name, start_date=None
     ):
@@ -135,6 +157,10 @@ class GenStockNewsDB(object):
         self.logger.info(
             "all_news_keys_cnt in {0} is {1}".format(collection_name, len(_keys_list))
         )
+
+        if len(_keys_list) == 0:
+            return None
+
         if "RelatedStockCodes" not in _keys_list:
             tokenization = Tokenization(
                 import_module="jieba", user_dict=config.USER_DEFINED_WEIGHT_DICT_PATH

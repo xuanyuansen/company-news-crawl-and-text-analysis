@@ -106,102 +106,16 @@ if __name__ == "__main__":
         report_list_of_dict = []
         collection_cnt = 0
         for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():
-            print('db  name {}'.format(db_name))
+            print("db  name {}".format(db_name))
             for col in collection_list:
-                print('col  name {}'.format(col))
+                print("col  name {}".format(col))
                 collection_cnt += 1
                 gdb.get_all_news_about_specific_stock(
                     db_name,
                     col.get("name").replace("spider", "data"),
                     start_date=start_date_time,
                 )
-                # one_col_report_dict = dict()
-                # # {
-                # #   'XXXX_name': { 'news': list(news_list), '利好': 111, '利空':222}
-                # # }
-                # report_dict_list = gdb.get_report(
-                #     db_name, col.get("name").replace("spider", "data")
-                # )
-                # if report_dict_list is None:
-                #     logging.warning("no data found, continue")
-                #     continue
-                #
-                # for element in report_dict_list:
-                #     # logging.info('element is {} {}'.format(type(element), element))
-                #     if one_col_report_dict.get(element.get("Name")) is None:
-                #         _value = [element]
-                #         one_col_report_dict[element.get("Name")] = dict({"news": _value, element.get("Label"): 1})
-                #     else:
-                #         # logging.warning(one_col_report_dict)
-                #         raw_news = one_col_report_dict.get(element.get("Name")).get("news")
-                #         raw_news.append(element)
-                #         one_col_report_dict[element.get("Name")] = (
-                #             dict({
-                #                     "news": raw_news,
-                #                     "利好": get_or_else(one_col_report_dict.get(element.get("Name")), "利好") + 1,
-                #                     "利空": get_or_else(one_col_report_dict.get(element.get("Name")), "利空"),
-                #                 })
-                #             if element.get("Label") == "利好"
-                #             else dict({
-                #                     "news": raw_news,
-                #                     "利好": get_or_else(one_col_report_dict[element.get("Name")], "利好"),
-                #                     "利空": get_or_else(one_col_report_dict[element.get("Name")], "利空") + 1,
-                #                 })
-                #         )
-                #
-                # report_list_of_dict.append(one_col_report_dict)
-                # logging.info(
-                #     "col_cnt: {3}, {0} : {1}\n insert data done, data cnt is {2}".format(
-                #         db_name, col, len(one_col_report_dict), collection_cnt
-                #     )
-                # )
-            # break
-        # logging.info("report list cnt is {}".format(len(report_list_of_dict)))
-        # whole_report_dict = dict()
-        # # logging.info(report_list_of_dict)
-        # for element in report_list_of_dict:
-        #     # logging.info(element)
-        #     for k, v in element.items():
-        #         # logging.info(k, v)
-        #         if whole_report_dict.get(k) is None:
-        #             whole_report_dict[k] = v
-        #         else:
-        #             whole_report_dict[k] = dict({
-        #                     "news": whole_report_dict.get(k).get("news") + v.get("news"),
-        #                     "利好": get_or_else(whole_report_dict.get(k), "利好") + get_or_else(v, "利好"),
-        #                     "利空": get_or_else(whole_report_dict.get(k), "利空") + get_or_else(v, "利空"),
-        #                 })
-        #
-        # whole_report_dict_sorted = dict(
-        #     sorted(
-        #         whole_report_dict.items(),
-        #         key=lambda item: item[1].get("利好")
-        #         if item[1].get("利好") is not None
-        #         else -1 * item[1].get("利空"),
-        #         reverse=True,
-        #     )
-        # )
-        #
-        # title_list = []
-        #
-        # temp_list = {}
-        # for k, v in whole_report_dict_sorted.items():
-        #     title_list.append("{},利好:{},利空:{}".format(k, v.get("利好"), v.get("利空")))
-        #
-        #     content_list = [
-        #         "{}\t\n{}\t\n{}\t\n{}\t\n{}".format(ele.get("Title"),
-        #                                             ele.get("Article"),
-        #                                             ele.get("Date"),
-        #                                             ele.get("Label"),
-        #                                             ele.get("Score"))
-        #         for ele in v.get("news")
-        #     ]
-        #     for content in content_list:
-        #         if temp_list.get(content) is None:
-        #             temp_list[content] = [k]
-        #         else:
-        #             temp_list[content] = temp_list[content] + [k]
-        # logging.info('all unique news count is '.format(len(whole_report_dict_sorted)))
+
         report_list_of_dict = gdb.get_report_raw_version()
 
         file_name = "./info/news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
@@ -243,9 +157,10 @@ if __name__ == "__main__":
         for ele_dict in report_list_of_dict:
             related_codes = json.loads(ele_dict.get("RelatedStockCodes"))
             _label = ele_dict.get("Label")
-            for k, _ in related_codes.items():
+            for k, _code in related_codes.items():
                 if title_dict.get(k) is None:
                     title_dict[k] = {_label: 1}
+                    title_dict[k] = {"code": _code}
                 else:
                     title_dict[k].update(
                         {_label: get_or_else(title_dict[k], _label) + 1}
@@ -259,22 +174,31 @@ if __name__ == "__main__":
 
         hot_cnt_sheet = wb.add_worksheet("GoodOrBad")
         # 写入表头
-        hot_cnt_sheet.write(
-            0, 0, "股票名字"
-        )
-        hot_cnt_sheet.write(
-            0, 1, "利好"
-        )
-        hot_cnt_sheet.write(
-            0, 2, "利空"
-        )
+        hot_cnt_sheet.write(0, 0, "股票名字")
+        hot_cnt_sheet.write(0, 1, "利好")
+        hot_cnt_sheet.write(0, 2, "利空")
+        hot_cnt_sheet.write(0, 3, "股票代码")
 
         row_idx = 1
         for element in title_dict_sort:
             hot_cnt_sheet.write(row_idx, 0, element[0])
             hot_cnt_sheet.write(row_idx, 1, get_or_else(element[1], "利好"))
             hot_cnt_sheet.write(row_idx, 2, get_or_else(element[1], "利空"))
+            hot_cnt_sheet.write(row_idx, 3, get_or_else(element[1], "code"))
             row_idx += 1
+
+        # 将top20的相关新闻列出来，写入表格里面
+        top_related_cnt = 30 if len(title_dict_sort) >= 30 else len(title_dict_sort)
+        for _idx in range(0, top_related_cnt):
+            _stock_name = title_dict_sort[_idx][0]
+            _stock_code = title_dict_sort[_idx][1].get("code")
+            current_sheet = wb.add_worksheet("{}_{}".format(_stock_name, _stock_code))
+            current_sheet.write(0, 0, "Articles")
+            all_news_list = gdb.get_all_news_of_one_stock(_stock_code, start_date_time)
+            _current_row = 1
+            for _news in all_news_list:
+                current_sheet.write(_current_row, 0, _news)
+                _current_row += 1
 
         wb.close()
 

@@ -15,8 +15,9 @@ class NBDSpider(BaseSpider):
         end_page = getattr(self, "end_page")
         self.logger.info(start_url)
         url_start = [start_url]
+        # 2023 05 21 格式变了，url后面没有html需要修改一下
         urls_plus = [
-            (start_url + "/page/1").replace("page/1", "page/{0}.html".format(xid))
+            (start_url + "/page/1").replace("page/1", "page/{0}".format(xid))
             for xid in range(2, end_page)
         ]
         urls = url_start + urls_plus
