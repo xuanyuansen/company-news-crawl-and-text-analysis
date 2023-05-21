@@ -106,7 +106,9 @@ if __name__ == "__main__":
         report_list_of_dict = []
         collection_cnt = 0
         for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():
+            print('db  name {}'.format(db_name))
             for col in collection_list:
+                print('col  name {}'.format(col))
                 collection_cnt += 1
                 gdb.get_all_news_about_specific_stock(
                     db_name,
@@ -234,7 +236,9 @@ if __name__ == "__main__":
                 ws.write(row, idx, news.get(ele))
                 idx += 1
             row += 1  # enter the next row
-        wb.close()
+        # 先不关闭，把股票热度写入第二张表格
+        # wb.close()
+
         title_dict = dict()
         for ele_dict in report_list_of_dict:
             related_codes = json.loads(ele_dict.get("RelatedStockCodes"))
@@ -252,6 +256,27 @@ if __name__ == "__main__":
             key=lambda item: get_or_else(item[1], "利好"),
             reverse=True,
         )
+
+        hot_cnt_sheet = wb.add_worksheet("GoodOrBad")
+        # 写入表头
+        hot_cnt_sheet.write(
+            0, 0, "股票名字"
+        )
+        hot_cnt_sheet.write(
+            0, 1, "利好"
+        )
+        hot_cnt_sheet.write(
+            0, 2, "利空"
+        )
+
+        row_idx = 1
+        for element in title_dict_sort:
+            hot_cnt_sheet.write(row_idx, 0, element[0])
+            hot_cnt_sheet.write(row_idx, 1, get_or_else(element[1], "利好"))
+            hot_cnt_sheet.write(row_idx, 2, get_or_else(element[1], "利空"))
+            row_idx += 1
+
+        wb.close()
 
         utils.send_mail(
             topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),

@@ -122,11 +122,16 @@ class GenStockNewsDB(object):
     ):
         # 获取collection_name的key值，看是否包含RelatedStockCodes，如果没有说明，没有做将新闻中所涉及的
         # 股票代码保存在新的一列
-        _keys_list = list(
-            next(
-                self.database.get_collection(database_name, collection_name).find()
-            ).keys()
-        )
+        try:
+            _keys_list = list(
+                next(
+                    self.database.get_collection(database_name, collection_name).find()
+                ).keys()
+            )
+        except Exception as e:
+            print(e)
+            _keys_list = []
+
         self.logger.info(
             "all_news_keys_cnt in {0} is {1}".format(collection_name, len(_keys_list))
         )

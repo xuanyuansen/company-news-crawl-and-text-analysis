@@ -19,6 +19,8 @@ class MongoDBPipeline(object):
             config.ZHONG_JIN_STOCK_NEWS_DB
         ]  # zhong jin 中金
 
+    # https://blog.csdn.net/Yy_Rose/article/details/123754021
+    # insert方法被移除，使用insert_one或者inset_many取代
     def process_item(self, item, spider):
         col_name = str(spider.name).replace("spider", "data")
         if str(spider.name).startswith("jrj"):
@@ -43,7 +45,8 @@ class MongoDBPipeline(object):
     @staticmethod
     def insert_item(collection, item):
         try:
-            collection.insert(dict(item))
+            # collection.insert(dict(item))
+            collection.insert_one(dict(item))
         except DuplicateKeyError:
             logging.warning("already in data base, {0}".format(dict(item)))
             pass

@@ -18,7 +18,7 @@ REDIS_IP = "localhost"
 REDIS_PORT = 6379
 
 CHROME_DRIVER = (
-    "./info/chromedriver_mac" if os_type == "Darwin" else "./info/chromedriver"
+    "./info/chromedriver_mac" if os_type == "Darwin" else "/home/ryne/Code/company-news-crawl-and-text-analysis/src/info/chromedriver"
 )
 # joint quant
 cipher_key = b"C8_ACDILYdQubRfNB7oUPWvFR1G1U7uhQRBVH_NGne8="
