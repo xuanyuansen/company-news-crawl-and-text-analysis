@@ -202,11 +202,11 @@ if __name__ == "__main__":
 
         wb.close()
 
-        utils.send_mail(
-            topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),
-            content=str(title_dict_sort),
-            attach_name=mail_file_name,
-            _file_name=file_name,
-        )
+        # utils.send_mail(
+        #     topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),
+        #     content=str(title_dict_sort),
+        #     attach_name=mail_file_name,
+        #     _file_name=file_name,
+        # )
 
     pass
