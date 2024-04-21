@@ -149,9 +149,10 @@ class LocalDbTool(object):
             _query = (
                 {
                     "date": {
-                        "$gte": datetime.datetime(
-                            int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                        )
+                        # 2024 04 21 换成日期，而非时间
+                        # "$gte": datetime.datetime(
+                        #     int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000)
+                        "$gte": start_date
                     }
                 }
                 if market_type == "cn"

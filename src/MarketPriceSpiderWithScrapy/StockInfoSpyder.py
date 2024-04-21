@@ -717,42 +717,59 @@ class StockInfoSpyder(Spyder):
         if len(stock_symbol_list) == 0:
             self.get_all_stock_code_info_of_cn()
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
+        print("len of stock symbol list {}".format(len(stock_symbol_list)))
+        # sub_stock_symbol_list = [ele for ele in stock_symbol_list if 'sh' in ele]
+        # stock_symbol_list = sub_stock_symbol_list
         print(stock_symbol_list)
         if freq == "day":
             for symbol in stock_symbol_list:
-                time.sleep(1)
+                time.sleep(0.1)
                 _col = self.db_obj.get_collection(self.database_name_cn, symbol)
-                if start_date is None:
-                    # 首先查询DB里面最大的时间
+                # 首先查询DB里面最大的时间
+                try:
                     max_date = _col.find_one(sort=[("date", pymongo.DESCENDING)]).get(
                         "date"
                     )
-                    if max_date:
-                        _start_date = max_date
-                        self.logger.info(
-                            "stock {} max date is {}".format(symbol, max_date)
-                        )
-                    # 如果该symbol有历史数据，如果有则从API获取从数据库中最近的时间开始直到现在的所有价格数据
-                    # 如果该symbol无历史数据，则从API获取从2015年1月1日开始直到现在的所有价格数据
-                    else:
-                        _start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
+                except Exception as e:
+                    self.logger.warn("{}".format(e))
+                    max_date = None
+                if max_date:
+                    _start_date = max_date
+                    self.logger.info(
+                        "stock {} max date is {}".format(symbol, max_date)
+                    )
+                # 如果该symbol有历史数据，如果有则从API获取从数据库中最近的时间开始直到现在的所有价格数据
+                # 如果该symbol无历史数据，则从API获取从2015年1月1日开始直到现在的所有价格数据
                 else:
-                    _start_date = start_date
+                    if start_date is None:
+
+                        _start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
+                    else:
+                        _start_date = start_date
+                today =datetime.date.today()
+
+                offset = (today.weekday() - 4) % 7
+                friday = today - datetime.timedelta(days=offset)
+                print(type(friday), friday)
+                if _start_date == friday.strftime("%Y-%m-%d"):
+                    self.logger.info('最近一个周五{} ，continue'.format(friday))
+                    continue
+
                 try:
                     if end_date is None:
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
-                            symbol=symbol,
-                            start_date=_start_date,
-                            # end_date=end_date,
-                            adjust="qfq",
-                        )
+                                symbol=symbol,
+                                start_date=_start_date,
+                                # end_date=end_date,
+                                adjust="qfq",
+                            )
                     else:
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
-                            symbol=symbol,
-                            start_date=_start_date,
-                            end_date=end_date,
-                            adjust="qfq",
-                        )
+                                symbol=symbol,
+                                start_date=_start_date,
+                                end_date=end_date,
+                                adjust="qfq",
+                            )
                 except Exception as e:
                     self.logger.error("trace {0}, symbol {1}".format(e, symbol))
                     continue

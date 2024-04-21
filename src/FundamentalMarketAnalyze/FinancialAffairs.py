@@ -154,8 +154,8 @@ class GlobalStockInfo(object):
         )
 
         stock_em_yjbb_df_sub_sub = stock_em_yjbb_df_sub[
-            (stock_em_yjbb_df_sub["总股本"] <= 4.0)
-            & (stock_em_yjbb_df_sub["经营现金流量"] >= 1.0)
+            (stock_em_yjbb_df_sub["总股本"] <= 10.0)
+            & (stock_em_yjbb_df_sub["经营现金流量"] >= 0.5)
         ]
 
         print(
@@ -259,14 +259,14 @@ def get_basic_stock(s_date: str, price_date: str):
             cash_flow.statDate,
         ).filter(
             # 风生水起选股指标
-            valuation.capitalization <= 30000,  # 总的股本数
+            # valuation.capitalization <= 50000,  # 总的股本数
             valuation.pe_ratio <= 200,
             valuation.pe_ratio > 0,
-            cash_flow.net_operate_cash_flow > 5000000,  # 经营活动现金流量净额
-            indicator.inc_operation_profit_year_on_year >= 15,  # 营业收入同比增长率(%)
+            # cash_flow.net_operate_cash_flow > 5000000,  # 经营活动现金流量净额
+            indicator.inc_operation_profit_year_on_year >= 10,  # 营业收入同比增长率(%)
             indicator.inc_net_profit_year_on_year >= 5,  # 净利润同比增长率(%)
             valuation.pb_ratio <= 20,
-            indicator.net_profit_margin >= 15,  # 销售净利率(%) 净利润/营业收入
+            indicator.net_profit_margin >= 10,  # 销售净利率(%) 净利润/营业收入
             indicator.gross_profit_margin >= 20,  # 销售毛利率(%) 毛利/营业收入
             # 这里不能使用 in 操作, 要使用in_()函数
             # valuation.code.in_(['000651.XSHE','002848.XSHE','603416.XSHG','603040.XSHG',
@@ -374,9 +374,9 @@ if __name__ == "__main__":
     final_res = price_db.get_financial_info_by_date_with_condition(
         end_date,
         gross_profit_margin=20,
-        net_profit_margin=15,
+        net_profit_margin=10,
         inc_net_profit_year_on_year=5,
-        inc_operation_profit_year_on_year=20,
+        inc_operation_profit_year_on_year=15,
         roe=5,
     )
     final_res.to_csv("价值选股_{0}_{1}.csv".format(season, today_date))

@@ -23,6 +23,7 @@ class Spyder(object):
         insert_cnt = 0
         for _idx in range(data.shape[0]):
             _tmp_dict = data.iloc[_idx].to_dict()
+            #print(_tmp_dict)
             id_md5 = hashlib.md5(
                 ("{0} {1}".format(symbol, _tmp_dict["date"])).encode(encoding="utf-8")
             ).hexdigest()
@@ -30,6 +31,7 @@ class Spyder(object):
                 self.logger.info("id already exist {0} {1}".format(id_md5, _tmp_dict))
                 continue
             _tmp_dict["_id"] = id_md5
+            _tmp_dict["date"] = _tmp_dict["date"].isoformat()
             # _tmp_dict.pop("turnover")
             col.insert_one(_tmp_dict)
             insert_cnt += 1
