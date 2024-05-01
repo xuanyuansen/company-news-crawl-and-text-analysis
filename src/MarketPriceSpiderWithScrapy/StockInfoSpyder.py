@@ -20,6 +20,19 @@ from Utils.database import Database
 import hashlib
 import akshare as ak
 from Utils.utils import today_date
+import signal
+import os
+
+
+def handler(signum, frame):
+    raise Exception("Timeout!")
+
+
+# 设置timeout为5秒钟
+timeout = 5
+# 注册signal handler
+signal.signal(signal.SIGALRM, handler)
+signal.alarm(timeout)
 
 
 class StockInfoSpyder(Spyder):
@@ -718,12 +731,12 @@ class StockInfoSpyder(Spyder):
             self.get_all_stock_code_info_of_cn()
         stock_symbol_list = self.col_basic_info_cn.distinct("symbol")
         print("len of stock symbol list {}".format(len(stock_symbol_list)))
-        # sub_stock_symbol_list = [ele for ele in stock_symbol_list if 'sh' in ele]
+        # sub_stock_symbol_list = [ele for ele in stock_symbol_list if 'sz' in ele]
         # stock_symbol_list = sub_stock_symbol_list
         print(stock_symbol_list)
         if freq == "day":
             for symbol in stock_symbol_list:
-                time.sleep(0.1)
+                # time.sleep(0.1)
                 _col = self.db_obj.get_collection(self.database_name_cn, symbol)
                 # 首先查询DB里面最大的时间
                 try:
@@ -746,14 +759,14 @@ class StockInfoSpyder(Spyder):
                         _start_date = config.STOCK_PRICE_REQUEST_DEFAULT_DATE
                     else:
                         _start_date = start_date
-                today =datetime.date.today()
+                today = datetime.date.today()
 
                 offset = (today.weekday() - 4) % 7
                 friday = today - datetime.timedelta(days=offset)
                 print(type(friday), friday)
-                if _start_date == friday.strftime("%Y-%m-%d"):
-                    self.logger.info('最近一个周五{} ，continue'.format(friday))
-                    continue
+                # if _start_date == friday.strftime("%Y-%m-%d"):
+                #    self.logger.info('最近一个周五{} ，continue'.format(friday))
+                #    continue
 
                 try:
                     if end_date is None:
@@ -773,6 +786,9 @@ class StockInfoSpyder(Spyder):
                 except Exception as e:
                     self.logger.error("trace {0}, symbol {1}".format(e, symbol))
                     continue
+                finally:
+                    # 无论是否超时，都取消alarm
+                    signal.alarm(0)
 
                 stock_zh_a_daily_hfq_df.index = range(len(stock_zh_a_daily_hfq_df))
                 res, cnt = self.insert_data_to_col_from_dataframe(
