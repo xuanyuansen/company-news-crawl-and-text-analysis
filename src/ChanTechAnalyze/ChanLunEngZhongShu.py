@@ -3,7 +3,7 @@
 # import sys
 import sys
 from ChanUtils import PlotUtil
-
+import akshare as ak
 # https://www.zhiu.cn/46287.html
 import pandas as pd
 from MongoDbComTools.LocalDbTool import LocalDbTool
@@ -13,6 +13,10 @@ from ChanUtils.ShapeUtil import ChanSourceDataObject, plot_with_mlf_v2
 import argparse
 import logging
 import matplotlib
+from matplotlib.pyplot import show, plot
+
+
+show(block=False)
 
 matplotlib.rcParams["font.sans-serif"] = ["WenQuanYi Micro Hei"]
 matplotlib.rcParams["axes.unicode_minus"] = False
@@ -56,7 +60,7 @@ if __name__ == "__main__":
         "--level",
         help="k line level",
         default="week",
-        choices=["daily", "week"],
+        choices=["daily", "week", "30m", "15m"],
     )
 
     args = parser.parse_args()
@@ -106,13 +110,23 @@ if __name__ == "__main__":
         sys.exit(0)
         pass
 
-    data_res, df = (
-        local_db.get_week_data_stock(symbol=t_stock, market_type=args.market)
-        if "week" == k_level
-        else local_db.get_daily_price_data_of_specific_stock(
+    if "week" == k_level:
+        data_res, df = local_db.get_week_data_stock(symbol=t_stock, market_type=args.market)
+
+    elif "m" in k_level:
+        data_res = True
+        df = ak.stock_zh_a_minute(symbol=t_stock, period=k_level[:-1], adjust='qfq')
+
+        print(df.shape)
+        print(df[:10])
+        df['volume'] = df.apply(lambda row: float(row["volume"]), axis=1)
+        df['money'] = df.apply(lambda row: float(row["volume"])*row["close"], axis=1)
+
+    else:
+        data_res, df = local_db.get_daily_price_data_of_specific_stock(
             symbol=t_stock, market_type=args.market, start_date=args.start
-        )
     )
+        print(df[:10])
     if not data_res:
         sys.exit(-1)
 
@@ -122,7 +136,10 @@ if __name__ == "__main__":
     # print(df[:100])
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-    df["Date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    if 'm' in k_level:
+        df["Date"] = pd.to_datetime(df["day"], format="%Y-%m-%d %H:%M:%S")
+    else:
+        df["Date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df.set_index("Date", inplace=True)
     # print(df[:100])
     # run_type = str(sys.argv[4])
@@ -155,8 +172,10 @@ if __name__ == "__main__":
     plot_with_mlf_v2(
         chan_data, "{0},{1},{2}".format(t_stock, name, k_level), today_date
     )
-
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    if 'm' in k_level:
+        df["date"] = pd.to_datetime(df["day"], format="%Y-%m-%d %H:%M:%S")
+    else:
+        df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df.set_index("date", inplace=True)
     # print(df[:100])
     _plot = PlotUtil.PlotUtil(df)

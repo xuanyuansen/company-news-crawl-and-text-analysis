@@ -29,10 +29,10 @@ def handler(signum, frame):
 
 
 # 设置timeout为5秒钟
-timeout = 5
+#timeout = 15
 # 注册signal handler
-signal.signal(signal.SIGALRM, handler)
-signal.alarm(timeout)
+#signal.signal(signal.SIGALRM, handler)
+#signal.alarm(timeout)
 
 
 class StockInfoSpyder(Spyder):
@@ -533,6 +533,7 @@ class StockInfoSpyder(Spyder):
             stock_symbol_list = symbols
         for symbol in stock_symbol_list:
             stock_hk_a_daily_hfq_df = self.__get_single_hk_stock_data(symbol)
+            self.logger.info("stock {} data shape is {}".format(symbol, stock_hk_a_daily_hfq_df.shape))
             if start_date is not None:
                 try:
                     stock_hk_a_daily_hfq_df["date"] = stock_hk_a_daily_hfq_df.apply(
@@ -550,6 +551,7 @@ class StockInfoSpyder(Spyder):
                     continue
             _col = self.db_obj.get_collection(self.database_name_hk, symbol)
 
+            # current_record_id = 0
             for _idx in range(stock_hk_a_daily_hfq_df.shape[0]):
                 _tmp_dict = stock_hk_a_daily_hfq_df.iloc[_idx].to_dict()
 
@@ -562,9 +564,10 @@ class StockInfoSpyder(Spyder):
                     )
                 ).hexdigest()
                 if _col.find_one({"_id": id_md5}) is not None:
-                    self.logger.info(
-                        "id already exist {0} {1}".format(id_md5, _tmp_dict)
-                    )
+                    if _idx % 20 == 0:
+                        self.logger.info(
+                            "id already exist {0} {1}".format(id_md5, _tmp_dict)
+                        )
                     continue
                 _tmp_dict["_id"] = id_md5
                 # _tmp_dict.pop("turnover")
@@ -582,7 +585,7 @@ class StockInfoSpyder(Spyder):
                     )
                     continue
 
-            time.sleep(1.5)
+            # time.sleep(1.5)
             if stock_hk_a_daily_hfq_df.shape[0] > 0:
                 self.logger.info(
                     "{} finished saving from {} to {} ... last day data is {}".format(

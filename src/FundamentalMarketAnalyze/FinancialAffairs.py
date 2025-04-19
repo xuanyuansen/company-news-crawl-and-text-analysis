@@ -76,20 +76,21 @@ class GlobalStockInfo(object):
         t_date: str,
         gross_profit_margin=30,
         net_profit_margin=15,
-        inc_net_profit_year_on_year=5,
+        inc_net_profit_year_on_year=10,
         inc_operation_profit_year_on_year=20,
-        roe=5,
+        roe=10,
     ):
         # stock_em_yjbb_df = ak.stock_em_yjbb(date=t_date)
         # update akshare function
         print(t_date)
         stock_em_yjbb_df = ak.stock_yjbb_em(date=t_date)
+        print(stock_em_yjbb_df[:5])
         stock_em_yjbb_df = stock_em_yjbb_df[
             [
                 "股票代码",
                 "股票简称",
-                "营业收入-营业收入",
-                "营业收入-同比增长",
+                "营业总收入-营业总收入",
+                "营业总收入-同比增长",
                 "净利润-净利润",
                 "净利润-同比增长",
                 "净资产收益率",
@@ -104,8 +105,8 @@ class GlobalStockInfo(object):
         )
 
         stock_em_yjbb_df["净利润率"] = stock_em_yjbb_df.progress_apply(
-            lambda row: (100 * row["净利润-净利润"]) / row["营业收入-营业收入"]
-            if row["营业收入-营业收入"] > 0
+            lambda row: (100 * row["净利润-净利润"]) / row["营业总收入-营业总收入"]
+            if row["营业总收入-营业总收入"] > 0
             else 0.0,
             axis=1,
         )
@@ -122,7 +123,7 @@ class GlobalStockInfo(object):
             (stock_em_yjbb_df_all["销售毛利率"] >= gross_profit_margin)
             & (stock_em_yjbb_df_all["净利润率"] >= net_profit_margin)
             & (stock_em_yjbb_df_all["净利润-同比增长"] >= inc_net_profit_year_on_year)
-            & (stock_em_yjbb_df_all["营业收入-同比增长"] >= inc_operation_profit_year_on_year)
+            & (stock_em_yjbb_df_all["营业总收入-同比增长"] >= inc_operation_profit_year_on_year)
             & (stock_em_yjbb_df_all["净资产收益率"] >= roe)
             & (stock_em_yjbb_df_all["市盈率-动态"] <= 100)
             & (stock_em_yjbb_df_all["市盈率-动态"] > 0)
@@ -260,14 +261,15 @@ def get_basic_stock(s_date: str, price_date: str):
         ).filter(
             # 风生水起选股指标
             # valuation.capitalization <= 50000,  # 总的股本数
-            valuation.pe_ratio <= 200,
+            valuation.pe_ratio <= 100,
             valuation.pe_ratio > 0,
+            indicator.roe >10 ,
             # cash_flow.net_operate_cash_flow > 5000000,  # 经营活动现金流量净额
-            indicator.inc_operation_profit_year_on_year >= 10,  # 营业收入同比增长率(%)
-            indicator.inc_net_profit_year_on_year >= 5,  # 净利润同比增长率(%)
+            indicator.inc_operation_profit_year_on_year >= 15,  # 营业收入同比增长率(%)
+            indicator.inc_net_profit_year_on_year >= 10,  # 净利润同比增长率(%)
             valuation.pb_ratio <= 20,
-            indicator.net_profit_margin >= 10,  # 销售净利率(%) 净利润/营业收入
-            indicator.gross_profit_margin >= 20,  # 销售毛利率(%) 毛利/营业收入
+            indicator.net_profit_margin >= 15,  # 销售净利率(%) 净利润/营业收入
+            indicator.gross_profit_margin >= 30,  # 销售毛利率(%) 毛利/营业收入
             # 这里不能使用 in 操作, 要使用in_()函数
             # valuation.code.in_(['000651.XSHE','002848.XSHE','603416.XSHG','603040.XSHG',
             # '002273.XSHE', '603079.XSHG', '300673.XSHE','603605.XSHG','603585.XSHG'])
@@ -372,12 +374,7 @@ if __name__ == "__main__":
     season = sys.argv[1]
     end_date = sys.argv[2]
     final_res = price_db.get_financial_info_by_date_with_condition(
-        end_date,
-        gross_profit_margin=20,
-        net_profit_margin=10,
-        inc_net_profit_year_on_year=5,
-        inc_operation_profit_year_on_year=15,
-        roe=5,
+        end_date
     )
     final_res.to_csv("价值选股_{0}_{1}.csv".format(season, today_date))
     pass

@@ -596,6 +596,8 @@ def from_point_to_bi(data: list[KiLineObject], value_data):
                 if -1 == data[idx_end_j].ding_di_to_bi:
                     break
                 idx_end_j += 1
+                print('type current_volume {}, type data[idx_end_j].volume {}'
+                      .format(type(current_volume), type(data[idx_end_j].volume)))
                 current_volume += data[idx_end_j].volume
             if idx_end_j < len(data) - 1:
                 # down bi done
