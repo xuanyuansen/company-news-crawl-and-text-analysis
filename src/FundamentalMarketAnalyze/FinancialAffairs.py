@@ -135,7 +135,7 @@ class GlobalStockInfo(object):
             )
         )
         print(stock_em_yjbb_df_sub[:10])
-
+        
         stock_em_yjbb_df_sub["basic_info"] = stock_em_yjbb_df_sub.progress_apply(
             lambda row: get_stock_basic_info_ak(str(row["代码"])), axis=1
         )
@@ -326,25 +326,25 @@ def get_stock_basic_info_ak(stock_code: str):
         # print(stock_individual_info_em_df)
         market_value = (
             0.0
-            if isinstance(stock_individual_info_em_df.loc[0, "value"], str)
-            else stock_individual_info_em_df.loc[0, "value"] / 100000000
+            if isinstance(stock_individual_info_em_df.loc[5, "value"], str)
+            else stock_individual_info_em_df.loc[5, "value"] / 100000000
         )
         flow_market_value = (
-            0.0
-            if isinstance(stock_individual_info_em_df.loc[1, "value"], str)
-            else stock_individual_info_em_df.loc[1, "value"] / 100000000
-        )
-        capitalization = (
             0.0
             if isinstance(stock_individual_info_em_df.loc[6, "value"], str)
             else stock_individual_info_em_df.loc[6, "value"] / 100000000
         )
+        capitalization = (
+            0.0
+            if isinstance(stock_individual_info_em_df.loc[3, "value"], str)
+            else stock_individual_info_em_df.loc[3, "value"] / 100000000
+        )
         flow_capitalization = (
             0.0
-            if isinstance(stock_individual_info_em_df.loc[7, "value"], str)
-            else stock_individual_info_em_df.loc[7, "value"] / 100000000
+            if isinstance(stock_individual_info_em_df.loc[4, "value"], str)
+            else stock_individual_info_em_df.loc[4, "value"] / 100000000
         )
-        stock_name = stock_individual_info_em_df.loc[5, "value"]
+        stock_name = stock_individual_info_em_df.loc[2, "value"]
         current_price = market_value / capitalization
         return (
             stock_name,
@@ -355,6 +355,7 @@ def get_stock_basic_info_ak(stock_code: str):
             flow_capitalization,
         )
     except Exception as e:
+        print(e)
         return None
 
 
@@ -368,6 +369,7 @@ if __name__ == "__main__":
     price_db = GlobalStockInfo()
     price_db.get_all_stock_code_list()
     test_code = "000001"
+    print("000001")
     print(get_stock_basic_info_ak(test_code))
     print(price_db.get_stock_pe_pb(test_code))
 
