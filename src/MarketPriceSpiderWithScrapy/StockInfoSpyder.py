@@ -773,16 +773,21 @@ class StockInfoSpyder(Spyder):
 
                 try:
                     if end_date is None:
+                        _start_date_new_format = _start_date.replace('-', '')
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
                                 symbol=symbol,
-                                start_date=_start_date,
+                                start_date=_start_date_new_format,
                                 # end_date=end_date,
                                 adjust="qfq",
                             )
                     else:
+
+                        _start_date_new_format = _start_date.replace('-', '')
+                        print('symbol is {},start date is {} end date is {}, new start date is {}'
+                              .format(symbol, _start_date, end_date, _start_date_new_format))
                         stock_zh_a_daily_hfq_df = ak.stock_zh_a_daily(
                                 symbol=symbol,
-                                start_date=_start_date,
+                                start_date=_start_date_new_format,
                                 end_date=end_date,
                                 adjust="qfq",
                             )
