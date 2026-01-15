@@ -89,10 +89,6 @@ if __name__ == "__main__":
         for spider_config in config.SHANG_HAI_SPIDER_LIST:
             _process_play.crawl(ShanghaiStockSpider, **spider_config)
 
-
-        for spider_config in config.NET_EASE_SPIDER_LIST:
-            _process_play.crawl(NetEaseSpider, **spider_config)
-
         for spider_config in config.JQKA_SPIDER_LIST:
             _process_play.crawl(JQKASpider, **spider_config)
         

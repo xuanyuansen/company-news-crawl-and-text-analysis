@@ -18,8 +18,8 @@ class BaseSpider(Spider):
         self.key_word = key_word
         self.key_word_chn = key_word_chn
         self.base_url = base_url
-        self.GenStockNewsDB = GenStockNewsDB(force_update_score_using_llm=True, model_path='/home/zhangSongbo/work/DL/kaggle/MAP/jigsawCode/models/Qwen3-8B-AWQ')
-        # self.GenStockNewsDB = GenStockNewsDB()
+        # self.GenStockNewsDB = GenStockNewsDB(force_update_score_using_llm=True, model_path='/home/zhangSongbo/work/DL/kaggle/MAP/jigsawCode/models/Qwen3-8B-AWQ')
+        self.GenStockNewsDB = GenStockNewsDB()
         self.name_code_dict = dict(
             (self.GenStockNewsDB.name_code_df[["name", "code"]]).values
         )
