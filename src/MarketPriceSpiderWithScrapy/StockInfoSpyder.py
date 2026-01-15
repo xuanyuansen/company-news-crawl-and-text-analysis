@@ -10,6 +10,7 @@ import logging
 import time
 import pymongo
 from pandas import DataFrame
+import pandas as pd
 from MongoDbComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price, get_query_count
 from MarketPriceSpiderWithScrapy import StockInfoUtils
@@ -176,6 +177,7 @@ class StockInfoSpyder(Spyder):
         return True
 
     def update_cn_stock_money_column_using_joint_quant(self):
+        # 使用joinquant接口填充成交金额
         sd = today_date.split("-")
         # 获得所以要更新的股票列表
         code_joint_quant_symbol = self.db_obj.get_data(
@@ -390,8 +392,13 @@ class StockInfoSpyder(Spyder):
 
     @staticmethod
     def __get_single_hk_stock_data(symbol, adjust="qfq"):
-        data = ak.stock_hk_daily(symbol=symbol, adjust=adjust)
-        return data
+        try:
+            data = ak.stock_hk_daily(symbol=symbol, adjust=adjust)
+            return data
+        except Exception as e:
+            logging.error(e)
+            print(f'cant not get {symbol} daily {adjust} data')
+        
 
     def get_historical_us_stock_daily_price(
         self, start_date=None, symbols: list = None
@@ -401,8 +408,11 @@ class StockInfoSpyder(Spyder):
         else:
             stock_symbol_list = symbols
         for symbol in stock_symbol_list:
-            stock_us_daily_qfq_df = ak.stock_us_daily(symbol)
-            stock_us_daily_qfq_df["date"] = stock_us_daily_qfq_df.index
+            try:
+                stock_us_daily_qfq_df = ak.stock_us_daily(symbol)
+            except:
+                continue
+            # stock_us_daily_qfq_df["date"] = stock_us_daily_qfq_df.index
             # stock_us_daily_qfq_df["date_py"] = stock_us_daily_qfq_df.apply(lambda row: row['date'].to_pydatetime(), axis=1)
             self.logger.info(
                 "start processing {}, from date {}".format(symbol, start_date)
@@ -411,7 +421,7 @@ class StockInfoSpyder(Spyder):
                 try:
                     stock_us_daily_qfq_df = stock_us_daily_qfq_df[
                         stock_us_daily_qfq_df["date"]
-                        >= datetime.datetime.strptime(start_date, "%Y-%m-%d")
+                        >= pd.to_datetime(start_date) # datetime.datetime.strptime(start_date, "%Y-%m-%d")
                     ]
                 except Exception as e:
                     self.logger.error(e)
@@ -422,25 +432,25 @@ class StockInfoSpyder(Spyder):
             self.logger.info(stock_us_daily_qfq_df[:10])
 
             _col = self.db_obj.get_collection(self.database_name_us, symbol)
+            if stock_us_daily_qfq_df.shape[0] >0:
+                for index, row in stock_us_daily_qfq_df.iterrows():
+                    _tmp_dict = row.to_dict()
+                    # print(_tmp_dict)
+                    _date_ = row["date"].strftime("%Y-%m-%d")
 
-            for index, row in stock_us_daily_qfq_df.iterrows():
-                _tmp_dict = row.to_dict()
-                # print(_tmp_dict)
-                _date_ = row["date"].strftime("%Y-%m-%d")
+                    id_md5 = hashlib.md5(
+                        ("{0} {1}".format(symbol, _date_)).encode(encoding="utf-8")
+                    ).hexdigest()
 
-                id_md5 = hashlib.md5(
-                    ("{0} {1}".format(symbol, _date_)).encode(encoding="utf-8")
-                ).hexdigest()
-
-                if _col.find_one({"_id": id_md5}) is not None:
-                    self.logger.info(
-                        "id already exist {0} {1} {2} {3}".format(
-                            id_md5, _tmp_dict, symbol, _date_
+                    if _col.find_one({"_id": id_md5}) is not None:
+                        self.logger.info(
+                            "id already exist {0} {1} {2} {3}".format(
+                                id_md5, _tmp_dict, symbol, _date_
+                            )
                         )
-                    )
-                    continue
-                else:
-                    _col.insert_one(_tmp_dict)
+                        continue
+                    else:
+                        _col.insert_one(_tmp_dict)
             self.logger.info(
                 "{} insert data done, count {}".format(
                     symbol, stock_us_daily_qfq_df.shape[0]
@@ -531,9 +541,14 @@ class StockInfoSpyder(Spyder):
                 stock_symbol_list = new_list
         else:
             stock_symbol_list = symbols
+        print(f"stock_symbol_list len {len(stock_symbol_list)}")
         for symbol in stock_symbol_list:
-            stock_hk_a_daily_hfq_df = self.__get_single_hk_stock_data(symbol)
-            self.logger.info("stock {} data shape is {}".format(symbol, stock_hk_a_daily_hfq_df.shape))
+            try:
+                stock_hk_a_daily_hfq_df = self.__get_single_hk_stock_data(symbol)
+                self.logger.info("stock {} data shape is {}".format(symbol, stock_hk_a_daily_hfq_df.shape))
+            except Exception as e:
+                continue
+            # print(f"start_date is {start_date}")
             if start_date is not None:
                 try:
                     stock_hk_a_daily_hfq_df["date"] = stock_hk_a_daily_hfq_df.apply(
@@ -594,7 +609,7 @@ class StockInfoSpyder(Spyder):
                         stock_hk_a_daily_hfq_df.iloc[
                             stock_hk_a_daily_hfq_df.shape[0] - 1, 0
                         ],  # end date
-                        stock_hk_a_daily_hfq_df[stock_hk_a_daily_hfq_df.shape[0] - 1 :],
+                        stock_hk_a_daily_hfq_df.iloc[stock_hk_a_daily_hfq_df.shape[0] - 1 :],
                     )
                 )
             else:
@@ -603,28 +618,28 @@ class StockInfoSpyder(Spyder):
 
     # 获取HK股票信息数据
     def get_all_stock_code_info_of_hk(self):
-        current_data_df = ak.stock_hk_spot()
+        current_data_df = ak.stock_hk_spot_em()
         print(current_data_df.shape)
         print(current_data_df[:10])
         for index, row in current_data_df.iterrows():
             str_md5 = hashlib.md5(
-                ("{0} {1}".format(row["name"], row["symbol"])).encode(encoding="utf-8")
+                ("{0} {1}".format(row["名称"], row["代码"])).encode(encoding="utf-8")
             ).hexdigest()
 
             if self.col_basic_info_hk.find_one({"_id": str_md5}) is not None:
                 self.logger.info(
                     "id already exist {0} {1} {2}".format(
-                        str_md5, row["name"], row["symbol"]
+                        str_md5, row["名称"], row["代码"]
                     )
                 )
                 continue
 
             _data = {
                 "_id": str_md5,
-                "symbol": row["symbol"],
-                "name": row["name"],
-                "tradetype": row["tradetype"],
-                "engname": row["engname"],
+                "symbol": row["代码"],
+                "name": row["名称"],
+                "tradetype": None,
+                "engname": None,
             }
 
             self.col_basic_info_hk.insert_one(_data)
@@ -856,8 +871,8 @@ class StockInfoSpyder(Spyder):
 
 if __name__ == "__main__":
     spider = StockInfoSpyder(joint_quant_on=False)
-    # spider.update_stock_industry()
-    res = spider.get_target_stock_info_by_code(stock_code="301419")
-    print(res)
+    spider.update_stock_industry()
+    # res = spider.get_target_stock_info_by_code(stock_code="301419")
+    # print(res)
 
     pass

@@ -9,7 +9,7 @@ class MongoDBPipeline(object):
     def __init__(self):
         db = Database()
         client = db.conn
-        self.db_stcn = client[config.STCN_NEWS_DB]  # stcn
+        self.db_jqka = client[config.JQKA_NEWS_DB]  # stcn
         self.db_jrj = client[config.JRJ_NEWS_DB]  # 金融界
         self.db_nbd = client[config.NBD_STOCK_NEWS_DB]  # 每经网
         self.db_net_ease = client[config.NET_EASE_STOCK_NEWS_DB]  # 163
@@ -25,8 +25,8 @@ class MongoDBPipeline(object):
         col_name = str(spider.name).replace("spider", "data")
         if str(spider.name).startswith("jrj"):
             self.insert_item(self.db_jrj[col_name], item)
-        elif str(spider.name).startswith("stcn"):
-            self.insert_item(self.db_stcn[col_name], item)
+        elif str(spider.name).startswith("jqka"):
+            self.insert_item(self.db_jqka[col_name], item)
         elif str(spider.name).startswith("nbd"):
             self.insert_item(self.db_nbd[col_name], item)
         elif str(spider.name).startswith("net_ease"):
@@ -39,7 +39,7 @@ class MongoDBPipeline(object):
             self.insert_item(self.db_zhong_jin_cn_stock[col_name], item)
         else:
             logging.info("wrong")
-
+        
         return item
 
     @staticmethod
@@ -48,5 +48,5 @@ class MongoDBPipeline(object):
             # collection.insert(dict(item))
             collection.insert_one(dict(item))
         except DuplicateKeyError:
-            logging.warning("already in data base, {0}".format(dict(item)))
+            # logging.warning("already in data base, {0}".format(dict(item)))
             pass

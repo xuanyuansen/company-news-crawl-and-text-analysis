@@ -5,14 +5,15 @@ import json
 from NlpModel.information_extract import InformationExtract
 from Utils import config, utils
 from NlpModel.tokenization import Tokenization
+from NlpModel.FinancialSentimentLLM import FinancialSentimentLLM
 import logging
 
 logger = logging.getLogger()
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-    datefmt="%a, %d %b %Y %H:%M:%S",
-)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+#     datefmt="%a, %d %b %Y %H:%M:%S",
+# )
 
 
 class GenStockNewsDB(object):
@@ -21,6 +22,8 @@ class GenStockNewsDB(object):
         force_update_model: bool = False,
         force_update_score_using_model: bool = False,
         generate_report: bool = False,
+        force_update_score_using_llm: bool = False,
+        model_path: str = None, 
     ):
         self.logger = utils.get_logger()
         self.information_extractor = InformationExtract(force_update_model)
@@ -36,6 +39,11 @@ class GenStockNewsDB(object):
         self.generate_report = generate_report
         self.latest_news_report = dict()
         self.news_report_raw_version = list()
+        self.model_path = model_path
+        self.llm_predictor = None
+        if force_update_score_using_llm and self.model_path:
+            self.llm_predictor = FinancialSentimentLLM(self.model_path)
+            # self.llm_predictor._load_model()
 
     def get_report_raw_version(self):
         return self.news_report_raw_version
