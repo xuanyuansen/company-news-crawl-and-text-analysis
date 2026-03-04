@@ -160,20 +160,28 @@ class LocalDbTool(object):
             )
             if end_date is not None and market_type == "cn":
                 e_d = end_date.split("-")
+                # _query = {
+                #     "date": {
+                #         "$gte": datetime.datetime(
+                #             int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
+                #         ),
+                #         "$lte": datetime.datetime(
+                #             int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
+                #         ),
+                #     }
+                # }
                 _query = {
-                    "date": {
-                        "$gte": datetime.datetime(
-                            int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                        ),
-                        "$lte": datetime.datetime(
-                            int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
-                        ),
+                        "date": {
+                            "$gte": start_date,
+                            "$lte": end_date,
+                        }
                     }
-                }
-
+                
             stock_data = self.db_obj.get_data(
                 db_name, symbol, query=_query, keys=_keys, sort=True, sort_key=["date"]
-            )
+            )            
+        
+        # print(f'end date is {end_date}, {start_date}, {_query}')        
         if stock_data is None:
             return False, DataFrame()
         # to do 用joint quant的数据来更新money数据。

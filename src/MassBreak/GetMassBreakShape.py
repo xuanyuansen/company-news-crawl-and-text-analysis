@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 # 通过交易量的变化，找到在底部长期盘整，然后突然放量突破的股票，例如万丰奥威或者中信海直这样的形态。
-from MarketPriceSpiderWithScrapy.StockInfoUtils import get_all_stock_code_info_of_cn
+# from MarketPriceSpiderWithScrapy.StockInfoUtils import get_all_stock_code_info_of_cn
+from MarketPriceSpiderWithScrapy.StockInfoUtilsBS import get_all_stock_code_info_of_cn
 from MongoDbComTools.LocalDbTool import LocalDbTool
 import sys
 import pandas as pd
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     info = get_all_stock_code_info_of_cn()
     print(info.shape)
-    info = info[~info['名称'].str.contains('ST')]
+    # info = info[~info['名称'].str.contains('ST')]
     print(info.shape)
     # info = info[:100]
     info["BreakDateAndVar"] = info.progress_apply(
@@ -110,7 +111,8 @@ if __name__ == "__main__":
         lambda row: row["BreakDateAndVar"][4],
         axis=1,
     )
-    info["name"] = info["名称"]
+    # info["name"] = info["名称"]
+    info["name"] = info["code_name"]
 
     info.to_csv("break_{}.csv".format(sys.argv[3]))
 

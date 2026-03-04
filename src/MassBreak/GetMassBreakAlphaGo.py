@@ -2,7 +2,8 @@
 # 通过交易量的变化，找到在底部长期盘整，然后突然放量突破的股票，例如万丰奥威或者中信海直这样的形态。
 # MACD没有用是后置，主要是量价关系
 # 例如邵阳液压、襄阳轴承、红宝丽
-from MarketPriceSpiderWithScrapy.StockInfoUtils import get_all_stock_code_info_of_cn
+# from MarketPriceSpiderWithScrapy.StockInfoUtils import get_all_stock_code_info_of_cn
+from MarketPriceSpiderWithScrapy.StockInfoUtilsBS import get_all_stock_code_info_of_cn
 from MongoDbComTools.LocalDbTool import LocalDbTool
 import sys
 import pandas as pd
@@ -32,7 +33,7 @@ def average_volume_last_30_days(group):
 def getVolumeBreakDateList(t_stock, market, start, AveDate: int, Ratio: float):
     res, data = get_specific_target_stock(t_stock, market, start)
     if res and data.shape[0] >= AveDate:
-        data["AvgVolumeLast30Days"] = data["volume"].rolling(AveDate).mean()
+        data["AvgVolumeLast30Days"] = data["volume"].rolling(AveDate).mean() 
         # 30 日价格方差，描述的是过去30日价格的波动范围，越小越好
         data["VarClosePriceLast30Days"] = data["close"].rolling(AveDate).var()
         # 30 均线价格
@@ -68,12 +69,12 @@ set_display()
 
 if __name__ == "__main__":
     # res, data = get_specific_target_stock(sys.argv[1], sys.argv[2], sys.argv[3])
-    getVolumeBreakDateList(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), float(sys.argv[5]))
+    res = getVolumeBreakDateList(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), float(sys.argv[5]))
     # sys.exit(0)
-
+    print(res)
     info = get_all_stock_code_info_of_cn()
     print(info.shape)
-    info = info[~info['名称'].str.contains('ST')]
+    # info = info[~info['名称'].str.contains('ST')]
     print(info.shape)
     # info = info[:100]
     info["BreakDateAndVar"] = info.progress_apply(
@@ -112,7 +113,8 @@ if __name__ == "__main__":
         axis=1,
     )
 
-    info["name"] = info["名称"]
+    # info["name"] = info["名称"] 
+    info["name"] = info["code_name"]
 
     info.to_csv("break_{}_{}_{}_{}.csv".format(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]))
 

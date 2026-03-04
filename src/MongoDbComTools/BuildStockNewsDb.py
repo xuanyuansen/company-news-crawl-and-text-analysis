@@ -43,7 +43,7 @@ class GenStockNewsDB(object):
         self.llm_predictor = None
         if force_update_score_using_llm and self.model_path:
             self.llm_predictor = FinancialSentimentLLM(self.model_path)
-            # self.llm_predictor._load_model()
+
 
     def get_report_raw_version(self):
         return self.news_report_raw_version
