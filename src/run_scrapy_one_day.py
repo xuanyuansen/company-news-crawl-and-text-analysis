@@ -115,7 +115,7 @@ if __name__ == "__main__":
             "%Y-%m-%d"
         )
         logging.info("start time is {}".format(start_date_time))
-        gdb = GenStockNewsDB(force_update_score_using_model=True, generate_report=True)
+        gdb = GenStockNewsDB(force_update_score_using_model=True)
         report_list_of_dict = []
         collection_cnt = 0
         for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():

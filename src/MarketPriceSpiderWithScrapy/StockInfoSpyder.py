@@ -13,7 +13,7 @@ from pandas import DataFrame
 import pandas as pd
 from MongoDbComTools.JointQuantTool import JointQuantTool
 from jqdatasdk import get_price, get_query_count
-from MarketPriceSpiderWithScrapy import StockInfoUtils
+from MarketPriceSpiderWithScrapy import StockInfoUtils, StockInfoUtilsBS
 from MarketPriceSpiderWithScrapy.BasicSpyder import Spyder
 from pandas._libs.tslibs.timestamps import Timestamp
 from Utils import config, utils
@@ -716,20 +716,20 @@ class StockInfoSpyder(Spyder):
     # 获取CN股票信息数据
     # if database is empty, then get all code info first through ak share
     def get_all_stock_code_info_of_cn(self):
-        data = StockInfoUtils.get_all_stock_code_info_of_cn()
+        data = StockInfoUtilsBS.get_all_stock_code_info_of_cn()
         for index, row in data.iterrows():
             if self.col_basic_info_cn.find_one({"_id": row["_id"]}) is not None:
                 self.logger.info("id already exist {0} {1}".format(row["_id"], index))
                 continue
-
+            # print(row)
             _data = {
                 "_id": row["_id"],
                 "symbol": row["joint_quant_code"],
-                "name": row["名称"],
-                "code": row["代码"],
+                "name": row['code_name'],#row["名称"],
+                "code": row['code'],#row["代码"],
                 "start_date": "",
                 "end_date": "",
-                "name_suo_xie": row["名称"],
+                "name_suo_xie": row['code_name'],#row["名称"],
                 "joint_quant_code": index,
             }
 

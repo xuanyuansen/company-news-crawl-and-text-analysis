@@ -22,8 +22,7 @@ class GenStockNewsDB(object):
         force_update_model: bool = False,
         force_update_score_using_model: bool = False,
         generate_report: bool = False,
-        force_update_score_using_llm: bool = False,
-        model_path: str = None, 
+        force_update_score_using_llm: bool = True
     ):
         self.logger = utils.get_logger()
         self.information_extractor = InformationExtract(force_update_model)
@@ -39,10 +38,13 @@ class GenStockNewsDB(object):
         self.generate_report = generate_report
         self.latest_news_report = dict()
         self.news_report_raw_version = list()
-        self.model_path = model_path
+        self.model_path = config.LLM_MODEL_PATH
+        self.use_device_type = config.LLM_USE_DEVICE_TYPE
         self.llm_predictor = None
         if force_update_score_using_llm and self.model_path:
-            self.llm_predictor = FinancialSentimentLLM(self.model_path)
+            self.llm_predictor = FinancialSentimentLLM(
+                self.model_path, use_device_type=self.use_device_type
+            )
 
 
     def get_report_raw_version(self):

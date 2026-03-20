@@ -1,137 +1,3 @@
-# from sklearn import model_selection
-# from xgboost import XGBClassifier
-
-# from ChanUtils.BasicUtil import KiLineObject
-# from ChanUtils.ChanFeature import DeepFeatureGen
-# from ChanUtils.ShapeUtil import ChanSourceDataObject
-# from MarketPriceSpiderWithScrapy.StockInfoSpyder import StockInfoSpyder
-
-# # import xgboost as xgb
-# import sys
-# import pandas as pd
-
-# from NlpModel.ChanBasedCnn import CustomChanDataset, TextCNN
-# from Utils.utils import set_display
-# from NlpModel.DataPreProcessing import DataPreProcessing
-
-# set_display()
-
-# param = {
-#     "max_depth": 5,
-#     "eta": 1,
-#     "num_class": 4,
-#     "tree_method": "gpu_hist",
-# }
-
-# model = XGBClassifier(param, objective="multi:softmax")
-
-# price_spider = StockInfoSpyder()
-# res, df = price_spider.get_week_data_stock(
-#     symbol="sz000001", market_type="cn", start_date="2021-06-04", end_date="2021-06-20"
-# )
-# if res:
-#     print(df)
-# exit(0)
-
-# data_processor = DataPreProcessing(feature_size=40, history_day_ta_feature_to_use=10)
-# # data_processor.get_ta_feature()
-
-# _res, stock_data = price_spider.get_daily_price_data_of_specific_stock(
-#     symbol="sz000001", market_type="cn", start_date="2020-06-01"
-# )
-# print(stock_data[:10])
-# print("stock shape is {}".format(stock_data.shape))
-# feature_list = data_processor.get_ta_feature(stock_data, upper_case=False)
-# print("feature list size {}".format(len(feature_list)))
-# print("feature list {}".format(feature_list))
-
-
-# stock_data["Date"] = pd.to_datetime(stock_data["date"], format="%Y-%m-%d")
-# stock_data.set_index("Date", inplace=True)
-
-# k_line_data = KiLineObject.k_line_merge("sz000930", stock_data, merge_or_not=True)
-# chan_data = ChanSourceDataObject("daily", k_line_data)
-# chan_data.gen_data_frame()
-# chan_data.get_plot_data_frame()
-
-# data = price_spider.col_basic_info_cn.find_one({"symbol": "sz000930"})
-# print(data["concept"])
-# print(data["industry"])
-# deep_fea_gen = DeepFeatureGen(chan_data)
-# res = deep_fea_gen.get_deep_sequence_feature(data["industry"], data["concept"])
-# print(res)
-# print("bi feature length {}".format(len(res)))
-# print(deep_fea_gen.concept_list)
-# print(deep_fea_gen.industry_list)
-# print(deep_fea_gen.industry_to_index)
-# print(deep_fea_gen.concept_to_index)
-# print(deep_fea_gen.from_industry_to_feature(data["industry"]))
-# print(deep_fea_gen.from_concept_to_feature(data["concept"]))
-# print(sum(deep_fea_gen.from_concept_to_feature(data["concept"])))
-
-# from MassBreak.BacktestFramework import BacktestFramework, strategy_adapter_alphago, strategy_adapter_shape
-# from Utils.utils import set_display
-
-# set_display()
-
-
-# if __name__ == "__main__":
-#     import sys
-    
-#     # 示例用法
-#     if len(sys.argv) < 6:
-#         print("用法: python BacktestFramework.py <策略类型> <市场类型> <开始日期> <平均天数> <放量倍数> [持有天数] [止损] [止盈]")
-#         print("策略类型: alphago 或 shape")
-#         print("示例: python BacktestFramework.py alphago cn 2026-01-01 30 1.2 30 0.1 0.2")
-#         sys.exit(1)
-    
-#     strategy_type = sys.argv[1]  # "alphago" 或 "shape"
-#     market_type = sys.argv[2]
-#     start_date = sys.argv[3]
-#     ave_date = int(sys.argv[4])
-#     ratio = float(sys.argv[5])
-#     hold_days = int(sys.argv[6]) if len(sys.argv) > 6 else 30
-#     stop_loss = float(sys.argv[7]) if len(sys.argv) > 7 else None
-#     take_profit = float(sys.argv[8]) if len(sys.argv) > 8 else None
-    
-#     # 选择策略
-#     if strategy_type == "alphago":
-#         strategy_func = strategy_adapter_alphago
-#     elif strategy_type == "shape":
-#         strategy_func = strategy_adapter_shape
-#     else:
-#         print(f"未知策略类型: {strategy_type}")
-#         sys.exit(1)
-    
-#     # 创建回测框架
-#     backtest = BacktestFramework(
-#         strategy_func=strategy_func,
-#         market_type=market_type,
-#         start_date=start_date,
-#         hold_days=hold_days,
-#         stop_loss=stop_loss,
-#         take_profit=take_profit
-#     )
-    
-#     # 运行回测
-#     results = backtest.run_backtest(ave_date=ave_date, ratio=ratio, stock_list=["sh600938"])#, "sh600938", "sz000547"])
-    
-#     # 生成报告
-#     output_file = f"backtest_{strategy_type}_{market_type}_{start_date}_{ave_date}_{ratio}.csv"
-#     backtest.generate_report(output_file=output_file)
-    
-#     # 绘制图表
-#     plot_file = f"backtest_{strategy_type}_{market_type}_{start_date}_{ave_date}_{ratio}.png"
-#     backtest.plot_results(save_path=plot_file)
-
-# from MassBreak.StockFundamentalIndicators import get_fundamental_indicators, print_fundamental_indicators
-# # 获取指标字典
-# indicators = get_fundamental_indicators("600938")
-# print(indicators["pe_ttm"], indicators["ps"], indicators["revenue_yoy"], indicators["profit_yoy"])
-# # 打印
-# print_fundamental_indicators("600938")
-
-
 # -*- coding:utf-8 -*-
 # 通过交易量变化，找到底部长期盘整后放量突破的股票（优化版）。
 # 在 GetMassBreakAlphaGo.py 的结构上扩展：
@@ -193,6 +59,14 @@ def _pick_code_column(df: pd.DataFrame) -> str:
     return ""
 
 
+def _pick_name_column(df: pd.DataFrame) -> str:
+    for col in ["code_name", "name", "股票名称"]:
+        if col in df.columns:
+            return col
+    return ""
+
+
+
 def get_stock_pool_by_market(market: str) -> pd.DataFrame:
     market_l = str(market).lower()
 
@@ -217,11 +91,9 @@ def get_stock_pool_by_market(market: str) -> pd.DataFrame:
     if code_col:
         df["joint_quant_code"] = df[code_col]
 
-    if "code_name" not in df.columns:
-        for name_col in ["name", "股票名称", "code_name"]:
-            if name_col in df.columns:
-                df["code_name"] = df[name_col]
-                break
+    name_col = _pick_name_column(df)
+    if name_col and "code_name" not in df.columns:
+        df["code_name"] = df[name_col]
 
     return df
 
@@ -235,6 +107,7 @@ def getVolumeBreakDateList(
     Ratio: float,
     KeepDays: int = 1,
     EnableLimitUpSpecial: bool = None,
+    PriceStableThreshold: float = 0.05,
 ):
     res, data = get_specific_target_stock(t_stock, market, start)
     min_days = max(AveDate, KeepDays + 1)
@@ -258,9 +131,26 @@ def getVolumeBreakDateList(
         last_today_vs_last_n_days = -1
 
     data["TodayVolumeVsN"] = data["volume"] / data["AvgVolumeLastNDays"].replace(0, pd.NA)
+    latest_today_volume_vs_n = data["TodayVolumeVsN"].iloc[-1]
+    if pd.isna(latest_today_volume_vs_n):
+        latest_today_volume_vs_n = 0
+
+    # ===== 放量期间（KeepDays窗口）价格稳定性 =====
+    # 使用 KeepDays 窗口的价格区间 / 均价衡量，越小越稳定。
+    keep_window = max(1, int(KeepDays))
+    data["KeepWindowCloseMax"] = data["close"].rolling(keep_window).max()
+    data["KeepWindowCloseMin"] = data["close"].rolling(keep_window).min()
+    data["KeepWindowCloseMean"] = data["close"].rolling(keep_window).mean()
+    data["KeepWindowPriceRangeRatio"] = (
+        (data["KeepWindowCloseMax"] - data["KeepWindowCloseMin"])
+        / data["KeepWindowCloseMean"].replace(0, pd.NA)
+    )
+    data["IsPriceStableInKeepDays"] = (
+        data["KeepWindowPriceRangeRatio"] <= PriceStableThreshold
+    ).fillna(False)
 
     if EnableLimitUpSpecial is None:
-        EnableLimitUpSpecial = _market_has_limit_up(market) # cn 股票才有
+        EnableLimitUpSpecial = _market_has_limit_up(market)
 
     # ===== 开盘涨停特殊处理（仅支持有涨停制度的市场）=====
     # 避免“开盘一字板导致成交量不明显放大”时被误过滤。
@@ -276,32 +166,25 @@ def getVolumeBreakDateList(
     else:
         data["IsOpenLimitUp"] = False
 
-    # 放量条件 OR 开盘涨停特例
-    data["VolumeOrLimitUp"] = (data["TodayVolumeVsN"] >= Ratio) | data["IsOpenLimitUp"]
+    # 在保证放量条件的同时，放量期间 KeepDays 内价格应相对稳定
+    data["VolumeWithStable"] = (data["TodayVolumeVsN"] >= Ratio) & data["IsPriceStableInKeepDays"]
+    # 放量且稳定 OR 开盘涨停特例
+    data["VolumeOrLimitUp"] = data["VolumeWithStable"]# | data["IsOpenLimitUp"]
     data["VolumeOrLimitUp"] = data["VolumeOrLimitUp"].fillna(False)
 
     # 连续天数统计，达到 KeepDays 后才触发信号
     data["KeepCount"] = _calc_consecutive_true_count(data["VolumeOrLimitUp"])
     data["IsSignalDay"] = (data["KeepCount"] >= KeepDays) & (
-        data["KeepCount"].shift(1).fillna(0) < KeepDays # 前面一天还没满足 
-        # 今天 >= KeepDays且昨天 < KeepDays
+        data["KeepCount"].shift(1).fillna(0) < KeepDays
     )
 
     signal_df = data[data["IsSignalDay"]]
     if signal_df.shape[0] == 0:
-        return [], -1, float(last_today_vs_last_n_days), 0, 0, []
+        return [], -1, float(last_today_vs_last_n_days), float(latest_today_volume_vs_n), 0, []
 
     signal_dates = signal_df["date"].values.tolist()
     price_var_list = signal_df["VarClosePriceLastNDays"].dropna().values.tolist()
     avg_price_var = sum(price_var_list) / len(price_var_list) if price_var_list else -1
-
-    first_signal_close_price = signal_df["close"].values.tolist()[0]
-    last_close_price = data["close"].values.tolist()[-1]
-    up_ratio = (
-        (last_close_price - first_signal_close_price) / first_signal_close_price
-        if first_signal_close_price not in (0, None)
-        else 0
-    )
 
     avg_signal_volume_ratio = signal_df["TodayVolumeVsN"].dropna().mean()
     if pd.isna(avg_signal_volume_ratio):
@@ -313,7 +196,7 @@ def getVolumeBreakDateList(
         signal_dates,
         float(avg_price_var),
         float(last_today_vs_last_n_days),
-        float(up_ratio),
+        float(latest_today_volume_vs_n),
         float(avg_signal_volume_ratio),
         open_limit_up_signal_dates,
     )
@@ -324,16 +207,24 @@ set_display()
 if __name__ == "__main__":
     if len(sys.argv) < 6:
         print(
-            "Usage: python MassBreakAlphaGo.py <stock_code> <market> <start_date> <AveDate> <Ratio> [KeepDays]"
+            "Usage: python MassBreakAlphaGo.py <stock_code> <market> <start_date> <AveDate> <Ratio> [KeepDays] [PriceStableThreshold]"
         )
-        print(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[0], len(sys.argv))
         sys.exit(1)
 
     keep_days = int(sys.argv[6]) if len(sys.argv) >= 7 else 2
+    price_stable_threshold = float(sys.argv[7]) if len(sys.argv) >= 8 else 0.12
 
     res = getVolumeBreakDateList(
-        sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), float(sys.argv[5]), keep_days
+        sys.argv[1],
+        sys.argv[2],
+        sys.argv[3],
+        int(sys.argv[4]),
+        float(sys.argv[5]),
+        keep_days,
+        None,
+        price_stable_threshold,
     )
+    print(f"stock {sys.argv[1]} res is {res}")
 
     info = get_stock_pool_by_market(sys.argv[2])
     if info is None or info.empty:
@@ -345,7 +236,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     print(info.shape)
-    print(info.shape)
+    print(info.head(10))
 
     info["BreakDateAndVar"] = info.progress_apply(
         lambda row: getVolumeBreakDateList(
@@ -355,6 +246,8 @@ if __name__ == "__main__":
             int(sys.argv[4]),
             float(sys.argv[5]),
             keep_days,
+            None,
+            price_stable_threshold,
         ),
         axis=1,
     )
@@ -369,7 +262,7 @@ if __name__ == "__main__":
     info["LastTodayVsLastNDays"] = info.progress_apply(
         lambda row: row["BreakDateAndVar"][2], axis=1
     )
-    info["UpRatioVsFirstVolumeUp"] = info.progress_apply(
+    info["TodayVolumeVsN"] = info.progress_apply(
         lambda row: row["BreakDateAndVar"][3], axis=1
     )
     info["AvgSignalVolumeRatio"] = info.progress_apply(
@@ -385,8 +278,8 @@ if __name__ == "__main__":
     info["name"] = info["code_name"] if "code_name" in info.columns else info["code"]
 
     info.to_csv(
-        "break_alphago_{}_{}_{}_{}_keep{}.csv".format(
-            sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], keep_days
+        "break_alphago_{}_{}_{}_{}_keep{}_stable{}.csv".format(
+            sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], keep_days, price_stable_threshold
         ),
         index=False,
     )
