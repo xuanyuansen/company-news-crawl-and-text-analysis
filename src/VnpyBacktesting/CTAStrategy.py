@@ -20,6 +20,9 @@ class CTAStrategy(CtaTemplate):
     3. 组合止盈（固定止盈 + 回撤止盈）卖出
     4. 超过持有天数卖出
     5. 除上述情况外不平仓，不再二次开仓
+    6. fixed_size 表示开仓手数，单手为 100 股
+       - fixed_size > 0：按指定手数下单，但最终数量不会超过本金可承受范围
+       - fixed_size <= 0：按当前价格和本金自动计算最多可买手数
     """
 
     buy_date = ""
@@ -29,7 +32,7 @@ class CTAStrategy(CtaTemplate):
     trailing_activate_ratio = 0.06
     trailing_stop_ratio = 0.03
     max_hold_bars = 10
-    fixed_size = 100
+    fixed_size = 0
 
     entry_price = 0.0
     highest_price = 0.0
@@ -99,13 +102,44 @@ class CTAStrategy(CtaTemplate):
     def _check_time_exit(self) -> bool:
         return bool(self.holding_bars >= self.max_hold_bars)
 
+    def _get_affordable_volume(self, price: float) -> int:
+        capital = float(getattr(self.cta_engine, "capital", 0) or 0)
+        size = float(getattr(self.cta_engine, "size", 1) or 1)
+        rate = float(getattr(self.cta_engine, "rate", 0) or 0)
+        slippage = float(getattr(self.cta_engine, "slippage", 0) or 0)
+        if capital <= 0 or price <= 0 or size <= 0:
+            return 0
+
+        unit_cost = price * size * (1 + rate) + size * slippage
+        if unit_cost <= 0:
+            return 0
+
+        return int(capital // unit_cost)
+
+    def _resolve_open_volume(self, price: float) -> int:
+        affordable_volume = self._get_affordable_volume(price)
+        if affordable_volume <= 0:
+            return 0
+
+        fixed_size = int(self.fixed_size or 0)
+        if fixed_size <= 0:
+            return affordable_volume
+
+        return min(fixed_size, affordable_volume)
+
     def on_bar(self, bar: BarData) -> None:
         self.cancel_all()
 
         if self.pos == 0 and self._should_force_buy_on_date(bar):
+            volume = self._resolve_open_volume(bar.close_price)
+            if volume <= 0:
+                self.write_log("本金不足，无法按当前价格买入")
+                self.has_opened_once = True
+                self.put_event()
+                return
             self._reset_position_state()
             self.has_opened_once = True
-            self.buy(bar.close_price, self.fixed_size)
+            self.buy(bar.close_price, volume)
             self.put_event()
             return
 
