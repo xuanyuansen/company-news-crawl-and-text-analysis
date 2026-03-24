@@ -456,7 +456,7 @@ class StockInfoSpyder(Spyder):
                     symbol, stock_us_daily_qfq_df.shape[0]
                 )
             )
-            time.sleep(random.randint(5, 10))
+            time.sleep(random.randint(2, 5))
             # break
         return True
 
@@ -506,7 +506,7 @@ class StockInfoSpyder(Spyder):
                     symbol, stock_us_zh_daily_qfq_df.shape[0]
                 )
             )
-            time.sleep(random.randint(5, 10))
+            time.sleep(random.randint(2, 5))
         return True
 
     # 获取港股历史行情

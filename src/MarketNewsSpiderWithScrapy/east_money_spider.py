@@ -24,7 +24,7 @@ class EastMoneySpider(BaseSpider):
         
         # 1. 等待列表加载
         try:
-            await page.wait_for_selector("#newsListContent li", timeout=10000)
+            await page.wait_for_selector("#newsListContent li", timeout=50000)
         except Exception as e:
             print(f"列表页加载超时: {e}")
             return
