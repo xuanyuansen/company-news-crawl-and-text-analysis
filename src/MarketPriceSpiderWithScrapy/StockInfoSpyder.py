@@ -755,6 +755,8 @@ class StockInfoSpyder(Spyder):
         if freq == "day":
             for symbol in stock_symbol_list:
                 # time.sleep(0.1)
+                if symbol[:2] == "sh" and symbol[2:3]!='6':
+                    continue
                 _col = self.db_obj.get_collection(self.database_name_cn, symbol)
                 # 首先查询DB里面最大的时间
                 try:
@@ -781,7 +783,7 @@ class StockInfoSpyder(Spyder):
 
                 offset = (today.weekday() - 4) % 7
                 friday = today - datetime.timedelta(days=offset)
-                print(type(friday), friday)
+                # print(type(friday), friday)
                 # if _start_date == friday.strftime("%Y-%m-%d"):
                 #    self.logger.info('最近一个周五{} ，continue'.format(friday))
                 #    continue

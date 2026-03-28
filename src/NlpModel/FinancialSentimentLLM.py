@@ -1,4 +1,5 @@
 import re
+import platform
 from typing import Any
 
 class FinancialSentimentLLM:
@@ -15,7 +16,13 @@ class FinancialSentimentLLM:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, model_path: str, tp_size: int = 2, use_device_type: str = "gpu"):
+    def __init__(
+        self,
+        model_path: str,
+        tp_size: int = 2,
+        use_device_type: str = "gpu",
+        ollama_model: str = "qwen3:1.7b",
+    ):
         # 如果已经加载过模型，直接退出，不要重复加载
         if self._initialized:
             return
@@ -23,15 +30,35 @@ class FinancialSentimentLLM:
         self.model_path = model_path
         self.tp_size = tp_size  # 启动GPU个数
         self.use_device_type = use_device_type.lower()
+        self.system_name = platform.system()
+        self.runtime_backend = None
         self.llm: Any = None
         self.sampling_params: Any = None
         self.tokenizer: Any = None
         self.torch: Any = None
-        self.max_tokens = 256
+        self.ollama_client: Any = None
+        self.max_tokens = 1024
         self.temperature = 0.6
         self.top_p = 0.8
+        self.ollama_base_url = "http://localhost:11434/v1"
+        self.ollama_api_key = "ollama"
+        self.ollama_model = ollama_model
+        self.ollama_temperature = 0.3
+        self.ollama_top_p = 0.9
+        self.ollama_max_tokens = 30
 
-        if self.use_device_type == "gpu":
+        if self.system_name == "Darwin":
+            self.runtime_backend = "ollama"
+        elif self.use_device_type == "gpu":
+            self.runtime_backend = "gpu"
+        elif self.use_device_type == "cpu":
+            self.runtime_backend = "cpu"
+        else:
+            raise ValueError(
+                f"use_device_type 仅支持 'cpu' 或 'gpu'，当前值: {use_device_type}"
+            )
+
+        if self.runtime_backend == "gpu":
             from vllm import LLM, SamplingParams
 
             self.sampling_params = SamplingParams(
@@ -47,7 +74,7 @@ class FinancialSentimentLLM:
                 max_model_len=4096,
                 gpu_memory_utilization=0.8,
             )
-        elif self.use_device_type == "cpu":
+        elif self.runtime_backend == "cpu":
             import torch
             from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -68,8 +95,11 @@ class FinancialSentimentLLM:
             self.llm.eval()
             self.llm.config.use_cache = True
         else:
-            raise ValueError(
-                f"use_device_type 仅支持 'cpu' 或 'gpu'，当前值: {use_device_type}"
+            from openai import OpenAI
+
+            self.ollama_client = OpenAI(
+                base_url=self.ollama_base_url,
+                api_key=self.ollama_api_key,
             )
 
         self._initialized = True
@@ -85,15 +115,25 @@ class FinancialSentimentLLM:
 文章: {article}
 分值在0-1之间，越高代表利好的概率越大。
 回答格式要求：
-1.使用json输出结果，且json中只包含一个字段label
-2.格式举例：{{"label":0.5}} .<|im_end|>
+1.回答简洁不需要进行思考。
+2.使用json输出结果，且json中只包含一个字段label
+3.格式举例：{{"label":0.5}} .<|im_end|>
 <|im_start|>assistant
 <think>
 </think>
 Answer:
 """
         try:
-            if self.use_device_type == "gpu":
+            if self.runtime_backend == "ollama":
+                response = self.ollama_client.chat.completions.create(
+                    model=self.ollama_model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=self.ollama_temperature,
+                    top_p=self.ollama_top_p,
+                    max_tokens=self.ollama_max_tokens,
+                )
+                res_text = response.choices[0].message.content or ""
+            elif self.runtime_backend == "gpu":
                 outputs = self.llm.generate([prompt], self.sampling_params)
                 res_text = outputs[0].outputs[0].text
             else:

@@ -408,5 +408,6 @@ ALL_SPIDER_LIST_OF_DICT = dict(
 )
 
 LATEST_DAY_OR_PAGE_SETTING = 3
-LLM_MODEL_PATH = "/home/zhangSongbo/work/DL/kaggle/MAP/jigsawCode/models/Qwen3-0.6B" # None
-LLM_USE_DEVICE_TYPE = "cpu"
+LLM_MODEL_PATH = "/home/zhangSongbo/work/DL/kaggle/MAP/jigsawCode/models/Qwen3-4B" # None
+LLM_USE_DEVICE_TYPE = "gpu"
+OLLAMA_MODEL = "qwen3:1.7b"
