@@ -140,8 +140,8 @@ class Database(object):
             data_length = len(data_list)
             if data_length == 0:
                 logging.warning(
-                    "no data found with query {0} data {1} {2}".format(
-                        query, data, data_length
+                    "no data found with query {0} data {1} {2}, database_name{3}, collection_name{4}".format(
+                        query, data, data_length, database_name, collection_name
                     )
                 )
                 return None

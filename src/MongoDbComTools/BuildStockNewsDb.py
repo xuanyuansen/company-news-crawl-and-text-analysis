@@ -33,6 +33,11 @@ class GenStockNewsDB(object):
             config.COLLECTION_NAME_STOCK_BASIC_INFO,
             keys=["name", "code"],
         )
+        self.name_code_df_us = self.database.get_data(
+            config.US_STOCK_DATABASE_NAME,
+            config.COLLECTION_NAME_STOCK_BASIC_INFO_US,
+            keys=["cname", "symbol"],
+        )
         self.force_update_score_using_model = force_update_score_using_model
         self.col_names = []
         self.generate_report = generate_report

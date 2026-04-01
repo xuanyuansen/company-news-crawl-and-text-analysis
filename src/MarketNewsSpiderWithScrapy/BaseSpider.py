@@ -20,9 +20,14 @@ class BaseSpider(Spider):
         self.base_url = base_url
         self.GenStockNewsDB = GenStockNewsDB()
         # self.GenStockNewsDB = GenStockNewsDB()
-        self.name_code_dict = dict(
-            (self.GenStockNewsDB.name_code_df[["name", "code"]]).values
+        if name.startswith("mei_tong"):
+            self.name_code_dict = dict(
+            (self.GenStockNewsDB.name_code_df_us[["cname", "symbol"]]).values
         )
+        else:
+            self.name_code_dict = dict(
+                (self.GenStockNewsDB.name_code_df[["name", "code"]]).values
+            )
         self.day_now = datetime.now().strftime("%Y-%m-%d")
         self.logger.info("spider name is {}".format(self.name))
         super().__init__()
@@ -100,14 +105,12 @@ class BaseSpider(Spider):
             article = article.replace("\r\n", "")
         article = " ".join(re.split(" +|\n+", article)).strip()
         playInfos['Article'] = article
-
         (
             related_stock_codes_json,
             cut_words_json,
         ) = self.GenStockNewsDB.information_extractor.token.find_stock_code_and_name_in_article(
             playInfos['Article'], self.name_code_dict
         )
-
         _ml_judge = self.GenStockNewsDB.information_extractor.predict_score(
             playInfos['Title'] + playInfos['Article']
         )

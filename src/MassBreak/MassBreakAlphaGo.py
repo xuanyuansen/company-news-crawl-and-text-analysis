@@ -15,6 +15,9 @@ tqdm.pandas(desc="progress status")
 
 local_db = LocalDbTool()
 
+AVG_VOLUME_MIN_THRESHOLD = 10000
+MIN_VOLUME_MIN_THRESHOLD = 1000
+
 
 def get_specific_target_stock(t_stock, market, start):
     return local_db.get_daily_price_data_of_specific_stock(
@@ -122,6 +125,7 @@ def getVolumeBreakDateList(
         return [], -1, -1, 0, 0, []
 
     data["AvgVolumeLastNDays"] = data["volume"].rolling(AveDate).mean()
+    data["MinVolumeLastNDays"] = data["volume"].rolling(AveDate).min()
     data["VarClosePriceLastNDays"] = data["close"].rolling(AveDate).var()
     data["ClosePriceLastNDays"] = data["close"].rolling(AveDate).mean()
     data["TodayVsLastNDays"] = data["close"] - data["ClosePriceLastNDays"]
@@ -167,7 +171,13 @@ def getVolumeBreakDateList(
         data["IsOpenLimitUp"] = False
 
     # 在保证放量条件的同时，放量期间 KeepDays 内价格应相对稳定
-    data["VolumeWithStable"] = (data["TodayVolumeVsN"] >= Ratio) & data["IsPriceStableInKeepDays"]
+    # 同时要求 AveDate 滚动均量和窗口最小成交量满足最低门槛，避免低流动性标的误入选股。
+    data["VolumeWithStable"] = (
+        (data["TodayVolumeVsN"] >= Ratio)
+        & data["IsPriceStableInKeepDays"]
+        & (data["AvgVolumeLastNDays"] > AVG_VOLUME_MIN_THRESHOLD)
+        & (data["MinVolumeLastNDays"] > MIN_VOLUME_MIN_THRESHOLD)
+    )
     # 放量且稳定 OR 开盘涨停特例
     data["VolumeOrLimitUp"] = data["VolumeWithStable"]# | data["IsOpenLimitUp"]
     data["VolumeOrLimitUp"] = data["VolumeOrLimitUp"].fillna(False)

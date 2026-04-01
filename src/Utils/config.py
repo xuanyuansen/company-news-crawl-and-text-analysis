@@ -395,6 +395,47 @@ ZHONG_JIN_SPIDER_LIST = [
     ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS,
 ]
 
+# mei tong she
+MEI_TONG_SHE_NEWS_DB = "mei_tong_she_news"
+MEI_TONG_SHE_ZHUAN_TI_NEWS = dict(
+    {
+        "name": "mei_tong_she_zhuan_ti_news_spider",
+        "start_url": "https://www.prnasia.com/releases/listpage-theme-0-all-1.shtml",
+        "key_word": "zhuan_ti_news",
+        "key_word_chn": "专题",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 2,
+    }
+)
+
+MEI_TONG_SHE_TOU_TIAO_NEWS = dict(
+    {
+        "name": "mei_tong_she_tou_tiao_news_spider",
+        "start_url": "https://www.prnasia.com/lightnews/listpage-102-all-1.shtml",
+        "key_word": "tou_tiao_news",
+        "key_word_chn": "美通社头条",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 1,
+    }
+)
+
+MEI_TONG_SHE_COMPANY_NEWS = dict(
+    {
+        "name": "mei_tong_she_company_news_spider",
+        "start_url": "https://www.prnasia.com/releases/all/listpage-pc-all-all-all-all-spec-1.shtml",
+        "key_word": "company_news",
+        "key_word_chn": "上市公司新闻稿",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 1,
+    }
+)
+
+MEI_TONG_SHE_SPIDER_LIST = [
+    MEI_TONG_SHE_ZHUAN_TI_NEWS,
+    MEI_TONG_SHE_TOU_TIAO_NEWS,
+    MEI_TONG_SHE_COMPANY_NEWS,
+]
+
 ALL_SPIDER_LIST_OF_DICT = dict(
     {
         EAST_MONEY_NEWS_DB: EAST_MONEY_SPIDER_LIST,
@@ -404,6 +445,7 @@ ALL_SPIDER_LIST_OF_DICT = dict(
         SHANG_HAI_STOCK_NEWS_DB: SHANG_HAI_SPIDER_LIST,
         ZHONG_JIN_STOCK_NEWS_DB: ZHONG_JIN_SPIDER_LIST,
         NBD_STOCK_NEWS_DB: NBD_SPIDER_LIST,
+        MEI_TONG_SHE_NEWS_DB: MEI_TONG_SHE_SPIDER_LIST,
     }
 )
 

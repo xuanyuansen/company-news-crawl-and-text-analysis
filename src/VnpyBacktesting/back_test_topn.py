@@ -266,7 +266,7 @@ if __name__ == "__main__":
         joint_code = str(row.get("joint_quant_code", "") or row.get("code", "")).strip()
         if not joint_code:
             continue
-        vt_symbols = load_massbreak_symbols([joint_code])
+        vt_symbols = load_massbreak_symbols([joint_code], market=args.market)
         if not vt_symbols:
             continue
         buy_date = str(row.get("LatestBreakDate", "") or "").strip()
@@ -297,6 +297,7 @@ if __name__ == "__main__":
             start=args.start_date,
             end=args.end_date,
             adjust=args.adjust,
+            market=args.market,
             clean_before_save=not args.no_clean,
         )
         print("数据准备结果:")

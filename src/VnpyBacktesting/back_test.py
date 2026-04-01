@@ -41,9 +41,9 @@ def parse_date(date_str: str) -> datetime:
 
 def resolve_symbols(args: argparse.Namespace) -> tuple[list[str], str]:
     if args.single:
-        return load_massbreak_symbols([args.single]), "single"
+        return load_massbreak_symbols([args.single], market=args.market), "single"
     if args.symbols:
-        return load_massbreak_symbols(args.symbols), "list"
+        return load_massbreak_symbols(args.symbols, market=args.market), "list"
     raise ValueError("请通过 --single 或 --symbols 指定回测股票")
 
 
@@ -59,7 +59,7 @@ def build_strategy_setting(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
-def parse_symbol_buy_dates(raw: str) -> dict[str, str]:
+def parse_symbol_buy_dates(raw: str, market: str) -> dict[str, str]:
     """
     Parse per-symbol buy dates.
     Example:
@@ -80,7 +80,7 @@ def parse_symbol_buy_dates(raw: str) -> dict[str, str]:
             raise ValueError(f"symbol-buy-dates 存在空值: {item}")
 
         # 复用统一代码解析，转成 vt_symbol
-        vt_symbols = load_massbreak_symbols([symbol_raw])
+        vt_symbols = load_massbreak_symbols([symbol_raw], market=market)
         if not vt_symbols:
             raise ValueError(f"无法解析股票代码: {symbol_raw}")
         vt_symbol = vt_symbols[0]
@@ -198,6 +198,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-prepare", action="store_true", help="跳过数据准备")
     parser.add_argument("--no-clean", action="store_true", help="准备数据时不清理旧数据")
     parser.add_argument("--adjust", default="qfq", choices=["", "qfq", "hfq"], help="akshare 复权类型")
+    parser.add_argument("--market", default="cn", choices=["cn", "us", "hk"], help="市场类型: cn/us/hk")
 
     parser.add_argument("--capital", type=int, default=1_000_000)
     parser.add_argument("--rate", type=float, default=2.5 / 10000)
@@ -230,7 +231,7 @@ def build_parser() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     args = build_parser().parse_args()
     symbols, mode = resolve_symbols(args)
-    symbol_buy_dates = parse_symbol_buy_dates(args.symbol_buy_dates)
+    symbol_buy_dates = parse_symbol_buy_dates(args.symbol_buy_dates, args.market)
     print(f"模式: {mode}")
     print(f"股票列表: {symbols}")
     if symbol_buy_dates:
@@ -245,6 +246,7 @@ if __name__ == "__main__":
             start=args.start_date,
             end=args.end_date,
             adjust=args.adjust,
+            market=args.market,
             clean_before_save=not args.no_clean,
         )
         print("数据准备结果:")

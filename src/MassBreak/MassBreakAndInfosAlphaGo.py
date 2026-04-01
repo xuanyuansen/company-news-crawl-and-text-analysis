@@ -58,6 +58,24 @@ def normalize_stock_code(raw_code) -> str:
     return code
 
 
+def format_ymd_date(raw_value) -> str | int | float:
+    if raw_value in (-1, None, "", "nan"):
+        return raw_value
+    if pd.isna(raw_value):
+        return ""
+
+    dt_value = pd.to_datetime(raw_value, errors="coerce")
+    if pd.isna(dt_value):
+        return str(raw_value)
+    return dt_value.strftime("%Y-%m-%d")
+
+
+def format_break_dates(raw_value):
+    if isinstance(raw_value, list):
+        return [format_ymd_date(item) for item in raw_value]
+    return format_ymd_date(raw_value)
+
+
 def to_symbol_for_stock_specific_news(code_norm: str) -> str:
     # 与 BuildStockNewsDb.__insert_data_to_db 的规则保持一致
     if code_norm.isdigit():
@@ -98,6 +116,15 @@ def load_massbreak_candidates(
         stock_pool["joint_quant_code"] = stock_pool[code_col]
 
     market_l = str(market).lower()
+    stock_pool["market_type"] = market_l
+    stock_pool["code"] = stock_pool[code_col]
+    if "tradeStatus" in stock_pool.columns:
+        stock_pool["tradeStatus"] = stock_pool["tradeStatus"].fillna("")
+    elif "tradetype" in stock_pool.columns:
+        stock_pool["tradeStatus"] = stock_pool["tradetype"].fillna("")
+    else:
+        stock_pool["tradeStatus"] = ""
+
     if market_l == "cn":
         # 过滤明显非个股标的，减少无行情数据造成的噪声
         stock_pool["joint_quant_code"] = stock_pool["joint_quant_code"].astype(str)
@@ -147,6 +174,9 @@ def load_massbreak_candidates(
     stock_pool["OpenLimitUpSignalCnt"] = stock_pool["OpenLimitUpSignalDates"].map(
         lambda x: len(x) if isinstance(x, list) else 0
     )
+
+    stock_pool["BreakDate"] = stock_pool["BreakDate"].map(format_break_dates)
+    stock_pool["LatestBreakDate"] = stock_pool["LatestBreakDate"].map(format_ymd_date)
 
     stock_pool["stock_code_norm"] = stock_pool["joint_quant_code"].map(normalize_stock_code)
     stock_pool["name"] = stock_pool["code_name"] if "code_name" in stock_pool.columns else stock_pool["joint_quant_code"]

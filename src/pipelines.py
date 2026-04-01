@@ -18,6 +18,7 @@ class MongoDBPipeline(object):
         self.db_zhong_jin_cn_stock = client[
             config.ZHONG_JIN_STOCK_NEWS_DB
         ]  # zhong jin 中金
+        self.db_mei_tong_she = client[config.MEI_TONG_SHE_NEWS_DB]  # mei tong she
 
     # https://blog.csdn.net/Yy_Rose/article/details/123754021
     # insert方法被移除，使用insert_one或者inset_many取代
@@ -37,6 +38,8 @@ class MongoDBPipeline(object):
             self.insert_item(self.db_shanghai_cn_stock[col_name], item)
         elif str(spider.name).startswith("zhong_jin"):
             self.insert_item(self.db_zhong_jin_cn_stock[col_name], item)
+        elif str(spider.name).startswith("mei_tong"):
+            self.insert_item(self.db_mei_tong_she[col_name], item)
         else:
             logging.info("wrong")
         

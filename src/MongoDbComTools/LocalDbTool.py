@@ -123,6 +123,106 @@ class LocalDbTool(object):
         # print(df2)
         return True, df2
 
+    @staticmethod
+    def _normalize_query_date_candidates(date_value):
+        if date_value is None:
+            return []
+
+        candidates = []
+        raw_value = str(date_value).strip()
+        if raw_value:
+            candidates.append(raw_value)
+
+        parsed_dt = None
+        if isinstance(date_value, datetime.datetime):
+            parsed_dt = date_value
+        elif isinstance(date_value, datetime.date):
+            parsed_dt = datetime.datetime.combine(date_value, datetime.time.min)
+        else:
+            for fmt in (
+                "%Y-%m-%d",
+                "%Y/%m/%d",
+                "%Y%m%d",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y/%m/%d %H:%M:%S",
+            ):
+                try:
+                    parsed_dt = datetime.datetime.strptime(raw_value, fmt)
+                    break
+                except Exception:
+                    continue
+
+        if parsed_dt is not None:
+            candidates.extend(
+                [
+                    parsed_dt,
+                    parsed_dt.strftime("%Y-%m-%d"),
+                    parsed_dt.strftime("%Y/%m/%d"),
+                    parsed_dt.strftime("%Y%m%d"),
+                ]
+            )
+
+        deduped = []
+        seen = set()
+        for item in candidates:
+            marker = (type(item).__name__, str(item))
+            if marker in seen:
+                continue
+            seen.add(marker)
+            deduped.append(item)
+        return deduped
+
+    def _build_date_query_candidates(self, start_date, end_date, market_type: str):
+        start_candidates = self._normalize_query_date_candidates(start_date)
+        end_candidates = (
+            self._normalize_query_date_candidates(end_date) if end_date is not None else [None]
+        )
+
+        market_l = str(market_type).lower()
+        if market_l == "us":
+            ordered_starts = [
+                *[c for c in start_candidates if isinstance(c, datetime.datetime)],
+                *[c for c in start_candidates if not isinstance(c, datetime.datetime)],
+            ]
+            ordered_ends = [
+                *[c for c in end_candidates if isinstance(c, datetime.datetime)],
+                *[c for c in end_candidates if not isinstance(c, datetime.datetime)],
+            ]
+        else:
+            ordered_starts = [
+                *[c for c in start_candidates if isinstance(c, str)],
+                *[c for c in start_candidates if not isinstance(c, str)],
+            ]
+            ordered_ends = [
+                *[c for c in end_candidates if isinstance(c, str)],
+                *[c for c in end_candidates if not isinstance(c, str)],
+            ]
+
+        query_candidates = []
+        if end_date is None:
+            for start_candidate in ordered_starts:
+                query_candidates.append({"date": {"$gte": start_candidate}})
+            return query_candidates
+
+        for start_candidate in ordered_starts:
+            for end_candidate in ordered_ends:
+                if end_candidate is None:
+                    query_candidates.append({"date": {"$gte": start_candidate}})
+                else:
+                    query_candidates.append(
+                        {"date": {"$gte": start_candidate, "$lte": end_candidate}}
+                    )
+        return query_candidates
+
+    def _try_load_stock_data(self, db_name, symbol, query_candidates, _keys=None):
+        for query in query_candidates:
+            stock_data = self.db_obj.get_data(
+                db_name, symbol, query=query, keys=_keys, sort=True, sort_key=["date"]
+            )
+            if stock_data is not None and not stock_data.empty:
+                return stock_data
+        return DataFrame()
+
     def get_daily_price_data_of_specific_stock(
         self,
         symbol,
@@ -145,44 +245,19 @@ class LocalDbTool(object):
                 db_name, symbol, sort=True, sort_key=["date"]
             )
         else:
-            sd = start_date.split("-")
-            _query = (
-                {
-                    "date": {
-                        # 2024 04 21 换成日期，而非时间
-                        # "$gte": datetime.datetime(
-                        #     int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000)
-                        "$gte": start_date
-                    }
-                }
-                if market_type == "cn"
-                else {"date": {"$gte": start_date}}
+            query_candidates = self._build_date_query_candidates(
+                start_date=start_date,
+                end_date=end_date,
+                market_type=market_type,
             )
-            if end_date is not None and market_type == "cn":
-                e_d = end_date.split("-")
-                # _query = {
-                #     "date": {
-                #         "$gte": datetime.datetime(
-                #             int(sd[0]), int(sd[1]), int(sd[2]), 0, 0, 0, 000000
-                #         ),
-                #         "$lte": datetime.datetime(
-                #             int(e_d[0]), int(e_d[1]), int(e_d[2]), 0, 0, 0, 000000
-                #         ),
-                #     }
-                # }
-                _query = {
-                        "date": {
-                            "$gte": start_date,
-                            "$lte": end_date,
-                        }
-                    }
-                
-            stock_data = self.db_obj.get_data(
-                db_name, symbol, query=_query, keys=_keys, sort=True, sort_key=["date"]
-            )            
-        
-        # print(f'end date is {end_date}, {start_date}, {_query}')        
-        if stock_data is None:
+            stock_data = self._try_load_stock_data(
+                db_name=db_name,
+                symbol=symbol,
+                query_candidates=query_candidates,
+                _keys=_keys,
+            )
+
+        if stock_data is None or stock_data.empty:
             return False, DataFrame()
         # to do 用joint quant的数据来更新money数据。
         stock_data["money"] = stock_data.apply(

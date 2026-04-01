@@ -32,13 +32,61 @@ _SUFFIX_TO_EXCHANGE = {
     "SH": Exchange.SSE,
     "SZ": Exchange.SZSE,
     "BJ": Exchange.BSE,
+    "SEHK": Exchange.SEHK,
+    "HK": Exchange.SEHK,
+    "SMART": Exchange.SMART,
+    "NYSE": Exchange.NYSE,
+    "NASDAQ": Exchange.NASDAQ,
+    "ARCA": Exchange.ARCA,
+    "AMEX": Exchange.AMEX,
+    "BATS": Exchange.BATS,
+    "IEX": Exchange.IEX,
+    "EDGEA": Exchange.EDGEA,
+    "ISLAND": Exchange.ISLAND,
 }
+_US_EXCHANGE_BY_NAME = {
+    "SMART": Exchange.SMART,
+    "NYSE": Exchange.NYSE,
+    "NASDAQ": Exchange.NASDAQ,
+    "ARCA": Exchange.ARCA,
+    "AMEX": Exchange.AMEX,
+    "BATS": Exchange.BATS,
+    "IEX": Exchange.IEX,
+    "EDGEA": Exchange.EDGEA,
+    "ISLAND": Exchange.ISLAND,
+}
+_CN_EXCHANGES = {Exchange.SSE, Exchange.SZSE, Exchange.BSE}
+SUPPORTED_MARKETS = {"cn", "us", "hk"}
 
 
 def parse_date(date_value: str | datetime) -> datetime:
     if isinstance(date_value, datetime):
         return date_value
     return datetime.strptime(str(date_value), "%Y-%m-%d")
+
+
+def normalize_market(market: str) -> str:
+    market_l = str(market).strip().lower()
+    if market_l not in SUPPORTED_MARKETS:
+        raise ValueError(f"不支持的 market: {market}，仅支持 cn/us/hk")
+    return market_l
+
+
+def _split_known_exchange_suffix(code: str) -> tuple[str, Exchange | None]:
+    value = str(code).strip()
+    if "." not in value:
+        return value, None
+
+    left, right = value.rsplit(".", 1)
+    exchange = _SUFFIX_TO_EXCHANGE.get(right.upper())
+    if exchange is None:
+        return value, None
+    return left, exchange
+
+
+def _strip_vt_symbol_suffix(code: str) -> str:
+    value, _ = _split_known_exchange_suffix(code)
+    return value
 
 
 def _infer_exchange(symbol: str) -> Exchange:
@@ -51,32 +99,130 @@ def _infer_exchange(symbol: str) -> Exchange:
     return Exchange.SMART
 
 
-def parse_symbol_exchange(raw_code: str) -> tuple[str, Exchange]:
+def _normalize_symbol_for_exchange(symbol: str, exchange: Exchange) -> str:
+    value = str(symbol).strip().upper()
+    if not value:
+        raise ValueError("股票代码为空")
+
+    if exchange in _CN_EXCHANGES:
+        if not value.isdigit():
+            raise ValueError(f"A股代码格式错误: {symbol}")
+        return value.zfill(6)
+
+    if exchange == Exchange.SEHK:
+        if not value.isdigit():
+            raise ValueError(f"港股代码格式错误: {symbol}")
+        return value.zfill(5)
+
+    return value
+
+
+def _normalize_ak_daily_df(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        raise ValueError("无可用日线数据")
+
+    working_df = df.copy()
+    if "日期" not in working_df.columns and "date" not in working_df.columns:
+        working_df = working_df.reset_index()
+
+    def pick_col(*candidates: str) -> str:
+        for col in candidates:
+            if col in working_df.columns:
+                return col
+        raise ValueError(f"缺少必要列: {candidates}")
+
+    date_col = pick_col("日期", "date", "datetime", "index")
+    open_col = pick_col("开盘", "open")
+    close_col = pick_col("收盘", "close")
+    high_col = pick_col("最高", "high")
+    low_col = pick_col("最低", "low")
+    volume_col = pick_col("成交量", "volume")
+    amount_col = next(
+        (
+            col
+            for col in ("成交额", "amount", "money", "turnover")
+            if col in working_df.columns
+        ),
+        "",
+    )
+
+    normalized_df = pd.DataFrame(
+        {
+            "日期": pd.to_datetime(working_df[date_col], errors="coerce").dt.strftime("%Y-%m-%d"),
+            "开盘": pd.to_numeric(working_df[open_col], errors="coerce"),
+            "收盘": pd.to_numeric(working_df[close_col], errors="coerce"),
+            "最高": pd.to_numeric(working_df[high_col], errors="coerce"),
+            "最低": pd.to_numeric(working_df[low_col], errors="coerce"),
+            "成交量": pd.to_numeric(working_df[volume_col], errors="coerce"),
+        }
+    )
+
+    if amount_col:
+        normalized_df["成交额"] = pd.to_numeric(working_df[amount_col], errors="coerce")
+    else:
+        normalized_df["成交额"] = (
+            0.25
+            * (
+                normalized_df["开盘"]
+                + normalized_df["收盘"]
+                + normalized_df["最高"]
+                + normalized_df["最低"]
+            )
+            * normalized_df["成交量"]
+        )
+
+    normalized_df = normalized_df.dropna(subset=["日期", "开盘", "收盘", "最高", "最低", "成交量"])
+    normalized_df = normalized_df.sort_values("日期").reset_index(drop=True)
+    return normalized_df
+
+
+def parse_symbol_exchange(raw_code: str, market: str = "cn") -> tuple[str, Exchange]:
     code = str(raw_code).strip().upper()
     if not code:
         raise ValueError("股票代码为空")
 
+    stripped_code, explicit_exchange = _split_known_exchange_suffix(code)
+    if explicit_exchange is not None:
+        return _normalize_symbol_for_exchange(stripped_code, explicit_exchange), explicit_exchange
+
     if "." in code:
         left, right = code.split(".", 1)
-        if left.isdigit() and right in _SUFFIX_TO_EXCHANGE:
-            return left.zfill(6), _SUFFIX_TO_EXCHANGE[right]
         if left in _PREFIX_TO_EXCHANGE and right.isdigit():
-            return right.zfill(6), _PREFIX_TO_EXCHANGE[left]
+            exchange = _PREFIX_TO_EXCHANGE[left]
+            return _normalize_symbol_for_exchange(right, exchange), exchange
         if left.isdigit() and right in _PREFIX_TO_EXCHANGE:
-            return left.zfill(6), _PREFIX_TO_EXCHANGE[right]
+            exchange = _PREFIX_TO_EXCHANGE[right]
+            return _normalize_symbol_for_exchange(left, exchange), exchange
 
-    if len(code) > 2 and code[:2] in _PREFIX_TO_EXCHANGE and code[2:].isdigit():
-        return code[2:].zfill(6), _PREFIX_TO_EXCHANGE[code[:2]]
+    market_l = normalize_market(market)
 
-    if code.isdigit():
-        symbol = code.zfill(6)
-        return symbol, _infer_exchange(symbol)
+    if market_l == "cn":
+        if len(code) > 2 and code[:2] in _PREFIX_TO_EXCHANGE and code[2:].isdigit():
+            return code[2:].zfill(6), _PREFIX_TO_EXCHANGE[code[:2]]
 
-    raise ValueError(f"无法解析股票代码: {raw_code}")
+        if code.isdigit():
+            symbol = code.zfill(6)
+            return symbol, _infer_exchange(symbol)
+
+    elif market_l == "hk":
+        if len(code) > 2 and code[:2] == "HK" and code[2:].isdigit():
+            return code[2:].zfill(5), Exchange.SEHK
+        if code.isdigit():
+            return code.zfill(5), Exchange.SEHK
+
+    elif market_l == "us":
+        if len(code) > 3 and code[:3] == "US.":
+            code = code[3:]
+        if code in _US_EXCHANGE_BY_NAME:
+            raise ValueError(f"美股代码格式错误: {raw_code}")
+        if any(ch.isalnum() for ch in code):
+            return code, Exchange.SMART
+
+    raise ValueError(f"无法解析股票代码: {raw_code}, market={market_l}")
 
 
-def to_vt_symbol(raw_code: str) -> str:
-    symbol, exchange = parse_symbol_exchange(raw_code)
+def to_vt_symbol(raw_code: str, market: str = "cn") -> str:
+    symbol, exchange = parse_symbol_exchange(raw_code, market=market)
     return f"{symbol}.{exchange.value}"
 
 
@@ -90,6 +236,7 @@ def split_symbols_arg(symbols_text: str) -> list[str]:
 def load_massbreak_symbols(
     symbols: str | Iterable[str],
     top_n: int = 0,
+    market: str = "cn",
 ) -> list[str]:
     if isinstance(symbols, str):
         raw_symbols = split_symbols_arg(symbols)
@@ -103,7 +250,7 @@ def load_massbreak_symbols(
     seen: set[str] = set()
     for raw in raw_symbols:
         try:
-            vt_symbol = to_vt_symbol(str(raw))
+            vt_symbol = to_vt_symbol(str(raw), market=market)
         except Exception:
             continue
         if vt_symbol not in seen:
@@ -113,25 +260,39 @@ def load_massbreak_symbols(
     return vt_symbols
 
 
-def _mongo_symbol_candidates(symbol: str) -> list[str]:
-    value = str(symbol).strip().lower()
+def _mongo_symbol_candidates(symbol: str, market: str = "cn") -> list[str]:
+    market_l = normalize_market(market)
+    value = _strip_vt_symbol_suffix(symbol)
     if not value:
         return []
 
     candidates: list[str] = []
-    if value.startswith(("sh", "sz", "bj")) and len(value) > 2 and value[2:].isdigit():
-        candidates.append(value)
-        candidates.append(value[2:])
-    elif value.isdigit():
-        if value.startswith(("6", "5", "9")):
-            candidates.append(f"sh{value}")
-        elif value.startswith(("0", "2", "3")):
-            candidates.append(f"sz{value}")
-        elif value.startswith(("4", "8")):
-            candidates.append(f"bj{value}")
-        candidates.extend([f"sh{value}", f"sz{value}", f"bj{value}", value])
+    if market_l == "cn":
+        value_l = value.lower()
+        if value_l.startswith(("sh", "sz", "bj")) and len(value_l) > 2 and value_l[2:].isdigit():
+            candidates.append(value_l)
+            candidates.append(value_l[2:])
+        elif value_l.isdigit():
+            if value_l.startswith(("6", "5", "9")):
+                candidates.append(f"sh{value_l}")
+            elif value_l.startswith(("0", "2", "3")):
+                candidates.append(f"sz{value_l}")
+            elif value_l.startswith(("4", "8")):
+                candidates.append(f"bj{value_l}")
+            candidates.extend([f"sh{value_l}", f"sz{value_l}", f"bj{value_l}", value_l])
+        else:
+            candidates.append(value_l)
+    elif market_l == "hk":
+        if value.isdigit():
+            candidates.extend([value.zfill(5), value])
+        else:
+            value_l = value.lower()
+            if value_l.startswith("hk") and value_l[2:].isdigit():
+                candidates.extend([value_l[2:].zfill(5), value_l[2:], value_l])
+            else:
+                candidates.extend([value, value_l])
     else:
-        candidates.append(value)
+        candidates.extend([value.upper(), value.lower(), value])
 
     uniq: list[str] = []
     seen: set[str] = set()
@@ -142,14 +303,32 @@ def _mongo_symbol_candidates(symbol: str) -> list[str]:
     return uniq
 
 
-def _fetch_daily_mongo_data(symbol: str, start: datetime, end: datetime) -> pd.DataFrame | None:
+def _resolve_stock_database_name(market: str) -> str:
+    market_l = normalize_market(market)
     try:
-        from Utils.database import Database
         from Utils import config
     except Exception:
-        return None
+        return "stock"
 
-    db_name = getattr(config, "STOCK_DATABASE_NAME", "stock")
+    if market_l == "cn":
+        return getattr(config, "STOCK_DATABASE_NAME", "stock")
+    if market_l == "hk":
+        return getattr(config, "HK_STOCK_DATABASE_NAME", "stock_hk")
+    return getattr(config, "US_STOCK_DATABASE_NAME", "stock_us")
+
+
+def _fetch_daily_mongo_data(
+    symbol: str,
+    start: datetime,
+    end: datetime,
+    market: str = "cn",
+) -> pd.DataFrame | None:
+    try:
+        from Utils.database import Database
+    except Exception:
+        return None
+    print(f"fetching {symbol} data from mongo, start={start}, end={end}, market={market}")
+    db_name = _resolve_stock_database_name(market)
     query = {
         "date": {
             "$gte": start.strftime("%Y-%m-%d"),
@@ -159,7 +338,7 @@ def _fetch_daily_mongo_data(symbol: str, start: datetime, end: datetime) -> pd.D
     keys = ["date", "open", "high", "low", "close", "volume", "amount", "turnover"]
 
     db = Database()
-    for collection_name in _mongo_symbol_candidates(symbol):
+    for collection_name in _mongo_symbol_candidates(symbol, market=market):
         try:
             raw_df = db.get_data(
                 db_name,
@@ -174,22 +353,10 @@ def _fetch_daily_mongo_data(symbol: str, start: datetime, end: datetime) -> pd.D
         if raw_df is None or raw_df.empty:
             continue
 
-        df = raw_df.copy()
-        df["日期"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
-        df["开盘"] = pd.to_numeric(df["open"], errors="coerce")
-        df["收盘"] = pd.to_numeric(df["close"], errors="coerce")
-        df["最高"] = pd.to_numeric(df["high"], errors="coerce")
-        df["最低"] = pd.to_numeric(df["low"], errors="coerce")
-        df["成交量"] = pd.to_numeric(df["volume"], errors="coerce")
-        if "amount" in df.columns:
-            df["成交额"] = pd.to_numeric(df["amount"], errors="coerce")
-        else:
-            df["成交额"] = 0.25 * (df["开盘"] + df["收盘"] + df["最高"] + df["最低"]) * df["成交量"]
-
-        use_cols = ["日期", "开盘", "收盘", "最高", "最低", "成交量", "成交额"]
-        df = df[use_cols].dropna(subset=["日期", "开盘", "收盘", "最高", "最低", "成交量"])
-        if not df.empty:
-            return df.reset_index(drop=True)
+        try:
+            return _normalize_ak_daily_df(raw_df)
+        except Exception:
+            continue
 
     return None
 
@@ -200,22 +367,40 @@ def fetch_daily_ak_data(
     end: datetime,
     adjust: str = "qfq",
     max_retry: int = 3,
+    market: str = "cn",
 ) -> pd.DataFrame:
-    params = dict(
-        symbol=symbol,
-        # period="daily",
-        start_date=start.strftime("%Y%m%d"),
-        end_date=end.strftime("%Y%m%d"),
-        adjust=adjust,
-    )
+    
+    market_l = normalize_market(market)
+    fetch_symbol = _strip_vt_symbol_suffix(symbol)
     last_err: Exception | None = None
+    start_s = start.strftime("%Y-%m-%d")
+    end_s = end.strftime("%Y-%m-%d")
+
+    def fetch_from_akshare() -> pd.DataFrame:
+        print(f"fetching {symbol} data from akshare, start={start}, end={end}, adjust={adjust}, market={market}")
+        if market_l == "cn":
+            raw_df = ak.stock_zh_a_daily(
+                symbol=fetch_symbol,
+                start_date=start.strftime("%Y%m%d"),
+                end_date=end.strftime("%Y%m%d"),
+                adjust=adjust,
+            )
+        elif market_l == "hk":
+            raw_df = ak.stock_hk_daily(symbol=fetch_symbol, adjust=adjust)
+        else:
+            raw_df = ak.stock_us_daily(fetch_symbol)
+
+        normalized_df = _normalize_ak_daily_df(raw_df)
+        normalized_df = normalized_df[
+            (normalized_df["日期"] >= start_s) & (normalized_df["日期"] <= end_s)
+        ].reset_index(drop=True)
+        if normalized_df.empty:
+            raise ValueError(f"{fetch_symbol} 无可用日线数据")
+        return normalized_df
 
     for i in range(max_retry):
         try:
-            df = ak.stock_zh_a_daily(**params)
-            if df is None or df.empty:
-                raise ValueError(f"{symbol} 无可用日线数据")
-            return df
+            return fetch_from_akshare()
         except Exception as exc:
             last_err = exc
             time.sleep(1 + i)
@@ -235,10 +420,7 @@ def fetch_daily_ak_data(
     try:
         for i in range(max_retry):
             try:
-                df = ak.stock_zh_a_daily(**params)
-                if df is None or df.empty:
-                    raise ValueError(f"{symbol} 无可用日线数据")
-                return df
+                return fetch_from_akshare()
             except Exception as exc:
                 last_err = exc
                 time.sleep(1 + i)
@@ -247,11 +429,11 @@ def fetch_daily_ak_data(
             if v:
                 os.environ[k] = v
 
-    mongo_df = _fetch_daily_mongo_data(symbol=symbol, start=start, end=end)
+    mongo_df = _fetch_daily_mongo_data(symbol=fetch_symbol, start=start, end=end, market=market_l)
     if mongo_df is not None and not mongo_df.empty:
         return mongo_df
 
-    raise RuntimeError(f"{symbol} 拉取数据失败，且MongoDB回退无数据: {last_err}")
+    raise RuntimeError(f"{fetch_symbol} 拉取数据失败，且MongoDB回退无数据: {last_err}")
 
 
 def convert_ak_to_bars(
@@ -298,21 +480,24 @@ def prepare_single_symbol(
     start: str | datetime,
     end: str | datetime,
     adjust: str = "qfq",
+    market: str = "cn",
     clean_before_save: bool = True,
 ) -> tuple[str, int]:
     start_dt = parse_date(start)
     end_dt = parse_date(end)
-    symbol, exchange = parse_symbol_exchange(raw_code)
-    df = fetch_daily_ak_data(symbol=symbol, start=start_dt, end=end_dt, adjust=adjust)
+    symbol, exchange = parse_symbol_exchange(raw_code, market=market)
+    fetch_symbol = _strip_vt_symbol_suffix(symbol)
+    df = fetch_daily_ak_data(symbol=fetch_symbol, start=start_dt, end=end_dt, adjust=adjust, market=market)
     print(f"stock {symbol} data is {df}")
     bars = convert_ak_to_bars(df=df, symbol=symbol, exchange=exchange)
+    vt_symbol = f"{symbol}.{exchange.value}"
     saved_count = save_bars_to_vnpy(
         symbol=symbol,
         exchange=exchange,
         bars=bars,
         clean_before_save=clean_before_save,
     )
-    return f"{symbol}.{exchange.value}", saved_count
+    return vt_symbol, saved_count
 
 
 def prepare_symbols(
@@ -320,6 +505,7 @@ def prepare_symbols(
     start: str | datetime,
     end: str | datetime,
     adjust: str = "qfq",
+    market: str = "cn",
     clean_before_save: bool = True,
     raise_on_error: bool = False,
 ) -> dict[str, int]:
@@ -331,6 +517,7 @@ def prepare_symbols(
                 start=start,
                 end=end,
                 adjust=adjust,
+                market=market,
                 clean_before_save=clean_before_save,
             )
             result[vt_symbol] = count
@@ -348,6 +535,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--start-date", default="2024-01-01", help="开始日期 YYYY-MM-DD")
     parser.add_argument("--end-date", default=datetime.now().strftime("%Y-%m-%d"), help="结束日期 YYYY-MM-DD")
     parser.add_argument("--adjust", default="qfq", choices=["", "qfq", "hfq"], help="复权类型")
+    parser.add_argument("--market", default="cn", choices=["cn", "us", "hk"], help="市场类型: cn/us/hk")
     parser.add_argument("--no-clean", action="store_true", help="不清理旧数据，直接追加")
     parser.add_argument("--strict", action="store_true", help="任意一只失败即退出")
     return parser
@@ -358,9 +546,9 @@ if __name__ == "__main__":
     targets: list[str]
 
     if args.single:
-        targets = load_massbreak_symbols([args.single])
+        targets = load_massbreak_symbols([args.single], market=args.market)
     elif args.symbols:
-        targets = load_massbreak_symbols(args.symbols)
+        targets = load_massbreak_symbols(args.symbols, market=args.market)
     else:
         raise ValueError("请通过 --single 或 --symbols 显式指定标的")
 
@@ -372,6 +560,7 @@ if __name__ == "__main__":
         start=args.start_date,
         end=args.end_date,
         adjust=args.adjust,
+        market=args.market,
         clean_before_save=not args.no_clean,
         raise_on_error=args.strict,
     )

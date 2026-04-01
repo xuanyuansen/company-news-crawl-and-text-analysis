@@ -14,6 +14,7 @@ from MarketNewsSpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
 from MarketNewsSpiderWithScrapy.jqka_spider import JQKASpider
 from MarketNewsSpiderWithScrapy.jrj_spider import JRJSpider
 from MarketNewsSpiderWithScrapy.nbd_spider import NBDSpider
+from MarketNewsSpiderWithScrapy.mei_tong_spider import MeiTongSpider
 from MarketNewsSpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
 from Utils import config, utils
 from datetime import datetime, timedelta
@@ -39,42 +40,7 @@ if __name__ == "__main__":
         settings = get_project_settings()
 
         
-        # EAST_MONEY = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.EAST_MONEY_SPIDER_LIST
-        # ]
-
-        # JRJ_NEWS = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.JRJ_SPIDER_LIST
-        # ]
-
-        # NET_EASE = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.NET_EASE_SPIDER_LIST
-        # ]
-
-        # STCN_EASE = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.STCN_SPIDER_LIST
-        # ]
-
-        # SHANG_HAI = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.SHANG_HAI_SPIDER_LIST
-        # ]
-
-        # NBD_NEWS = [
-        #     element.update({"end_page": int(args.spider)})
-        #     for element in config.NBD_SPIDER_LIST
-        # ]
-
-        # ZHONG_JIN = [
-        #     element.update({"end_page": 2 * int(args.spider)})
-        #     for element in config.ZHONG_JIN_SPIDER_LIST
-        # ]
-        
-        PLAYWRIGHT_SPIDERS = ['east_money', 'jrj', 'shanghai_stock', "jqka"]
+        PLAYWRIGHT_SPIDERS = ['east_money', 'jrj', 'shanghai_stock', "jqka", "mei_tong_she"]
         SCRAPY_SPIDERS = ['net_ease', 'zhong_jin', 'nbd']
     
         #### 基于playwrite的爬虫
@@ -91,6 +57,9 @@ if __name__ == "__main__":
 
         for spider_config in config.JQKA_SPIDER_LIST:
             _process_play.crawl(JQKASpider, **spider_config)
+
+        for spider_config in config.MEI_TONG_SHE_SPIDER_LIST:
+            _process_play.crawl(MeiTongSpider, **spider_config)
         
         _process_play.start()
         
