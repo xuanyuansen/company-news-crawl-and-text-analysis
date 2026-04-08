@@ -1,0 +1,194 @@
+import json
+import logging
+import os
+
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from xlsxwriter import Workbook
+import argparse
+from Utils.utils import get_or_else
+from MongoDbComTools.BuildStockNewsDb import GenStockNewsDB
+from MarketNewsSpiderWithScrapy.east_money_spider import EastMoneySpider
+from MarketNewsSpiderWithScrapy.net_ease_spider import NetEaseSpider
+from MarketNewsSpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
+from MarketNewsSpiderWithScrapy.jqka_spider import JQKASpider
+from MarketNewsSpiderWithScrapy.jrj_spider import JRJSpider
+from MarketNewsSpiderWithScrapy.nbd_spider import NBDSpider
+from MarketNewsSpiderWithScrapy.mei_tong_spider import MeiTongSpider
+from MarketNewsSpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
+from Utils import config, utils
+from datetime import datetime, timedelta
+
+from MarketNewsSpiderWithScrapy.BasePlayCrawler import PlaywrightCrawlerProcess
+
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+#     datefmt="%a, %d %b %Y %H:%M:%S",
+# )
+
+# 每天运行一次,爬取最新的信息,然后形成最新消息的汇总.统计报告发出来到邮箱.按照消息数量由多到少排序.
+# 再把这些消息插入到各自新闻的db.同时生成报告
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--spider", help="run spider")
+    parser.add_argument("-r", "--report", help="run report")
+    args = parser.parse_args()
+    if args.spider:
+        logging.info("page number is {}".format(int(args.spider)))
+        os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
+        settings = get_project_settings()
+
+        
+        PLAYWRIGHT_SPIDERS = ['east_money', 'jrj', 'shanghai_stock', "jqka", "mei_tong_she"]
+        SCRAPY_SPIDERS = ['net_ease', 'zhong_jin', 'nbd']
+    
+        #### 基于playwrite的爬虫
+        _process_play = PlaywrightCrawlerProcess(settings)
+
+        for spider_config in config.EAST_MONEY_SPIDER_LIST:
+            _process_play.crawl(EastMoneySpider, **spider_config)
+        
+        for spider_config in config.JRJ_SPIDER_LIST:
+            _process_play.crawl(JRJSpider, **spider_config)
+
+        for spider_config in config.SHANG_HAI_SPIDER_LIST:
+            _process_play.crawl(ShanghaiStockSpider, **spider_config)
+
+        for spider_config in config.JQKA_SPIDER_LIST:
+            _process_play.crawl(JQKASpider, **spider_config)
+
+        for spider_config in config.MEI_TONG_SHE_SPIDER_LIST:
+            _process_play.crawl(MeiTongSpider, **spider_config)
+        
+        _process_play.start()
+        
+
+        #### 基于scrapy的爬虫
+        _process_scrapy = CrawlerProcess(settings)
+
+        for spider_config in config.NET_EASE_SPIDER_LIST:
+            _process_scrapy.crawl(NetEaseSpider, **spider_config)
+
+        for spider_config in config.NBD_SPIDER_LIST:
+            _process_scrapy.crawl(NBDSpider, **spider_config)
+
+        for spider_config in config.ZHONG_JIN_SPIDER_LIST:
+            _process_scrapy.crawl(ZhongJinStockSpider, **spider_config)
+
+        _process_scrapy.start()
+
+    if args.report:
+        logging.info("report of {} days".format(int(args.report)))
+        start_date_time = (datetime.now() - timedelta(days=int(args.report))).strftime(
+            "%Y-%m-%d"
+        )
+        logging.info("start time is {}".format(start_date_time))
+        gdb = GenStockNewsDB(force_update_score_using_model=True)
+        report_list_of_dict = []
+        collection_cnt = 0
+        for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():
+            print("db  name {}".format(db_name))
+            for col in collection_list:
+                print("col  name {}".format(col))
+                collection_cnt += 1
+                gdb.get_all_news_about_specific_stock(
+                    db_name,
+                    col.get("name").replace("spider", "data"),
+                    start_date=start_date_time,
+                )
+
+        report_list_of_dict = gdb.get_report_raw_version()
+
+        file_name = "./info/news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
+        mail_file_name = "news_{}.xlsx".format(datetime.now().strftime("%Y-%m-%d"))
+
+        ordered_list = [
+            "Code",
+            "Title",
+            "Article",
+            "Date",
+            "Category",
+            "Label",
+            "Score",
+            "Url",
+        ]
+        # list object calls by index but dict object calls items randomly
+        wb = Workbook(file_name)
+        ws = wb.add_worksheet("News")  # or leave it blank, default name is "Sheet 1"
+        # 表头
+        first_row = 0
+        for header in ordered_list:
+            col = ordered_list.index(header)  # we are keeping order.
+            ws.write(
+                first_row, col, header
+            )  # we have written first row which is the header of worksheet also.
+
+        row = 1
+        for news in report_list_of_dict:
+            ws.write(row, 0, news.get("RelatedStockCodes"))
+            idx = 1
+            for ele in ordered_list[1:]:
+                ws.write(row, idx, news.get(ele))
+                idx += 1
+            row += 1  # enter the next row
+        # 先不关闭，把股票热度写入第二张表格
+        # wb.close()
+
+        title_dict = dict()
+        for ele_dict in report_list_of_dict:
+            related_codes = json.loads(ele_dict.get("RelatedStockCodes"))
+            _label = ele_dict.get("Label")
+            for k, _code in related_codes.items():
+                if title_dict.get(k) is None:
+                    title_dict[k] = {_label: 1}
+                    title_dict[k] = {"code": _code}
+                else:
+                    title_dict[k].update(
+                        {_label: get_or_else(title_dict[k], _label) + 1}
+                    )
+
+        title_dict_sort = sorted(
+            title_dict.items(),
+            key=lambda item: get_or_else(item[1], "利好"),
+            reverse=True,
+        )
+
+        hot_cnt_sheet = wb.add_worksheet("GoodOrBad")
+        # 写入表头
+        hot_cnt_sheet.write(0, 0, "股票名字")
+        hot_cnt_sheet.write(0, 1, "利好")
+        hot_cnt_sheet.write(0, 2, "利空")
+        hot_cnt_sheet.write(0, 3, "股票代码")
+
+        row_idx = 1
+        for element in title_dict_sort:
+            hot_cnt_sheet.write(row_idx, 0, element[0])
+            hot_cnt_sheet.write(row_idx, 1, get_or_else(element[1], "利好"))
+            hot_cnt_sheet.write(row_idx, 2, get_or_else(element[1], "利空"))
+            hot_cnt_sheet.write(row_idx, 3, get_or_else(element[1], "code"))
+            row_idx += 1
+
+        # 将top20的相关新闻列出来，写入表格里面
+        top_related_cnt = 30 if len(title_dict_sort) >= 30 else len(title_dict_sort)
+        for _idx in range(0, top_related_cnt):
+            _stock_name = title_dict_sort[_idx][0]
+            _stock_code = title_dict_sort[_idx][1].get("code")
+            current_sheet = wb.add_worksheet("{}_{}".format(_stock_name, _stock_code))
+            current_sheet.write(0, 0, "Articles")
+            all_news_list = gdb.get_all_news_of_one_stock(_stock_code, start_date_time)
+            _current_row = 1
+            for _news in all_news_list:
+                current_sheet.write(_current_row, 0, _news)
+                _current_row += 1
+
+        wb.close()
+
+        # utils.send_mail(
+        #     topic="news_{}".format(datetime.now().strftime("%Y-%m-%d")),
+        #     content=str(title_dict_sort),
+        #     attach_name=mail_file_name,
+        #     _file_name=file_name,
+        # )
+
+    pass
