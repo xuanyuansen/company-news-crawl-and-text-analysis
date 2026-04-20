@@ -4,9 +4,11 @@
 # 1) 支持“维持放量 Ratio 连续 X 天”后再触发选股
 # 2) 对“开盘涨停导致无放量”的场景做特殊处理
 
+import argparse
+import sys
+
 from MarketPriceSpiderWithScrapy.StockInfoUtilsBS import get_all_stock_code_info_of_cn
 from MongoDbComTools.LocalDbTool import LocalDbTool
-import sys
 import pandas as pd
 from Utils.utils import set_display
 from tqdm import tqdm
@@ -19,9 +21,9 @@ AVG_VOLUME_MIN_THRESHOLD = 10000
 MIN_VOLUME_MIN_THRESHOLD = 1000
 
 
-def get_specific_target_stock(t_stock, market, start):
+def get_specific_target_stock(t_stock, market, start, end_date: str = ""):
     return local_db.get_daily_price_data_of_specific_stock(
-        symbol=t_stock, market_type=market, start_date=start
+        symbol=t_stock, market_type=market, start_date=start, end_date=end_date or None
     )
 
 
@@ -111,8 +113,9 @@ def getVolumeBreakDateList(
     KeepDays: int = 1,
     EnableLimitUpSpecial: bool = None,
     PriceStableThreshold: float = 0.05,
+    end_date: str = "",
 ):
-    res, data = get_specific_target_stock(t_stock, market, start)
+    res, data = get_specific_target_stock(t_stock, market, start, end_date=end_date)
     min_days = max(AveDate, KeepDays + 1)
     if (not res) or data.shape[0] < min_days:
         return [], -1, -1, 0, 0, []
@@ -215,30 +218,37 @@ def getVolumeBreakDateList(
 set_display()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
-        print(
-            "Usage: python MassBreakAlphaGo.py <stock_code> <market> <start_date> <AveDate> <Ratio> [KeepDays] [PriceStableThreshold]"
-        )
-        sys.exit(1)
-
-    keep_days = int(sys.argv[6]) if len(sys.argv) >= 7 else 2
-    price_stable_threshold = float(sys.argv[7]) if len(sys.argv) >= 8 else 0.12
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stock_code")
+    parser.add_argument("market")
+    parser.add_argument("start_date")
+    parser.add_argument("ave_date", type=int)
+    parser.add_argument("ratio", type=float)
+    parser.add_argument("--keep-days", type=int, default=2)
+    parser.add_argument("--price-stable-threshold", type=float, default=0.12)
+    parser.add_argument(
+        "--end-date",
+        default="",
+        help="数据截止日期 YYYY-MM-DD；为空则使用最新可用数据",
+    )
+    args = parser.parse_args()
 
     res = getVolumeBreakDateList(
-        sys.argv[1],
-        sys.argv[2],
-        sys.argv[3],
-        int(sys.argv[4]),
-        float(sys.argv[5]),
-        keep_days,
+        args.stock_code,
+        args.market,
+        args.start_date,
+        args.ave_date,
+        args.ratio,
+        args.keep_days,
         None,
-        price_stable_threshold,
+        args.price_stable_threshold,
+        args.end_date,
     )
-    print(f"stock {sys.argv[1]} res is {res}")
+    print(f"stock {args.stock_code} res is {res}")
 
-    info = get_stock_pool_by_market(sys.argv[2])
+    info = get_stock_pool_by_market(args.market)
     if info is None or info.empty:
-        print("stock pool is empty for market={}, skip batch scan".format(sys.argv[2]))
+        print("stock pool is empty for market={}, skip batch scan".format(args.market))
         sys.exit(0)
 
     if "joint_quant_code" not in info.columns:
@@ -251,13 +261,14 @@ if __name__ == "__main__":
     info["BreakDateAndVar"] = info.progress_apply(
         lambda row: getVolumeBreakDateList(
             row["joint_quant_code"],
-            sys.argv[2],
-            sys.argv[3],
-            int(sys.argv[4]),
-            float(sys.argv[5]),
-            keep_days,
+            args.market,
+            args.start_date,
+            args.ave_date,
+            args.ratio,
+            args.keep_days,
             None,
-            price_stable_threshold,
+            args.price_stable_threshold,
+            args.end_date,
         ),
         axis=1,
     )
@@ -289,7 +300,7 @@ if __name__ == "__main__":
 
     info.to_csv(
         "break_alphago_{}_{}_{}_{}_keep{}_stable{}.csv".format(
-            sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], keep_days, price_stable_threshold
+            args.market, args.start_date, args.ave_date, args.ratio, args.keep_days, args.price_stable_threshold
         ),
         index=False,
     )

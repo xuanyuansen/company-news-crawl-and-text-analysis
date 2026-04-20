@@ -488,7 +488,7 @@ def prepare_single_symbol(
     symbol, exchange = parse_symbol_exchange(raw_code, market=market)
     fetch_symbol = _strip_vt_symbol_suffix(symbol)
     df = fetch_daily_ak_data(symbol=fetch_symbol, start=start_dt, end=end_dt, adjust=adjust, market=market)
-    print(f"stock {symbol} data is {df}")
+    # print(f"stock {symbol} data is {df}")
     bars = convert_ak_to_bars(df=df, symbol=symbol, exchange=exchange)
     vt_symbol = f"{symbol}.{exchange.value}"
     saved_count = save_bars_to_vnpy(

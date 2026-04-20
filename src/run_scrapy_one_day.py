@@ -58,8 +58,8 @@ if __name__ == "__main__":
         for spider_config in config.JQKA_SPIDER_LIST:
             _process_play.crawl(JQKASpider, **spider_config)
 
-        for spider_config in config.MEI_TONG_SHE_SPIDER_LIST:
-            _process_play.crawl(MeiTongSpider, **spider_config)
+        # for spider_config in config.MEI_TONG_SHE_SPIDER_LIST:
+        #     _process_play.crawl(MeiTongSpider, **spider_config)
         
         _process_play.start()
         

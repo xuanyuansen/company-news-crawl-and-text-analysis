@@ -92,16 +92,62 @@ def build_massbreak_selection(args: argparse.Namespace) -> pd.DataFrame:
     if final_df.empty:
         return final_df
 
-    final_df = final_df.sort_values(by=["final_score", "good_cnt", "TodayVolumeVsN"], ascending=False)
-    return final_df.head(args.top_n).copy()
+    target_break_date = parse_date(args.end_date).strftime("%Y-%m-%d")
+    final_scores = pd.to_numeric(final_df["final_score"], errors="coerce")
+    filtered_df = final_df[
+        (final_df["LatestBreakDate"].astype(str) == target_break_date)
+        & (final_scores > args.min_final_score)
+    ].copy()
+    if filtered_df.empty:
+        return filtered_df
+
+    filtered_df = filtered_df.sort_values(
+        by=["final_score", "good_cnt", "TodayVolumeVsN"],
+        ascending=False,
+    ).reset_index(drop=True)
+    filtered_df["rank"] = filtered_df.index + 1
+    return filtered_df.head(args.top_n).copy()
 
 
-def calc_per_stock_capital(total_capital: int, top_n: int) -> int:
+def calc_per_stock_capital(
+    total_capital: int,
+    top_n: int,
+    actual_count: int,
+    max_per_stock_capital: int,
+) -> int:
     if top_n <= 0:
         raise ValueError("top_n 必须大于 0")
-    if total_capital % top_n != 0:
-        raise ValueError(f"总 capital={total_capital} 不能被 top_n={top_n} 整除")
-    return total_capital // top_n
+    if actual_count <= 0:
+        raise ValueError("actual_count 必须大于 0")
+    if max_per_stock_capital <= 0:
+        raise ValueError("max_per_stock_capital 必须大于 0")
+
+    effective_count = min(top_n, actual_count)
+    dynamic_capital = total_capital / effective_count
+    return int(min(float(max_per_stock_capital), dynamic_capital))
+
+
+def resolve_next_trading_date(history_data: Any, signal_date: str) -> str:
+    if not signal_date or not history_data:
+        return ""
+
+    signal_ts = pd.Timestamp(signal_date).normalize()
+    trading_dates: set[pd.Timestamp] = set()
+
+    if isinstance(history_data, dict):
+        for key in history_data.keys():
+            dt_value = key[0] if isinstance(key, tuple) else key
+            trading_dates.add(pd.Timestamp(dt_value).normalize())
+    else:
+        for item in history_data:
+            dt_value = getattr(item, "datetime", item)
+            trading_dates.add(pd.Timestamp(dt_value).normalize())
+
+    future_dates = sorted(ts for ts in trading_dates if ts > signal_ts)
+    if not future_dates:
+        return ""
+
+    return future_dates[0].strftime("%Y-%m-%d")
 
 
 def save_backtest_png(result_df: pd.DataFrame, chart_file: Path) -> None:
@@ -134,8 +180,9 @@ def save_backtest_png(result_df: pd.DataFrame, chart_file: Path) -> None:
 
 def run_one_backtest(
     vt_symbol: str,
-    buy_date: str,
+    signal_date: str,
     args: argparse.Namespace,
+    per_stock_capital: int,
     selection_row: pd.Series | None = None,
     show_chart: bool = False,
     save_chart: bool = False,
@@ -150,21 +197,37 @@ def run_one_backtest(
         slippage=args.slippage,
         size=args.size,
         pricetick=args.pricetick,
-        capital=calc_per_stock_capital(args.capital, args.top_n),
+        capital=per_stock_capital,
     )
-    strategy_setting = build_strategy_setting(args)
-    strategy_setting["buy_date"] = buy_date
-    engine.add_strategy(CTAStrategy, strategy_setting)
 
     engine.load_data()
     if not engine.history_data:
         engine.clear_data()
         return {
             "股票": vt_symbol,
-            "指定买入日期": buy_date or "",
+            "信号触发日期": signal_date or "",
+            "指定买入日期": signal_date or "",
+            "实际成交日期": "",
             "成交笔数": 0,
             "错误信息": "no_history_data",
         }
+
+    actual_trade_date = resolve_next_trading_date(engine.history_data, signal_date)
+    if not actual_trade_date:
+        engine.clear_data()
+        return {
+            "股票": vt_symbol,
+            "信号触发日期": signal_date or "",
+            "指定买入日期": signal_date or "",
+            "实际成交日期": "",
+            "成交笔数": 0,
+            "错误信息": "no_next_trading_day",
+        }
+
+    strategy_setting = build_strategy_setting(args)
+    # buy_date 表示发单日；vnpy 日线回测会在下一根 bar 完成撮合。
+    strategy_setting["buy_date"] = signal_date
+    engine.add_strategy(CTAStrategy, strategy_setting)
 
     engine.run_backtesting()
     result_df = engine.calculate_result()
@@ -173,7 +236,9 @@ def run_one_backtest(
 
     row: dict[str, Any] = {
         "股票": vt_symbol,
-        "指定买入日期": buy_date or "",
+        "信号触发日期": signal_date or "",
+        "指定买入日期": signal_date or "",
+        "实际成交日期": actual_trade_date,
         "成交笔数": len(trades),
     }
     if selection_row is not None:
@@ -205,7 +270,7 @@ def run_one_backtest(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="vnpy CTA 回测（单票/列表）")
+    parser = argparse.ArgumentParser(description="vnpy CTA 回测（TopN 且 LatestBreakDate 必须等于 end-date）")
 
     parser.add_argument("--start-date", default="2024-01-01", help="开始日期 YYYY-MM-DD")
     parser.add_argument("--end-date", default=datetime.now().strftime("%Y-%m-%d"), help="结束日期 YYYY-MM-DD")
@@ -218,6 +283,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ave-date", type=int, default=30, help="均量窗口天数")
     parser.add_argument("--ratio", type=float, default=2.0, help="放量倍数")
     parser.add_argument("--keep-days", type=int, default=2, help="连续放量天数")
+    parser.add_argument("--max_per_stock_capital", type=int, default=100000, help="单只股票最大买入金额")
     parser.add_argument(
         "--price-stable-threshold",
         type=float,
@@ -230,8 +296,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-stocks", type=int, default=0, help="仅调试用，限制股票池数量")
     parser.add_argument("--as-of-date", default="", help="评分参考日期 YYYY-MM-DD，默认当天")
     parser.add_argument("--top-n", type=int, default=50, help="MassBreak 选出的前 N 只股票进行回测")
+    parser.add_argument("--min-final-score", type=float, default=0.0, help="仅回测 final_score 严格大于该阈值的股票")
 
     parser.add_argument("--capital", type=int, default=1_000_000)
+    parser.add_argument(
+        "--max-per-stock-capital",
+        type=int,
+        default=50_000,
+        help="单票买入金额上限；实际单票金额 = min(该值, capital / min(top_n, 实际筛选数量))",
+    )
     parser.add_argument("--rate", type=float, default=2.5 / 10000)
     parser.add_argument("--slippage", type=float, default=0.01)
     parser.add_argument("--size", type=int, default=100)
@@ -255,7 +328,7 @@ if __name__ == "__main__":
     args = build_parser().parse_args()
     selection_df = build_massbreak_selection(args)
     if selection_df.empty:
-        print("MassBreak 候选为空，退出")
+        print("MassBreak 候选为空，或未命中 LatestBreakDate/end-date 与 final_score 阈值条件，退出")
         output_path = args.output_csv or str(Path.cwd() / f"vnpy_backtest_result_{datetime.now().strftime('%Y-%m-%d')}.csv")
         selection_df.to_csv(output_path, index=False)
         sys.exit(0)
@@ -288,10 +361,26 @@ if __name__ == "__main__":
         selection_df.to_csv(output_path, index=False)
         sys.exit(0)
 
+    print(f"筛选条件: LatestBreakDate == {parse_date(args.end_date).strftime('%Y-%m-%d')}, final_score > {args.min_final_score}")
     print("MassBreak TopN 结果:")
     print(pd.DataFrame(rows)[["rank", "joint_quant_code", "code_name", "LatestBreakDate", "final_score", "match_type"]].to_string(index=False))
     print(f"回测股票数量: {len(symbols)}")
     print(f"回测股票列表: {symbols}")
+
+    per_stock_capital = calc_per_stock_capital(
+        total_capital=args.capital,
+        top_n=args.top_n,
+        actual_count=len(symbols),
+        max_per_stock_capital=args.max_per_stock_capital,
+    )
+    print(
+        "单票买入金额: {} = min({}, {}/{})".format(
+            per_stock_capital,
+            args.max_per_stock_capital,
+            args.capital,
+            min(args.top_n, len(symbols)),
+        )
+    )
 
     if not args.skip_prepare:
         prepared = prepare_symbols(
@@ -317,15 +406,24 @@ if __name__ == "__main__":
             results.append(
                 run_one_backtest(
                     vt_symbol=vt_symbol,
-                    buy_date=buy_date,
+                    signal_date=buy_date,
                     args=args,
+                    per_stock_capital=per_stock_capital,
                     selection_row=selection_by_vt_symbol.get(vt_symbol),
                     show_chart=show_chart and is_single,
                     save_chart=save_chart and is_single,
                 )
             )
         except Exception as exc:
-            results.append({"股票": vt_symbol, "指定买入日期": buy_date or "", "错误信息": str(exc)})
+            results.append(
+                {
+                    "股票": vt_symbol,
+                    "信号触发日期": buy_date or "",
+                    "指定买入日期": buy_date or "",
+                    "实际成交日期": "",
+                    "错误信息": str(exc),
+                }
+            )
 
     result_df = pd.DataFrame(results)
     if "错误信息" in result_df.columns:

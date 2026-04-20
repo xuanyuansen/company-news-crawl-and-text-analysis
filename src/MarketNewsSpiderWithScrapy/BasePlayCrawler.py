@@ -91,7 +91,7 @@ class PlaywrightCrawlerProcess:
                     else:
                         # 执行页面跳转
                         # 可以在这里根据 settings 增加全局超时控制
-                        await page.goto(req.url, wait_until="domcontentloaded", timeout=30000)
+                        await page.goto(req.url, wait_until="domcontentloaded", timeout=50000)
                         response = Response(req.url, page, req.meta)
                         
                         # 执行回调

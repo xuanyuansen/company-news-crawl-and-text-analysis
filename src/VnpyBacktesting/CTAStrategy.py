@@ -28,7 +28,7 @@ class CTAStrategy(CtaTemplate):
     buy_date = ""
 
     stop_loss_ratio = 0.03
-    take_profit_ratio = 0.12
+    take_profit_ratio = 0.15
     trailing_activate_ratio = 0.06
     trailing_stop_ratio = 0.03
     max_hold_bars = 10

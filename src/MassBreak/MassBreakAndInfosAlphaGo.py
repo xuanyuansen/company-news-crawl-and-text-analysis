@@ -88,6 +88,11 @@ def to_cn_news_date_start(date_str: str) -> str:
     return d.strftime("%Y年%m月%d日 00:00")
 
 
+def to_cn_news_date_end(date_str: str) -> str:
+    d = dt.datetime.strptime(date_str, "%Y-%m-%d")
+    return d.strftime("%Y年%m月%d日 23:59")
+
+
 def load_massbreak_candidates(
     market: str,
     start_date: str,
@@ -98,6 +103,7 @@ def load_massbreak_candidates(
     min_break_count: int,
     enable_limit_up_special=None,
     max_stocks: int = 0,
+    end_date: str = "",
 ) -> pd.DataFrame:
     stock_pool = get_stock_pool_by_market(market)
     if stock_pool is None or stock_pool.empty:
@@ -149,6 +155,7 @@ def load_massbreak_candidates(
             int(keep_days),
             enable_limit_up_special,
             float(price_stable_threshold),
+            end_date=end_date,
         ),
         axis=1,
     )
@@ -188,6 +195,7 @@ def load_news_good_or_bad(
     candidate_df: pd.DataFrame,
     label_field: str = "Label",
     news_start_date: str = "",
+    news_end_date: str = "",
 ) -> pd.DataFrame:
     """
     从 stock_specific_news 按候选股票聚合新闻情绪。
@@ -210,6 +218,9 @@ def load_news_good_or_bad(
     start_cn = ""
     if news_start_date:
         start_cn = to_cn_news_date_start(news_start_date)
+    end_cn = ""
+    if news_end_date:
+        end_cn = to_cn_news_date_end(news_end_date)
 
     unique_codes = candidate_df["stock_code_norm"].dropna().astype(str).unique().tolist()
     rows = []
@@ -233,6 +244,10 @@ def load_news_good_or_bad(
         match_query = {label_field: {"$in": ["利好", "利空"]}}
         if start_cn:
             match_query["Date"] = {"$gte": start_cn}
+        if end_cn:
+            if "Date" not in match_query:
+                match_query["Date"] = {}
+            match_query["Date"]["$lte"] = end_cn
 
         grouped = list(
             col.aggregate(
@@ -416,6 +431,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--market", default="cn", help="市场类型: cn/us/hk")
     parser.add_argument("--start-date", required=True, help="MassBreak 开始日期 YYYY-MM-DD")
+    parser.add_argument(
+        "--end-date",
+        default=dt.date.today().strftime("%Y-%m-%d"),
+        help="MassBreak 截止日期 YYYY-MM-DD",
+    )
     parser.add_argument("--ave-date", type=int, default=30, help="均量窗口天数")
     parser.add_argument("--ratio", type=float, default=2.0, help="放量倍数")
     parser.add_argument("--keep-days", type=int, default=2, help="连续放量天数")
@@ -449,6 +469,7 @@ if __name__ == "__main__":
     massbreak_candidates = load_massbreak_candidates(
         market=args.market,
         start_date=args.start_date,
+        end_date=args.end_date,
         ave_date=args.ave_date,
         ratio=args.ratio,
         keep_days=args.keep_days,
@@ -466,6 +487,7 @@ if __name__ == "__main__":
         candidate_df=massbreak_candidates,
         label_field=label_field,
         news_start_date=args.news_start_date,
+        news_end_date=args.end_date,
     )
     print("news stock records:", news_df.shape)
 
