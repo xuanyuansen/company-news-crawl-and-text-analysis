@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import akshare as ak
 import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
@@ -64,6 +65,11 @@ STATS_NAME_MAP = {
     "total_net_pnl": "总净盈亏",
     "end_balance": "期末资金",
 }
+
+BENCHMARK_SERIES_META = (
+    ("shanghai_cum_return", "沪指收益", "#c55a11", "sh000001"),
+    ("shenzhen_cum_return", "深指收益", "#2f8f4e", "sz399001"),
+)
 
 
 def parse_date(date_str: str) -> datetime:
@@ -464,29 +470,47 @@ def build_close_panel(history_data: dict, vt_symbols: list[str]) -> pd.DataFrame
     return close_df.sort_index()
 
 
-def build_benchmark_curve(close_df: pd.DataFrame, start_dt: datetime, end_dt: datetime) -> pd.Series:
-    if close_df.empty:
-        return pd.Series(dtype=float)
+def resolve_benchmark_start_date(selection_df: pd.DataFrame) -> str:
+    if selection_df.empty or "actual_trade_date" not in selection_df.columns:
+        raise ValueError("selection_df 为空，无法确定基准起始日期")
 
-    close_df = close_df.copy()
-    close_df.index = normalize_datetime_index(close_df.index).normalize()
-    start_ts = normalize_date_timestamp(start_dt)
-    end_ts = normalize_date_timestamp(end_dt)
-    window_df = close_df.loc[(close_df.index >= start_ts) & (close_df.index <= end_ts)].copy()
-    if window_df.empty:
-        return pd.Series(dtype=float)
+    actual_trade_dates = selection_df["actual_trade_date"].astype(str)
+    actual_trade_dates = actual_trade_dates[(actual_trade_dates != "") & (actual_trade_dates != "nan")]
+    if actual_trade_dates.empty:
+        raise ValueError("selection_df 中没有可用的 actual_trade_date，无法确定基准起始日期")
 
-    start_row = window_df.iloc[0].dropna()
-    valid_cols = list(start_row.index)
-    if not valid_cols:
-        return pd.Series(dtype=float)
+    return pd.to_datetime(actual_trade_dates).min().strftime("%Y-%m-%d")
 
-    window_df = window_df[valid_cols].copy()
-    start_prices = window_df.iloc[0]
-    benchmark_balance = window_df.div(start_prices).mean(axis=1)
-    benchmark_return = benchmark_balance - 1.0
-    benchmark_return.name = "benchmark_cum_return"
-    return benchmark_return
+
+def build_index_benchmark_curve(start_date: str, end_date: str) -> pd.DataFrame:
+    start_ts = normalize_timestamp(parse_date(start_date))
+    end_ts = normalize_timestamp(parse_date(end_date))
+    benchmark_frames: list[pd.DataFrame] = []
+
+    for column_name, _label, _color, ak_symbol in BENCHMARK_SERIES_META:
+        raw_df = ak.stock_zh_index_daily(symbol=ak_symbol)
+        if raw_df is None or raw_df.empty:
+            raise ValueError(f"{ak_symbol} 无可用指数日线数据")
+
+        index_df = raw_df.copy()
+        index_df["date"] = pd.to_datetime(index_df["date"]).dt.normalize()
+        index_df = index_df.loc[(index_df["date"] >= start_ts) & (index_df["date"] <= end_ts)].copy()
+        if index_df.empty:
+            raise ValueError(f"{ak_symbol} 在 {start_date} ~ {end_date} 区间无可用指数数据")
+
+        entry_open = float(index_df.iloc[0]["open"])
+        if entry_open <= 0:
+            raise ValueError(f"{ak_symbol} 起始开盘价异常: {entry_open}")
+
+        index_df[column_name] = index_df["close"].astype(float) / entry_open - 1.0
+        benchmark_frames.append(index_df.set_index("date")[[column_name]])
+
+    benchmark_df = benchmark_frames[0]
+    for frame in benchmark_frames[1:]:
+        benchmark_df = benchmark_df.join(frame, how="outer")
+
+    benchmark_df.index = normalize_datetime_index(benchmark_df.index)
+    return benchmark_df.sort_index()
 
 
 def extract_active_result(result_df: pd.DataFrame, start_date: str, end_date: str, capital: float) -> pd.DataFrame:
@@ -647,11 +671,16 @@ def save_cumulative_chart_png(curve_df: pd.DataFrame, chart_file: Path) -> None:
 
     x = pd.to_datetime(curve_df.index)
     strategy = curve_df["strategy_cum_return"].astype(float)
-    benchmark = curve_df["benchmark_cum_return"].astype(float)
 
-    strategy_line = ax.plot(x, strategy, color="#4d76c9", linewidth=2.6, label="策略收益")[0]
+    ax.plot(x, strategy, color="#4d76c9", linewidth=2.6, label="策略收益")
     ax.fill_between(x, strategy, 0, color="#4d76c9", alpha=0.16)
-    benchmark_line = ax.plot(x, benchmark, color="#9c4f3e", linewidth=2.8, label="基准收益")[0]
+
+    for column_name, label, color, _ak_symbol in BENCHMARK_SERIES_META:
+        if column_name not in curve_df.columns:
+            continue
+        series = curve_df[column_name].astype(float)
+        ax.plot(x, series, color=color, linewidth=2.0, label=label)
+
     ax.axhline(0, color="#222222", linewidth=1.0)
 
     ax.yaxis.tick_right()
@@ -659,18 +688,17 @@ def save_cumulative_chart_png(curve_df: pd.DataFrame, chart_file: Path) -> None:
     ax.yaxis.set_major_formatter(mticker.PercentFormatter(1.0))
     ax.set_ylabel("累计收益", rotation=270, labelpad=18)
     ax.grid(alpha=0.28, linestyle="--")
-    ax.legend(handles=[strategy_line, benchmark_line], loc="upper left", frameon=False)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, loc="upper left", frameon=False)
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%y-%m-%d"))
     fig.autofmt_xdate(rotation=0)
 
     last_dt = x[-1]
     last_strategy = float(strategy.iloc[-1])
-    last_benchmark = float(benchmark.iloc[-1])
     ax.scatter([last_dt], [last_strategy], color="#4d76c9", s=36, zorder=5)
-    ax.scatter([last_dt], [last_benchmark], color="#9c4f3e", s=36, zorder=5)
     ax.annotate(
-        f"策略收益: {last_strategy:.2%}\n基准收益: {last_benchmark:.2%}",
+        f"策略收益: {last_strategy:.2%}",
         xy=(last_dt, last_strategy),
         xytext=(18, 18),
         textcoords="offset points",
@@ -693,7 +721,6 @@ def save_cumulative_chart_html(curve_df: pd.DataFrame, html_file: Path) -> None:
 
     x = pd.to_datetime(curve_df.index)
     strategy = curve_df["strategy_cum_return"].astype(float)
-    benchmark = curve_df["benchmark_cum_return"].astype(float)
 
     fig = go.Figure()
     fig.add_trace(
@@ -708,16 +735,21 @@ def save_cumulative_chart_html(curve_df: pd.DataFrame, html_file: Path) -> None:
             hovertemplate="%{x|%Y-%m-%d}<br>策略收益: %{y:.2%}<extra></extra>",
         )
     )
-    fig.add_trace(
-        go.Scatter(
-            x=x,
-            y=benchmark,
-            mode="lines",
-            name="基准收益",
-            line=dict(color="#9c4f3e", width=3),
-            hovertemplate="%{x|%Y-%m-%d}<br>基准收益: %{y:.2%}<extra></extra>",
+
+    for column_name, label, color, _ak_symbol in BENCHMARK_SERIES_META:
+        if column_name not in curve_df.columns:
+            continue
+        series = curve_df[column_name].astype(float)
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=series,
+                mode="lines",
+                name=label,
+                line=dict(color=color, width=2.5),
+                hovertemplate=f"%{{x|%Y-%m-%d}}<br>{label}: %{{y:.2%}}<extra></extra>",
+            )
         )
-    )
 
     fig.update_layout(
         template="plotly_white",
@@ -744,7 +776,7 @@ def save_cumulative_chart_html(curve_df: pd.DataFrame, html_file: Path) -> None:
 def run_portfolio_backtest(
     args: argparse.Namespace,
     vt_symbols: list[str],
-) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str]]:
+) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str]]:
     engine = BacktestingEngine()
     rates, slippages, sizes, priceticks = build_contract_settings(vt_symbols, args)
 
@@ -768,7 +800,7 @@ def run_portfolio_backtest(
     if not engine.history_data:
         engine.clear_data()
         empty_df = pd.DataFrame()
-        return empty_df, empty_df, {"错误信息": "no_history_data"}, empty_df, empty_df, empty_df, empty_df, []
+        return empty_df, {"错误信息": "no_history_data"}, empty_df, empty_df, empty_df, empty_df, []
 
     close_df = build_close_panel(engine.history_data, vt_symbols)
     trading_dates = [pd.Timestamp(dt).normalize().strftime("%Y-%m-%d") for dt in close_df.index]
@@ -778,7 +810,7 @@ def run_portfolio_backtest(
     if raw_result_df is None or raw_result_df.empty:
         engine.clear_data()
         empty_df = pd.DataFrame()
-        return empty_df, empty_df, {"错误信息": "empty_result"}, empty_df, empty_df, empty_df, empty_df, trading_dates
+        return empty_df, {"错误信息": "empty_result"}, empty_df, empty_df, empty_df, empty_df, trading_dates
 
     active_result_df = extract_active_result(
         raw_result_df,
@@ -795,16 +827,11 @@ def run_portfolio_backtest(
     if active_result_df.empty:
         engine.clear_data()
         empty_df = pd.DataFrame()
-        return empty_df, empty_df, {"错误信息": "empty_active_result"}, empty_df, empty_df, empty_df, empty_df, trading_dates
+        return empty_df, {"错误信息": "empty_active_result"}, empty_df, empty_df, empty_df, empty_df, trading_dates
 
     stats = calculate_safe_statistics(
         df=active_result_df.copy(),
         capital=float(args.capital),
-    )
-    benchmark_curve = build_benchmark_curve(
-        close_df=close_df,
-        start_dt=parse_date(args.start_date),
-        end_dt=parse_date(args.end_date),
     )
     trades = list(engine.get_all_trades())
     trade_df = build_trade_ledger(trades, sizes, args.rate, args.slippage)
@@ -818,7 +845,7 @@ def run_portfolio_backtest(
     symbol_summary_df = build_symbol_summary(trade_df)
     comparison_df = build_return_comparison(active_result_df, trade_equity_df)
     engine.clear_data()
-    return active_result_df, benchmark_curve.to_frame(), stats, trade_df, trade_equity_df, symbol_summary_df, comparison_df, trading_dates
+    return active_result_df, stats, trade_df, trade_equity_df, symbol_summary_df, comparison_df, trading_dates
 
 
 def build_output_paths(output_path: Path, chart_file: str, html_file: str) -> dict[str, Path]:
@@ -969,7 +996,7 @@ def main() -> None:
         for vt_symbol, count in prepared.items():
             print(vt_symbol, count)
 
-    active_result_df, benchmark_df, stats, trade_df, trade_equity_df, symbol_summary_df, comparison_df, trading_dates = run_portfolio_backtest(args, vt_symbols)
+    active_result_df, stats, trade_df, trade_equity_df, symbol_summary_df, comparison_df, trading_dates = run_portfolio_backtest(args, vt_symbols)
 
     selection_df = build_daily_selection_df(daily_selection_map, trading_dates=trading_dates)
     selection_df.to_csv(artifact_paths["selection_csv"], index=False)
@@ -984,24 +1011,17 @@ def main() -> None:
         return
 
     curve_df = active_result_df[["strategy_balance", "strategy_cum_return"]].copy()
-    if not benchmark_df.empty:
-        benchmark_df = benchmark_df.copy()
-        benchmark_df.index = normalize_datetime_index(benchmark_df.index).normalize()
-        benchmark_df = benchmark_df.reindex(curve_df.index).ffill().bfill()
-        curve_df = curve_df.join(benchmark_df.rename(columns={"benchmark_cum_return": "benchmark_cum_return"}), how="left")
-        curve_df["benchmark_balance"] = float(args.capital) * (1.0 + curve_df["benchmark_cum_return"])
-        curve_df = curve_df.dropna(subset=["benchmark_cum_return"])
-    else:
-        curve_df["benchmark_cum_return"] = np.nan
-        curve_df["benchmark_balance"] = np.nan
+    benchmark_start_date = resolve_benchmark_start_date(selection_df)
+    benchmark_df = build_index_benchmark_curve(benchmark_start_date, args.end_date)
+    chart_df = curve_df.join(benchmark_df, how="left")
 
     result_df = curve_df.reset_index().rename(columns={"index": "date"})
     result_df.to_csv(output_path_obj, index=False)
 
-    if not benchmark_df.empty and not curve_df.empty:
-        save_cumulative_chart_png(curve_df=curve_df, chart_file=artifact_paths["chart_path"])
+    if not chart_df.empty:
+        save_cumulative_chart_png(curve_df=chart_df, chart_file=artifact_paths["chart_path"])
         try:
-            save_cumulative_chart_html(curve_df=curve_df, html_file=artifact_paths["html_path"])
+            save_cumulative_chart_html(curve_df=chart_df, html_file=artifact_paths["html_path"])
         except Exception as exc:
             print(f"HTML 图表生成失败: {exc}")
 
@@ -1024,9 +1044,8 @@ def main() -> None:
     print(f"输出个股汇总: {artifact_paths['symbol_summary_csv']}")
     print(f"输出重放权益: {artifact_paths['trade_equity_csv']}")
     print(f"输出收益对账: {artifact_paths['comparison_csv']}")
-    if not benchmark_df.empty:
-        print(f"输出PNG: {artifact_paths['chart_path']}")
-        print(f"输出HTML: {artifact_paths['html_path']}")
+    print(f"输出PNG: {artifact_paths['chart_path']}")
+    print(f"输出HTML: {artifact_paths['html_path']}")
     print(pd.DataFrame([stats]).to_string(index=False))
     print(result_df.tail(5).to_string(index=False))
 
