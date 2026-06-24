@@ -11,18 +11,21 @@ from MongoDbComTools.BuildStockNewsDb import GenStockNewsDB
 from MarketNewsSpiderWithScrapy.east_money_spider import EastMoneySpider
 from MarketNewsSpiderWithScrapy.net_ease_spider import NetEaseSpider
 from MarketNewsSpiderWithScrapy.shanghai_stock_spider import ShanghaiStockSpider
-from MarketNewsSpiderWithScrapy.stcn_spider import StcnSpider
-from MarketNewsSpiderWithScrapy.jrj_spider import JrjSpider
+from MarketNewsSpiderWithScrapy.jqka_spider import JQKASpider
+from MarketNewsSpiderWithScrapy.jrj_spider import JRJSpider
 from MarketNewsSpiderWithScrapy.nbd_spider import NBDSpider
+from MarketNewsSpiderWithScrapy.mei_tong_spider import MeiTongSpider
 from MarketNewsSpiderWithScrapy.zhong_jin_spider import ZhongJinStockSpider
 from Utils import config, utils
 from datetime import datetime, timedelta
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-    datefmt="%a, %d %b %Y %H:%M:%S",
-)
+from MarketNewsSpiderWithScrapy.BasePlayCrawler import PlaywrightCrawlerProcess
+
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
+#     datefmt="%a, %d %b %Y %H:%M:%S",
+# )
 
 # 每天运行一次,爬取最新的信息,然后形成最新消息的汇总.统计报告发出来到邮箱.按照消息数量由多到少排序.
 # 再把这些消息插入到各自新闻的db.同时生成报告
@@ -35,66 +38,45 @@ if __name__ == "__main__":
         logging.info("page number is {}".format(int(args.spider)))
         os.environ["SCRAPY_SETTINGS_MODULE"] = f"settings"
         settings = get_project_settings()
-        _process = CrawlerProcess(settings)
 
-        EAST_MONEY = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.EAST_MONEY_SPIDER_LIST
-        ]
-
-        JRJ_NEWS = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.JRJ_SPIDER_LIST
-        ]
-
-        NET_EASE = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.NET_EASE_SPIDER_LIST
-        ]
-
-        STCN_EASE = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.STCN_SPIDER_LIST
-        ]
-
-        SHANG_HAI = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.SHANG_HAI_SPIDER_LIST
-        ]
-
-        NBD_NEWS = [
-            element.update({"end_page": int(args.spider)})
-            for element in config.NBD_SPIDER_LIST
-        ]
-
-        ZHONG_JIN = [
-            element.update({"end_page": 2 * int(args.spider)})
-            for element in config.ZHONG_JIN_SPIDER_LIST
-        ]
+        
+        PLAYWRIGHT_SPIDERS = ['east_money', 'jrj', 'shanghai_stock', "jqka", "mei_tong_she"]
+        SCRAPY_SPIDERS = ['net_ease', 'zhong_jin', 'nbd']
+    
+        #### 基于playwrite的爬虫
+        _process_play = PlaywrightCrawlerProcess(settings)
 
         for spider_config in config.EAST_MONEY_SPIDER_LIST:
-            logging.info(spider_config)
-            _process.crawl(EastMoneySpider, **spider_config)
-
+            _process_play.crawl(EastMoneySpider, **spider_config)
+        
         for spider_config in config.JRJ_SPIDER_LIST:
-            _process.crawl(JrjSpider, **spider_config)
-
-        for spider_config in config.NET_EASE_SPIDER_LIST:
-            _process.crawl(NetEaseSpider, **spider_config)
-
-        for spider_config in config.STCN_SPIDER_LIST:
-            _process.crawl(StcnSpider, **spider_config)
+            _process_play.crawl(JRJSpider, **spider_config)
 
         for spider_config in config.SHANG_HAI_SPIDER_LIST:
-            _process.crawl(ShanghaiStockSpider, **spider_config)
+            _process_play.crawl(ShanghaiStockSpider, **spider_config)
+
+        for spider_config in config.JQKA_SPIDER_LIST:
+            _process_play.crawl(JQKASpider, **spider_config)
+
+        # for spider_config in config.MEI_TONG_SHE_SPIDER_LIST:
+        #     _process_play.crawl(MeiTongSpider, **spider_config)
+        
+        _process_play.start()
+        
+
+        #### 基于scrapy的爬虫
+        _process_scrapy = CrawlerProcess(settings)
+
+        for spider_config in config.NET_EASE_SPIDER_LIST:
+            _process_scrapy.crawl(NetEaseSpider, **spider_config)
 
         for spider_config in config.NBD_SPIDER_LIST:
-            _process.crawl(NBDSpider, **spider_config)
+            _process_scrapy.crawl(NBDSpider, **spider_config)
 
         for spider_config in config.ZHONG_JIN_SPIDER_LIST:
-            _process.crawl(ZhongJinStockSpider, **spider_config)
+            _process_scrapy.crawl(ZhongJinStockSpider, **spider_config)
 
-        _process.start()
+        _process_scrapy.start()
 
     if args.report:
         logging.info("report of {} days".format(int(args.report)))
@@ -102,7 +84,7 @@ if __name__ == "__main__":
             "%Y-%m-%d"
         )
         logging.info("start time is {}".format(start_date_time))
-        gdb = GenStockNewsDB(force_update_score_using_model=True, generate_report=True)
+        gdb = GenStockNewsDB(force_update_score_using_model=True)
         report_list_of_dict = []
         collection_cnt = 0
         for db_name, collection_list in config.ALL_SPIDER_LIST_OF_DICT.items():

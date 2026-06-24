@@ -19,12 +19,12 @@ REDIS_IP = "localhost"
 REDIS_PORT = 6379
 
 CHROME_DRIVER = (
-    "./info/chromedriver_mac" if os_type == "Darwin" else "./info/chromedriver"
+    "./info/chromedriver_mac" if os_type == "Darwin" else '/usr/bin/chromedriver'#"./info/chromedriver"
 )
 # joint quant
 cipher_key = b"C8_ACDILYdQubRfNB7oUPWvFR1G1U7uhQRBVH_NGne8="
 
-STOCK_PRICE_REQUEST_DEFAULT_DATE = "20180101"
+STOCK_PRICE_REQUEST_DEFAULT_DATE = "20251229"
 
 # 机器学习
 USER_DEFINED_DICT_PATH = "./info/finance_dict.txt"
@@ -52,164 +52,71 @@ COLLECTION_NAME_STOCK_BASIC_INFO_US_ZH = "us_zh_stock_basic_info"
 CN_STOCK_INDUSTRY_DICT_FILE = "./info/cn_stock_industry_dict_file.txt"
 CN_STOCK_CONCEPT_DICT_FILE = "./info/cn_stock_concept_dict_file.txt"
 
-STCN_NEWS_DB = "stcn"
-STCN_DJSJ = dict(
+JQKA_NEWS_DB = "jqka"
+JQKA_TT_INFOS = dict(
     {
-        "name": "stcn_du_jia_data_spider",
-        "start_url": "https://data.stcn.com/djsj/index.html",
-        "key_word": "djsj",
-        "key_word_chn": "独家数据",
-        "base_url": "https://data.stcn.com/",
-        "end_page": 100,
-    }
-)
-STCN_DJJD = dict(
-    {
-        "name": "stcn_du_jia_jie_du_spider",
-        "start_url": "https://stock.stcn.com/djjd/index.html",
-        "key_word": "djjd",
-        "key_word_chn": "独家解读",
-        "base_url": "https://stock.stcn.com/",
-        "end_page": 20,
+        "name": "jqka_tt_spider",
+        "start_url": "https://www.10jqka.com.cn/",
+        "key_word": "jqka",
+        "key_word_chn": "头条",
+        "base_url": "https://www.10jqka.com.cn/",
+        "end_page": 3,
     }
 )
 
-STCN_JIGOU = dict(
-    {
-        "name": "stcn_ji_gou_buyer_spider",
-        "start_url": "https://finance.stcn.com/index.html",
-        "key_word": "jigou",
-        "key_word_chn": "机构",
-        "base_url": "https://finance.stcn.com/",
-        "end_page": 20,
-    }
-)
-# https://kuaixun.stcn.com/egs/index.html 股市
-STCN_KX_EGS = dict(
-    {
-        "name": "stcn_egs_fast_info_spider",
-        "start_url": "https://kuaixun.stcn.com/egs/index.html",
-        "key_word": "egs",
-        "key_word_chn": "快讯",
-        "base_url": "https://kuaixun.stcn.com/",
-        "end_page": 20,
-    }
-)
-
-STCN_KX_REPORT = dict(
-    {
-        "name": "stcn_company_report_spider",
-        "start_url": "https://kuaixun.stcn.com/yb/index.html",
-        "key_word": "yb",
-        "key_word_chn": "研报",
-        "base_url": "https://kuaixun.stcn.com/",
-        "end_page": 20,
-    }
-)
-
-STCN_COMPANY_TRENDS = dict(
-    {
-        "name": "stcn_company_latest_trends_spider",
-        "start_url": "https://company.stcn.com/gsdt/index.html",
-        "key_word": "gsdt",
-        "key_word_chn": "公司动态",
-        "base_url": "https://company.stcn.com/",
-        "end_page": 20,
-    }
-)
-
-STCN_COMPANY_NEWS = dict(
-    {
-        "name": "stcn_company_news_spider",
-        "start_url": "https://company.stcn.com/gsxw/index.html",
-        "key_word": "gsxw",
-        "key_word_chn": "公司新闻",
-        "base_url": "https://company.stcn.com/",
-        "end_page": 20,
-    }
-)
-
-STCN_DEEP_NEWS = dict(
-    {
-        "name": "stcn_company_deep_news_spider",
-        "start_url": "https://news.stcn.com/sd/index.html",
-        "key_word": "sd",
-        "key_word_chn": "深度",
-        "base_url": "https://news.stcn.com/",
-        "end_page": 20,
-    }
-)
-STCN_SPIDER_LIST = [
-    STCN_DJSJ,
-    STCN_DJJD,
-    STCN_JIGOU,
-    STCN_KX_EGS,
-    STCN_KX_REPORT,
-    STCN_COMPANY_TRENDS,
-    STCN_COMPANY_NEWS,
-    STCN_DEEP_NEWS,
+JQKA_SPIDER_LIST = [
+    JQKA_TT_INFOS,
 ]
 
 
 # JRJ
 JRJ_NEWS_DB = "jrj_news"
-JRJ_INVEST_SCGC = dict(
+JRJ_STOCK_YBJX = dict(
     {
-        "name": "jrj_invest_market_analyze_spider",
-        "start_url": "http://stock.jrj.com.cn/invest/scgc.shtml",
-        "key_word": "invest_scgc",
-        "key_word_chn": "市场分析",
-        "base_url": "http://stock.jrj.com.cn/invest/",
-        "end_page": 11,
-    }
-)
-JRJ_STOCK_SSGS = dict(
-    {
-        "name": "jrj_stock_shang_shi_gong_si_spider",
-        "start_url": "http://stock.jrj.com.cn/list/stockssgs.shtml",
+        "name": "jrj_stock_yan_bao_jing_xuan_spider",
+        "start_url": "https://stock.jrj.com.cn/ybjx.shtml?jrjbq",
         "key_word": "stock_ss_gs",
-        "key_word_chn": "上市公司",
+        "key_word_chn": "研报精选",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 11,
+        "end_page": 1,
     }
 )
 # http://stock.jrj.com.cn/hotstock/gnjj.shtml
-JRJ_HOT_STOCK_GNJJ = dict(
+JRJ_HOT_STOCK_GGJX = dict(
     {
-        "name": "jrj_hot_stock_jue_jin_spider",
-        "start_url": "http://stock.jrj.com.cn/hotstock/gnjj.shtml",
+        "name": "jrj_hot_stock_bao_gao_spider",
+        "start_url": "https://stock.jrj.com.cn/ggjj.shtml?jrjbq",
         "key_word": "hot_stock_jj",
-        "key_word_chn": "行业掘金",
+        "key_word_chn": "公告精选",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 11,
+        "end_page": 1,
     }
 )
-JRJ_STOCK_GU_SHI_NEWS = dict(
+JRJ_STOCK_JH_NEWS = dict(
     {
-        "name": "jrj_stock_gu_shi_news_spider",
-        "start_url": "http://stock.jrj.com.cn/list/stockgszx.shtml",
+        "name": "jrj_stock_ji_hui_news_spider",
+        "start_url": "https://stock.jrj.com.cn/jhqb.shtml?jrjbq",
         "key_word": "stock_news",
-        "key_word_chn": "股市资讯",
+        "key_word_chn": "机会情报",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 11,
+        "end_page": 1,
     }
 )
-JRJ_STOCK_ZHANG_TING_PREDICT = dict(
+JRJ_STOCK_A_TT = dict(
     {
-        "name": "jrj_stock_zhang_ting_predict_spider",
-        "start_url": "http://stock.jrj.com.cn/list/ztbyc.shtml",
+        "name": "jrj_stock_a_gu_tt_spider",
+        "start_url": "https://stock.jrj.com.cn/agtt.shtml?jrjbq",
         "key_word": "stock_zhang_ting",
-        "key_word_chn": "涨停板预测",
+        "key_word_chn": "A股头条",
         "base_url": "http://stock.jrj.com.cn/",
-        "end_page": 11,
+        "end_page": 1,
     }
 )
 JRJ_SPIDER_LIST = [
-    JRJ_INVEST_SCGC,
-    JRJ_STOCK_SSGS,
-    JRJ_HOT_STOCK_GNJJ,
-    JRJ_STOCK_GU_SHI_NEWS,
-    JRJ_STOCK_ZHANG_TING_PREDICT,
+    JRJ_STOCK_YBJX,
+    JRJ_HOT_STOCK_GGJX,
+    JRJ_STOCK_JH_NEWS,
+    JRJ_STOCK_A_TT,
 ]
 
 # NBD NEWS
@@ -294,7 +201,7 @@ EAST_MONEY_A_STOCK_NEWS = dict(
         "key_word": "stock_cn_company_news",
         "key_word_chn": "A股公司",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 26,
+        "end_page": 50,
     }
 )
 EAST_MONEY_A_MARKET_NEWS = dict(
@@ -304,7 +211,7 @@ EAST_MONEY_A_MARKET_NEWS = dict(
         "key_word": "cn_market_data_news",
         "key_word_chn": "市场数据",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 26,
+        "end_page": 2,
     }
 )
 EAST_MONEY_DEEP_INVESTIGATE_NEWS = dict(
@@ -314,7 +221,7 @@ EAST_MONEY_DEEP_INVESTIGATE_NEWS = dict(
         "key_word": "cn_stock_deep_investigate_news",
         "key_word_chn": "纵深调查",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 10,
+        "end_page": 2,
     }
 )
 EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS = dict(
@@ -324,7 +231,7 @@ EAST_MONEY_INDUSTRY_DEEP_REVIEW_NEWS = dict(
         "key_word": "cn_industry_deep_review_news",
         "key_word_chn": "产业透视",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 26,
+        "end_page": 2,
     }
 )
 EAST_MONEY_STOCK_OPINION_NEWS = dict(
@@ -334,7 +241,7 @@ EAST_MONEY_STOCK_OPINION_NEWS = dict(
         "key_word": "cn_stock_opinion_news",
         "key_word_chn": "股市评论",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 26,
+        "end_page": 2,
     }
 )
 EAST_MONEY_BUSINESS_NEWS = dict(
@@ -344,7 +251,7 @@ EAST_MONEY_BUSINESS_NEWS = dict(
         "key_word": "cn_business_news",
         "key_word_chn": "商业资讯",
         "base_url": "https://finance.eastmoney.com/",
-        "end_page": 30,
+        "end_page": 25,
     }
 )
 EAST_MONEY_SPIDER_LIST = [
@@ -361,58 +268,48 @@ SHANG_HAI_STOCK_NEWS_DB = "shanghai_cn_stock_news"
 SHANG_HAI_STOCK_COMPANY_NEWS = dict(
     {
         "name": "shanghai_stock_company_focus_news_spider",
-        "start_url": "https://company.cnstock.com/company/scp_gsxw",
+        "start_url": "https://www.cnstock.com/channel/10006",
         "key_word": "stock_company_news",
-        "key_word_chn": "公司聚集",
-        "base_url": "https://company.cnstock.com/",
-        "end_page": 100,
+        "key_word_chn": "公司聚集", # "公司"->"全部"
+        "base_url": "https://www.cnstock.com/",
+        "end_page": 5,
     }
 )
 SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS = dict(
     {
         "name": "shanghai_stock_company_announcement_spider",
-        "start_url": "http://ggjd.cnstock.com/company/scp_ggjd/tjd_bbdj",
+        "start_url": "https://www.cnstock.com/channel/10111",
         "key_word": "stock_announcement_news",
-        "key_word_chn": "公告解读",
+        "key_word_chn": "公告解读", # 公告速递
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 100,
+        "end_page": 4,
     }
 )
 SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS = dict(
     {
         "name": "shanghai_stock_company_kuai_xun_spider",
-        "start_url": "http://ggjd.cnstock.com/company/scp_ggjd/tjd_ggkx",
+        "start_url": "https://www.cnstock.com/channel/10030",
         "key_word": "stock_kuai_xun_news",
-        "key_word_chn": "公告快讯",
+        "key_word_chn": "公告快讯", # 公司快讯
         "base_url": "http://ggjd.cnstock.com/",
-        "end_page": 100,
+        "end_page": 4,
     }
 )
-SHANG_HAI_STOCK_COMPANY_GOOD_NEWS = dict(
-    {
-        "name": "shanghai_stock_company_very_good_news_spider",
-        "start_url": "https://ggjd.cnstock.com/company/scp_ggjd/tjd_sdlh",
-        "key_word": "stock_good_news",
-        "key_word_chn": "利好公告",
-        "base_url": "https://ggjd.cnstock.com/",
-        "end_page": 100,
-    }
-)
+
 SHANG_HAI_STOCK_INDUSTRY_NEWS = dict(
     {
         "name": "shanghai_stock_industry_news_spider",
-        "start_url": "https://news.cnstock.com/industry",
+        "start_url": "https://www.cnstock.com/channel/10029",
         "key_word": "stock_industry_news",
-        "key_word_chn": "产业聚焦",
+        "key_word_chn": "产业聚焦", # "公司"->"聚焦"
         "base_url": "https://news.cnstock.com/",
-        "end_page": 100,
+        "end_page": 3,
     }
 )
 SHANG_HAI_SPIDER_LIST = [
     SHANG_HAI_STOCK_COMPANY_NEWS,
     SHANG_HAI_STOCK_ANNOUNCEMENT_NEWS,
     SHANG_HAI_STOCK_COMPANY_KUAI_XUN_NEWS,
-    SHANG_HAI_STOCK_COMPANY_GOOD_NEWS,
     SHANG_HAI_STOCK_INDUSTRY_NEWS,
 ]
 
@@ -498,16 +395,61 @@ ZHONG_JIN_SPIDER_LIST = [
     ZHONG_JIN_STOCK_MARKET_MAIN_FORCE_TREND_NEWS,
 ]
 
+# mei tong she
+MEI_TONG_SHE_NEWS_DB = "mei_tong_she_news"
+MEI_TONG_SHE_ZHUAN_TI_NEWS = dict(
+    {
+        "name": "mei_tong_she_zhuan_ti_news_spider",
+        "start_url": "https://www.prnasia.com/releases/listpage-theme-0-all-1.shtml",
+        "key_word": "zhuan_ti_news",
+        "key_word_chn": "专题",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 2,
+    }
+)
+
+MEI_TONG_SHE_TOU_TIAO_NEWS = dict(
+    {
+        "name": "mei_tong_she_tou_tiao_news_spider",
+        "start_url": "https://www.prnasia.com/lightnews/listpage-102-all-1.shtml",
+        "key_word": "tou_tiao_news",
+        "key_word_chn": "美通社头条",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 1,
+    }
+)
+
+MEI_TONG_SHE_COMPANY_NEWS = dict(
+    {
+        "name": "mei_tong_she_company_news_spider",
+        "start_url": "https://www.prnasia.com/releases/all/listpage-pc-all-all-all-all-spec-1.shtml",
+        "key_word": "company_news",
+        "key_word_chn": "上市公司新闻稿",
+        "base_url": "https://www.prnasia.com/",
+        "end_page": 1,
+    }
+)
+
+MEI_TONG_SHE_SPIDER_LIST = [
+    MEI_TONG_SHE_ZHUAN_TI_NEWS,
+    MEI_TONG_SHE_TOU_TIAO_NEWS,
+    MEI_TONG_SHE_COMPANY_NEWS,
+]
+
 ALL_SPIDER_LIST_OF_DICT = dict(
     {
         EAST_MONEY_NEWS_DB: EAST_MONEY_SPIDER_LIST,
         JRJ_NEWS_DB: JRJ_SPIDER_LIST,
         NET_EASE_STOCK_NEWS_DB: NET_EASE_SPIDER_LIST,
-        STCN_NEWS_DB: STCN_SPIDER_LIST,
+        JQKA_NEWS_DB: JQKA_SPIDER_LIST,
         SHANG_HAI_STOCK_NEWS_DB: SHANG_HAI_SPIDER_LIST,
         ZHONG_JIN_STOCK_NEWS_DB: ZHONG_JIN_SPIDER_LIST,
         NBD_STOCK_NEWS_DB: NBD_SPIDER_LIST,
+        MEI_TONG_SHE_NEWS_DB: MEI_TONG_SHE_SPIDER_LIST,
     }
 )
 
 LATEST_DAY_OR_PAGE_SETTING = 3
+LLM_MODEL_PATH = "/home/zhangSongbo/work/DL/kaggle/MAP/jigsawCode/models/Qwen3-4B" # None
+LLM_USE_DEVICE_TYPE = "gpu"
+OLLAMA_MODEL = "qwen3:1.7b"

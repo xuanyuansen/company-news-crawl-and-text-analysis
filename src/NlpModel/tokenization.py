@@ -51,13 +51,12 @@ class Tokenization(object):
         # 直接从原始文档里面寻找，而非切词后再寻找
         stock_codes_dict = dict()
         for name, code in stock_name_code_dict.items():
-            if name in article:
+            if isinstance(name, str) and name in article: # 美股里面部分股票名称是非字符串类型的
                 stock_codes_dict[name] = code
         stock_codes_dict_sorted = dict(
             sorted(stock_codes_dict.items(), key=lambda item: item[1], reverse=False)
         )
         f_codes_json = json.dumps(stock_codes_dict_sorted, ensure_ascii=False)
-
         cut_words_lists = self.cut_words(article)
         info_dict = dict()
         if len(cut_words_lists) > 0:

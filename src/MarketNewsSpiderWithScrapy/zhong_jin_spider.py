@@ -2,12 +2,22 @@ from datetime import datetime, timedelta
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from scrapy import Request
+from selenium.webdriver.common.by import By
 from MarketNewsSpiderWithScrapy.BaseSpider import BaseSpider
 from Utils import config
 import time
 import random
 import logging
+
+# 设置 Chrome 选项
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # 无头模式
+chrome_options.add_argument("--no-sandbox")  # 禁用沙箱
+chrome_options.add_argument("--disable-dev-shm-usage")  # 禁用共享内存
+# chrome_options.add_argument("--remote-debugging-port=9222")  # 启用远程调试端口
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +35,9 @@ class ZhongJinStockSpider(BaseSpider):
     # http://stock.cnfol.com/
     def start_requests(self):
         start_url = getattr(self, "start_url")
-        driver = webdriver.Chrome(executable_path=config.CHROME_DRIVER)
+
+        service = Service(executable_path=config.CHROME_DRIVER)
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         btn_more_text = ""
         driver.get(start_url)
         page_cnt = 0
@@ -33,7 +45,7 @@ class ZhongJinStockSpider(BaseSpider):
             page_cnt += 1
 
             time.sleep(random.random() + 1)
-            more_btn = driver.find_element_by_xpath("//a[contains(@class, 'loadMore')]")
+            more_btn = driver.find_element(By.XPATH, "//a[contains(@class, 'loadMore')]")
             btn_more_text = more_btn.text
             logging.info(
                 "1-{} \n{} \n{} \n page cnt {}".format(
@@ -42,7 +54,7 @@ class ZhongJinStockSpider(BaseSpider):
             )
             if more_btn.text == "正在加载":
                 driver.execute_script("arguments[0].focus();", more_btn)
-                target_elem = driver.find_element_by_xpath(
+                target_elem = driver.find_element(By.XPATH, 
                     "//a[contains(@class, 'backBtn')]"
                 )
                 driver.execute_script("arguments[0].focus();", target_elem)

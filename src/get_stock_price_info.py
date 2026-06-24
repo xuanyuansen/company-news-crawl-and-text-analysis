@@ -51,6 +51,7 @@ if __name__ == "__main__":
     elif "us" == market_type:
         # stock_info_spyder.get_historical_us_zh_stock_daily_price()
         stock_info_spyder.get_historical_us_stock_daily_price(start_date=_start_date)
+        # stock_info_spyder.get_all_stock_code_info_of_us()
     else:
         stock_info_spyder.get_historical_us_zh_stock_daily_price()
     pass
